@@ -1,11 +1,10 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import App from './App';
-import './index.css';
+import {EBoard} from './EBoard';
 import registerServiceWorker from './registerServiceWorker';
 
 ReactDOM.render(
-  <App />,
+  <EBoard />,
   document.getElementById('root') as HTMLElement
 );
 registerServiceWorker();

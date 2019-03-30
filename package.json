@@ -4,7 +4,9 @@
   "private": true,
   "dependencies": {
     "react": "^16.8.6",
-    "react-dom": "^16.8.6"
+    "react-dom": "^16.8.6",
+    "lodash-decorators": "^6.0.1",
+    "fabric": "^2.7.0"
   },
   "scripts": {
     "start": "node scripts/start.js",
@@ -12,6 +14,7 @@
     "test": "node scripts/test.js --env=jsdom"
   },
   "devDependencies": {
+    "@types/fabric": "^2.6.6",
     "@types/jest": "^24.0.11",
     "@types/node": "^11.12.1",
     "@types/react": "^16.8.10",

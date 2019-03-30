@@ -5,12 +5,14 @@
  */
 import React from "react";
 import {Config,IConfig} from './Config';
+import {FRAME_TYPE_ENUM} from "./enums/EBoardEnum";
+import {IEmptyFrame, IImageFrame} from "./interface/IFrame";
 
 export declare interface IEBoardContext{
     lock:boolean;
     config:IConfig;
     activeBoard?:string;
-    boardMap:Map<string,IFrame|IImageFrame>
+    boardMap:Map<string,IEmptyFrame|IImageFrame>
 }
 
 const Context=React.createContext(null);
@@ -21,11 +23,11 @@ class EBoardContext extends React.PureComponent<{},IEBoardContext>{
     public static Consumer=Context.Consumer;
     constructor(props:{}){
         super(props);
-        const boardMap = new Map<string,IFrame|IImageFrame>();
-        const frame:IFrame= {type:"empty",id:"111"};
-        const frame1:IFrame= {type:"empty",id:"222"};
-        const frame2:IFrame= {type:"empty",id:"333"};
-        const frame3:IImageFrame= {type:"image",id:"444",image:"http://pic15.nipic.com/20110628/1369025_192645024000_2.jpg"};
+        const boardMap = new Map<string,IEmptyFrame|IImageFrame>();
+        const frame:IEmptyFrame= {type:FRAME_TYPE_ENUM.EMPTY,id:"111"};
+        const frame1:IEmptyFrame= {type:FRAME_TYPE_ENUM.EMPTY,id:"222"};
+        const frame2:IEmptyFrame= {type:FRAME_TYPE_ENUM.EMPTY,id:"333"};
+        const frame3:IImageFrame= {type:FRAME_TYPE_ENUM.IMAGE,id:"444",image:"http://pic15.nipic.com/20110628/1369025_192645024000_2.jpg",imageWidth:150,imageHeight:100};
         boardMap.set("111",frame);
         boardMap.set("222",frame1);
         boardMap.set("333",frame2);

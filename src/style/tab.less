@@ -1,0 +1,189 @@
+/*
+ * @Author: Liheng (liheeng@gmail.com)
+ * @Date: 2018-05-28 20:02:11
+ * @Last Modified by: Liheng (liheeng@gmail.com)
+ * @Last Modified time: 2018-05-29 10:20:55
+ */
+@tabHeight:30px;
+@tabBorderColor:#bbbbbb;
+@tabFontSize:12px;
+@tabItemPadding:10px;
+@tabItemMinWidth:60px;
+@tabItemMaxWidth:120px;
+@tabItemColor:#666666;
+@tabItemBgColor:#eaeaea;
+@tabItemActiveColor:#fff;
+@tabItemActiveBgColor:#4c84ff;
+@tabItemSpacing:2px;
+@tabItemAddIconSize:12px;
+@tabItemAddHoverColor:#fff;
+@tabItemAddWidth:40px;
+@tabControlWidth:54px;
+@tabControlIconSize:12px;
+@tabControlIconColor:#666666;
+@tabControlIconDisableColor:#bbbbbb;
+@tabControlLineHeight:20px;
+@tabControlLineColor:#bbbbbb;
+@tabRemoveIconSize:12px;
+@tabRemoveIconLeft:12px;
+@tabRemoveIconColor:#666;
+@tabRemoveIconActiveColor:#fff;
+@tabRemoveIconHoverColor:#f90d0d;
+
+
+.tab{
+  &-container{
+    position: absolute;
+    width: 100%;
+    &:after{
+      position: absolute;
+      width: 100%;
+      bottom: -1px;
+      border-bottom: 1px solid @tabBorderColor;
+      content: '';
+      z-index: 10;
+      left: 0;
+    }
+    height: @tabHeight;
+  }
+  &-item{
+    display: inline-block;
+    vertical-align: middle;
+    //padding: 0 @tabItemPadding;
+    height: @tabHeight;
+    font-size: @tabFontSize;
+    line-height: @tabHeight;
+    min-width: @tabItemMinWidth;
+    max-width: @tabItemMaxWidth;
+    color: @tabItemColor;
+    cursor: pointer;
+    margin-right: @tabItemSpacing;
+    background-color: @tabItemBgColor;
+    position: relative;
+    &:hover{
+      .tab-remove{
+        opacity: 1;
+      }
+    }
+    &-name{
+      display: inline-block;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      text-align: center;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      padding: 0 @tabItemPadding;
+      min-width: @tabItemMinWidth;
+      max-width: @tabItemMaxWidth;
+    }
+    &-calc{
+      position: absolute;
+      z-index: -1;
+      opacity: 0;
+    }
+  }
+  &-active{
+    color: @tabItemActiveColor;
+    background: @tabItemActiveBgColor;
+    .tab-remove{
+      opacity: 1;
+      color: @tabRemoveIconActiveColor;
+    }
+  }
+  &-add{
+    display: inline-block;
+    vertical-align: middle;
+    width:@tabItemAddWidth;
+    height: @tabHeight;
+    font-size: @tabItemAddIconSize;
+    line-height: @tabHeight;
+    text-align: center;
+    box-sizing: border-box;
+    background-color: @tabItemBgColor;
+    cursor: pointer;
+    &:hover{
+      background-color: @tabItemActiveBgColor;
+      color: @tabItemAddHoverColor;
+    }
+  }
+  &-scroll{
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    max-width: calc(~"100% - @{tabItemAddWidth}");
+    padding-right:0;
+    transition: max-width 240ms ease;
+    white-space: nowrap;
+    overflow: hidden;
+    &-pager{
+      @right:@tabItemAddWidth+@tabControlWidth;
+      max-width:calc(~"100% - @{right}");
+    }
+    &-bar{
+      position: relative;
+      transform: translateX(0);
+      transition: transform 240ms ease;
+    }
+  }
+  &-prev,&-next{
+    display: inline-block;
+    width:@tabControlWidth/2;
+    line-height: @tabHeight;
+    font-size: @tabControlIconSize;
+    color: @tabControlIconColor;
+    text-align: center;
+    vertical-align: middle;
+    position: absolute;
+    right:@tabItemAddWidth;
+    top:0;
+    box-sizing: border-box;
+    height: @tabHeight;
+    background: @tabItemBgColor;
+    cursor: pointer;
+    &-disable{
+      cursor: not-allowed;
+      pointer-events: none;
+      color: @tabControlIconDisableColor!important;
+    }
+  }
+  &-prev{
+    right:@tabItemAddWidth + @tabControlWidth/2;
+    &:after{
+      content: "";
+      height: @tabControlLineHeight;
+      width: 1px;
+      position: absolute;
+      background-color: @tabControlLineColor;
+      right: -0.5px;
+      top: (@tabHeight - @tabControlLineHeight)/2;
+      z-index: 1;
+    }
+  }
+  &-next ~ &-add{
+    position: absolute;
+    right:0;
+    top:0;
+  }
+  &-remove{
+    font-size: @tabRemoveIconSize!important;
+    margin-right: @tabItemPadding;
+    top: 50%;
+    transform: translateY(-50%);
+    position: relative;
+    float: right;
+    line-height: @tabHeight;
+    margin-top: 1px;
+    opacity: 0;
+    color: @tabRemoveIconColor;
+    &:hover{
+      color: @tabRemoveIconHoverColor;
+    }
+    & ~ .tab-item-name{
+      min-width: @tabItemMinWidth - @tabItemPadding - @tabRemoveIconSize;
+      max-width: @tabItemMaxWidth - @tabItemPadding - @tabRemoveIconSize;
+    }
+  }
+}

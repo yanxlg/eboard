@@ -6,8 +6,10 @@
 
 import React from "react";
 import {EBoardContext, IEBoardContext} from './EBoardContext';
+import {FRAME_TYPE_ENUM} from "./enums/EBoardEnum";
 import {EmptyFrame} from './frames/EmptyFrame';
 import {ImageFrame} from './frames/ImageFrame';
+import {IImageFrame} from "./interface/IFrame";
 
 class EBoardBody extends React.PureComponent{
     public static contextType = EBoardContext.Context;
@@ -20,9 +22,9 @@ class EBoardBody extends React.PureComponent{
                 {
                     boardList.map((board)=>{
                         switch (board.type) {
-                            case 'empty':
+                            case FRAME_TYPE_ENUM.EMPTY:
                                 return <EmptyFrame key={board.id} {...board}/>;
-                            case 'image':
+                            case FRAME_TYPE_ENUM.IMAGE:
                                 return <ImageFrame key={board.id} {...(board as IImageFrame)}/>;
                             default:
                                 return  null;

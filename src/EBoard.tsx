@@ -6,6 +6,7 @@
 import React from "react";
 import {EBoardBody} from './EBoardBody';
 import {EBoardContext} from './EBoardContext';
+import {EBoardTab} from "./EBoardTab";
 import {ResizeEmitter} from './ResizeEmitter';
 import "./style/layout.less";
 import "./untils/polyfill";
@@ -23,9 +24,7 @@ class EBoard extends React.PureComponent{
                 <div>
                     toolbar
                 </div>
-                <div>
-                    tab
-                </div>
+                <EBoardTab/>
             </EBoardContext>
         ];
     }

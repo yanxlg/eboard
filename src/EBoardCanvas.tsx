@@ -8,6 +8,7 @@ import {Canvas} from "./derived/Canvas";
 import {EBoardContext, IEBoardContext} from './EBoardContext';
 import {FRAME_TYPE_ENUM} from "./enums/EBoardEnum";
 import {IEmptyFrame, IImageFrame} from "./interface/IFrame";
+import {CircleBrush} from "./derived/CircleBrush";
 
 
 declare interface IEBoardCanvas{
@@ -67,7 +68,6 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
         const brush = new fabric.PencilBrush(this.fabricCanvas);
         brush.width=3;
         brush.color="red";
-        // @ts-ignore
         this.fabricCanvas.freeDrawingBrush = brush;
         const property = this.props.frameProperty;
         const {type} = property;
@@ -99,6 +99,35 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                 this.fabricCanvas.backgroundImage=fabricImage;
                 break;
         }
+
+
+        const circleBrush = new CircleBrush(this.fabricCanvas);
+        circleBrush.color="red";
+        // this.fabricCanvas.freeDrawingBrush = circleBrush;
+
+        // 动画
+        circleBrush.onMouseDown(new fabric.Point(0,0));// 中心点
+        fabric.util.animate({
+            byValue:100,
+            duration: 1000,
+            endValue: 100,
+            startValue: 0,
+            onChange(value:number){
+                circleBrush.onMouseMove(new fabric.Point(value,value));// 中心点
+                // circleBrush.render();
+            },
+            onComplete(){
+                circleBrush.onMouseUp();// 中心点
+                console.log("COMPLETE");
+            }
+        });
+
+        this.fabricCanvas.freeDrawingBrush = circleBrush;
+
+        // circleBrush.onMouseMove(new fabric.Point(100,100));
+        // circleBrush.clear();
+        // circleBrush.width=200;
+        // circleBrush.onMouseMove(new fabric.Point(200,200));
     }
     componentWillReceiveProps(nextProps: Readonly<IEBoardCanvas>, nextContext: any): void {
         const {className} = nextProps;

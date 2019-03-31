@@ -30,3 +30,8 @@ export declare interface IImageFrame extends IBaseFrame{
 }
 
 export type IFrame = IEmptyFrame|IImageFrame;
+
+export declare interface ICirclePoint extends fabric.Point{
+    radius?:number;
+    fill?:string;
+}

@@ -11,7 +11,9 @@
     "interface-name": false,
     "no-shadowed-variable": false,
     "no-empty-interface": false,
-    "ordered-imports": false
+    "ordered-imports": false,
+    "object-literal-sort-keys": false,
+    "no-unused-expression": false
   },
   "linterOptions": {
     "exclude": [

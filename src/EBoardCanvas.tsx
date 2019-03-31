@@ -8,7 +8,8 @@ import {Canvas} from "./derived/Canvas";
 import {EBoardContext, IEBoardContext} from './EBoardContext';
 import {FRAME_TYPE_ENUM} from "./enums/EBoardEnum";
 import {IEmptyFrame, IImageFrame} from "./interface/IFrame";
-import {CircleBrush} from "./derived/CircleBrush";
+// import {CircleBrush} from "./derived/CircleBrush";
+import {PencilBrush} from "./derived/PencilBrush";
 
 
 declare interface IEBoardCanvas{
@@ -64,11 +65,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
         this.fabricCanvas.setDimensions(dimensions,{backstoreOnly:true});// 设置canvas 画布大小
     
         this.fabricCanvas.isDrawingMode=true;
-        // @ts-ignore
-        const brush = new fabric.PencilBrush(this.fabricCanvas);
-        brush.width=3;
-        brush.color="red";
-        this.fabricCanvas.freeDrawingBrush = brush;
+
         const property = this.props.frameProperty;
         const {type} = property;
         switch (type) {
@@ -101,10 +98,8 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
         }
 
 
-        const circleBrush = new CircleBrush(this.fabricCanvas);
+   /*     const circleBrush = new CircleBrush(this.fabricCanvas);
         circleBrush.color="red";
-        // this.fabricCanvas.freeDrawingBrush = circleBrush;
-
         // 动画
         circleBrush.onMouseDown(new fabric.Point(0,0));// 中心点
         fabric.util.animate({
@@ -121,13 +116,31 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                 console.log("COMPLETE");
             }
         });
-
         this.fabricCanvas.freeDrawingBrush = circleBrush;
+*/
 
-        // circleBrush.onMouseMove(new fabric.Point(100,100));
-        // circleBrush.clear();
-        // circleBrush.width=200;
-        // circleBrush.onMouseMove(new fabric.Point(200,200));
+
+        const brush = new PencilBrush(this.fabricCanvas);
+        brush.width=3;
+        brush.color="red";
+        this.fabricCanvas.freeDrawingBrush = brush;
+        brush.onMouseDown(new fabric.Point(0,0));
+        fabric.util.animate({
+            byValue:100,
+            duration: 1000,
+            endValue: 100,
+            startValue: 0,
+            onChange(value:number){
+                brush.onMouseMove(new fabric.Point(value,value));// 中心点
+                // circleBrush.render();
+            },
+            onComplete:()=>{
+                brush.onMouseUp();// 中心点
+                console.log("COMPLETE");
+                console.log(this.fabricCanvas.getObjects())
+            }
+        });
+
     }
     componentWillReceiveProps(nextProps: Readonly<IEBoardCanvas>, nextContext: any): void {
         const {className} = nextProps;

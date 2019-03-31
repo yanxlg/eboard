@@ -9,7 +9,6 @@ import {EBoardContext} from './EBoardContext';
 import {EBoardTab} from "./EBoardTab";
 import {ResizeEmitter} from './ResizeEmitter';
 import "./style/layout.less";
-import "./untils/polyfill";
 
 
 class EBoard extends React.PureComponent{

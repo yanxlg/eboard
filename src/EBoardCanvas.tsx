@@ -100,6 +100,15 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                 break;
         }
     }
+    componentWillReceiveProps(nextProps: Readonly<IEBoardCanvas>, nextContext: any): void {
+        const {className} = nextProps;
+        if(this.props.className!==className){
+            this.fabricCanvas.setContainerClass(className);
+        }
+    }
+    componentWillUnmount(): void {
+        this.fabricCanvas.dispose();
+    }
     render(){
         return (
             <canvas ref={this.containerRef}/>

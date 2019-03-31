@@ -7,9 +7,16 @@
  */
 import {FRAME_TYPE_ENUM} from "../enums/EBoardEnum";
 
-export declare interface IBaseFrame{
+
+export declare interface ITab{
+    canRemove?:boolean;
+    icon?:string;
+    name:string;
+    wbNumber:string;
+}
+
+export declare interface IBaseFrame extends ITab{
     type:FRAME_TYPE_ENUM;
-    id:string;
 }
 
 export declare interface IEmptyFrame extends IBaseFrame{
@@ -21,3 +28,5 @@ export declare interface IImageFrame extends IBaseFrame{
     imageWidth:number;
     imageHeight:number;
 }
+
+export type IFrame = IEmptyFrame|IImageFrame;

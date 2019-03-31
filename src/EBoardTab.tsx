@@ -1,61 +1,41 @@
 import {Bind} from "lodash-decorators";
-import React,{MouseEvent,RefObject} from "react";
+import React, {MouseEvent, RefObject} from "react";
+import {EBoardContext, IEBoardContext} from "./EBoardContext";
+import {IEmptyFrame, IFrame} from "./interface/IFrame";
 import "./font/iconfont.css";
 import "./style/tab.less";
+import {FRAME_TYPE_ENUM} from "./enums/EBoardEnum";
 
-
-export declare interface ITabItem{
-    name:string;
-    icon?:string;
-    tabId:string;
-    canRemove?:boolean;
-}
 
 declare interface ITabInterface{
-    tabs:ITabItem[];
     showPager:boolean;
-    activeId?:string;
     scrollOffset:number;
     prevDisable:boolean;
     nextDisable:boolean;
 }
 
-class EBoardTab extends React.Component<{}, ITabInterface>{
+class EBoardTab extends React.PureComponent<{}, ITabInterface>{
+    public static contextType = EBoardContext.Context;
+    public context:IEBoardContext;
     private containerRef:RefObject<HTMLDivElement>=React.createRef();
     private scrollRef:RefObject<HTMLDivElement>=React.createRef();
     private addRef:RefObject<HTMLDivElement>=React.createRef();
+    private prevRef:RefObject<HTMLDivElement>=React.createRef();
+    private nextRef:RefObject<HTMLDivElement>=React.createRef();
     private calcItem:HTMLDivElement;
-    private prevBtnWidth:number=0;
-    private nextBtnWidth:number=0;
     constructor(props:{}){
         super(props);
-        this.state={tabs:[],showPager:false,scrollOffset:0,prevDisable:true,nextDisable:true};
+        this.state={showPager:false,scrollOffset:0,prevDisable:true,nextDisable:true};
     }
-    componentWillUpdate(
-        nextProps: Readonly<{}>, nextState: Readonly<ITabInterface>,
-        nextContext: any): void {
-        const prevBtn = (this.containerRef.current as HTMLDivElement).querySelector(".tab-prev") as HTMLDivElement;
-        const nextBtn = (this.containerRef.current as HTMLDivElement).querySelector(".tab-prev") as HTMLDivElement;
-        if(prevBtn&&nextBtn){
-            this.prevBtnWidth=prevBtn.offsetWidth;
-            this.nextBtnWidth=nextBtn.offsetWidth;
-        }
+    componentDidUpdate(prevProps: Readonly<{}>, prevState: Readonly<ITabInterface>, snapshot?: any): void {
+        console.log("update");
     }
-    componentDidUpdate(
-        prevProps: Readonly<{}>, prevState: Readonly<ITabInterface>,
-        snapshot?: any): void {
-        const prevBtn = (this.containerRef.current as HTMLDivElement).querySelector(".tab-prev") as HTMLDivElement;
-        const nextBtn = (this.containerRef.current as HTMLDivElement).querySelector(".tab-prev") as HTMLDivElement;
-        if(prevBtn&&nextBtn){
-            this.prevBtnWidth=prevBtn.offsetWidth;
-            this.nextBtnWidth=nextBtn.offsetWidth;
-        }
-    }
+
     private calcItemWidth(tabName:string,canRemove:boolean){
         if(!this.calcItem){
             const tabItem = document.createElement("div");
             tabItem.className="tab-item tab-item-calc";
-            tabItem.innerHTML=`<i class="tab-remove eboard-icon eboard-icon-remove"/><span class="tab-item-name"/>`;
+            tabItem.innerHTML=`<i class="tab-remove eboard-icon eboard-icon-remove"></i><span class="tab-item-name"></span>`;
             this.calcItem=tabItem;
             (this.containerRef.current as HTMLDivElement).appendChild(this.calcItem);
         }
@@ -67,33 +47,35 @@ class EBoardTab extends React.Component<{}, ITabInterface>{
         const marginRight = parseInt(document.defaultView.getComputedStyle(this.calcItem,null)["margin-right"],10);
         return this.calcItem.getBoundingClientRect().width+marginLeft+marginRight;
     }
-    private scrollToTab(tabId:string,showPagerChange:boolean){
-        const targetTab = (this.containerRef.current as HTMLDivElement).querySelector(`[data-id="${tabId}"]`) as HTMLDivElement;
-        const marginRight = parseInt(document.defaultView.getComputedStyle(targetTab,null)["margin-right"],10);
-        const scrollLeft =targetTab.offsetLeft+targetTab.offsetWidth + marginRight;
-        let {scrollWidth,offsetWidth} = (this.scrollRef.current as HTMLDivElement);
-        if(showPagerChange){
-            const prevBtn = (this.containerRef.current as HTMLDivElement).querySelector(".tab-prev") as HTMLDivElement;
-            const nextBtn = (this.containerRef.current as HTMLDivElement).querySelector(".tab-prev") as HTMLDivElement;
-            if(prevBtn&&nextBtn){
-                offsetWidth=offsetWidth-this.prevBtnWidth-this.nextBtnWidth;
+    private scrollToTab(wbNumber:string,nextShowPager:boolean,removeItemWidth?:number){
+        // 如果不存在则最后+1，如果存在则获取存在位置
+        const container = this.containerRef.current;
+        const scroll = this.scrollRef.current;
+        const addBtn = this.addRef.current;
+        const addWidth = addBtn.offsetWidth;
+        const allWidth = container.offsetWidth;
+        const item:HTMLDivElement = scroll.querySelector(`[data-id="${wbNumber}"]`);
+        if(item){
+            const marginRight = parseInt(document.defaultView.getComputedStyle(item,null)["margin-right"],10);
+            const scrollLeft =item.offsetLeft+item.offsetWidth + marginRight - (removeItemWidth||0);// 可能不准确，需要减去removeItemWidth
+            let {scrollWidth} = scroll;
+            const prevBtnWidth = this.prevRef.current.offsetWidth;
+            const nextBtnWidth = this.nextRef.current.offsetWidth;
+            const offsetWidth = nextShowPager?allWidth - addWidth-prevBtnWidth-nextBtnWidth:allWidth-addWidth;
+            if(scrollLeft<=offsetWidth){
+                this.setState({
+                    nextDisable:false,
+                    prevDisable:true,
+                    scrollOffset:0
+                })
             }else{
-                offsetWidth=offsetWidth+this.prevBtnWidth+this.nextBtnWidth;
+                const scrollOffset = scrollLeft-offsetWidth;
+                this.setState({
+                    nextDisable:scrollOffset+offsetWidth>=scrollWidth,
+                    prevDisable:scrollOffset<=0,
+                    scrollOffset
+                })
             }
-        }
-        if(scrollLeft<=offsetWidth){
-            this.setState({
-                nextDisable:false,
-                prevDisable:true,
-                scrollOffset:0
-            })
-        }else{
-            const scrollOffset = scrollLeft-offsetWidth;
-            this.setState({
-                nextDisable:scrollOffset+offsetWidth>=scrollWidth,
-                prevDisable:scrollOffset<=0,
-                scrollOffset
-            })
         }
     }
     @Bind
@@ -113,7 +95,14 @@ class EBoardTab extends React.Component<{}, ITabInterface>{
     }
     @Bind
     private onAddClick(){
-        console.log("add");
+        const {config} = this.context;
+        const frame:IEmptyFrame = {
+            canRemove:true,
+            name:config.defaultName,
+            type:FRAME_TYPE_ENUM.EMPTY,
+            wbNumber:Date.now().toString(),
+        };
+        this.add(frame);
     }
     @Bind
     private onPrevClick(){
@@ -139,81 +128,101 @@ class EBoardTab extends React.Component<{}, ITabInterface>{
         })
     }
     @Bind
-    public add(tabItem:ITabItem,active?:boolean){
-        const {tabId} = tabItem;
-        const {tabs,activeId} = this.state;
-        const items = (this.containerRef.current as HTMLDivElement).querySelectorAll(".tab-item");
-        tabs.push(tabItem);
-        if(tabs.length===0||!items||items.length===0){
+    public add(tabItem:IFrame,active?:boolean){
+        const {wbNumber} = tabItem;
+        const {boardMap,activeBoard} = this.context;
+        boardMap.set(wbNumber,tabItem);
+        if(boardMap.size===0){
+            EBoardContext.updateBoardMap(boardMap,active===false?activeBoard:wbNumber);
             this.setState({
-                activeId:active===false?activeId:tabId,
+                nextDisable:false,
+                prevDisable:false,
                 scrollOffset:0,
                 showPager:false,
-                tabs
             })
         }else{
-            const allWidth = (this.containerRef.current as HTMLDivElement).getBoundingClientRect().width;
-            // calc nextItemWidth
+            const container = this.containerRef.current;
+            const scroll = this.scrollRef.current;
+            const addBtn = this.addRef.current;
+            const allWidth = container.getBoundingClientRect().width;
             const itemWidth = this.calcItemWidth(tabItem.name,tabItem.canRemove!==false);
-            const scrollWidth = (this.scrollRef.current as HTMLDivElement).getBoundingClientRect().width;
-            const addWidth = (this.addRef.current as HTMLDivElement).getBoundingClientRect().width;
+            const width = scroll.getBoundingClientRect().width;
+            const addWidth = addBtn.getBoundingClientRect().width;
             const {showPager} = this.state;
-            const nextShowPager = showPager?showPager:addWidth+scrollWidth+itemWidth>allWidth;
-            this.setState({
-                activeId:active===false?activeId:tabId,
-                showPager:nextShowPager,
-                tabs
-            },()=>{
-                this.scrollToTab(tabId,showPager!==nextShowPager);
-            });
+            const nextShowPager = showPager?showPager:addWidth+width+itemWidth>allWidth;
+            if(!nextShowPager){
+                this.setState({
+                    nextDisable:false,
+                    prevDisable:true,
+                    scrollOffset:0,
+                    showPager:nextShowPager,
+                })
+            }else{
+                const items = scroll.querySelectorAll(".tab-item");
+                const last = items[items.length-1] as HTMLDivElement;
+                const offsetLeft = last?(last.offsetWidth+last.offsetLeft + parseInt(document.defaultView.getComputedStyle(last,null)["margin-right"],10)):0;
+                const scrollLeft = offsetLeft + itemWidth;
+                let {scrollWidth} = scroll;
+                const prevBtnWidth = this.prevRef.current.offsetWidth;
+                const nextBtnWidth = this.nextRef.current.offsetWidth;
+                const offsetWidth=allWidth-addWidth-prevBtnWidth-nextBtnWidth;
+                const scrollOffset = scrollLeft-offsetWidth;
+                this.setState({
+                    nextDisable:scrollOffset+offsetWidth>=scrollWidth,
+                    prevDisable:scrollOffset<=0,
+                    scrollOffset,
+                    showPager:nextShowPager,
+                })
+            }
+            EBoardContext.updateBoardMap(boardMap,active===false?activeBoard:wbNumber);
         }
     };
-    public remove(tabId:string){
-        const {tabs,activeId} = this.state;
-        const items = (this.containerRef.current as HTMLDivElement).querySelectorAll(".tab-item");
-        const index = tabs.findIndex((tab)=>tab.tabId===tabId);
-        tabs.splice(index,1);
-        if(tabs.length===0||!items||items.length===0){
+    public remove(wbNumber:string){
+        const {boardMap,activeBoard} = this.context;
+        boardMap.delete(wbNumber);
+        if(boardMap.size===0){
+            EBoardContext.updateBoardMap(boardMap,undefined);
             this.setState({
-                activeId:undefined,
                 scrollOffset:0,
                 showPager:false,
-                tabs
             })
         }else{
-            const allWidth = (this.containerRef.current as HTMLDivElement).getBoundingClientRect().width;
-            const itemWidth = (items[index] as HTMLDivElement).getBoundingClientRect().width;
-            const scrollWidth = (this.scrollRef.current as HTMLDivElement).scrollWidth;
-            const addWidth = (this.addRef.current as HTMLDivElement).getBoundingClientRect().width;
-            const nextActiveId = activeId === tabId ? tabs[tabs.length - 1].tabId : activeId as string;
+            const container = this.containerRef.current;
+            const scroll = this.scrollRef.current;
+            const addBtn = this.addRef.current;
+            const allWidth = container.getBoundingClientRect().width;
+            const item:HTMLDivElement = scroll.querySelector(`[data-id="${wbNumber}"]`);
+            const itemWidth = item.getBoundingClientRect().width;
+            const scrollWidth = scroll.scrollWidth;
+            const addWidth = addBtn.getBoundingClientRect().width;
+            const nextActiveId = activeBoard === wbNumber ? boardMap.last().wbNumber : activeBoard;
             const nextShowPager = addWidth + scrollWidth - itemWidth > allWidth;
-            const {showPager} = this.state;
+            EBoardContext.updateBoardMap(boardMap,nextActiveId);
             this.setState({
-                activeId: nextActiveId,
                 showPager: nextShowPager,
-                tabs
-            },()=>{
-                this.scrollToTab(nextActiveId,showPager!==nextShowPager);
             });
+            // 如果在active之前则需要reduce itemWidth
+            this.scrollToTab(wbNumber,nextShowPager ,itemWidth);// 需要减去当前ItemWidth
+
         }
     }
     @Bind
-    public setActive(tabId:string){
-        this.setState({
-            activeId:tabId
-        },()=>{
-            this.scrollToTab(tabId,false);
-        })
+    public setActive(wbNumber:string){
+        const {showPager} = this.state;
+        EBoardContext.updateActiveBoard(wbNumber);
+        this.scrollToTab(wbNumber,showPager);
     }
     render(){
-        const {tabs,showPager,activeId,scrollOffset,prevDisable,nextDisable} = this.state;
+        const {showPager,scrollOffset,prevDisable,nextDisable} = this.state;
+        const boardList = EBoardContext.getBoardList();
+        const {activeBoard} = this.context;
         return (
             <div className="tab-container" ref={this.containerRef}>
                 <div className={`tab-scroll ${showPager?"tab-scroll-pager":""}`} ref={this.scrollRef}>
                     <div className="tab-scroll-bar" style={{transform:`translateX(-${scrollOffset}px)`}}>
                         {
-                            tabs.map(tab=>(
-                                <div className={`tab-item ${activeId===tab.tabId?"tab-active":""}`} key={tab.tabId} data-id={tab.tabId} onClick={this.onItemClick}>
+                            boardList.map(tab=>(
+                                <div className={`tab-item ${activeBoard===tab.wbNumber?"tab-active":""}`} key={tab.wbNumber} data-id={tab.wbNumber} onClick={this.onItemClick}>
                                     {
                                         tab.canRemove!==false?(
                                             <i className="tab-remove eboard-icon eboard-icon-remove" onClick={this.removeItem}/>
@@ -227,13 +236,9 @@ class EBoardTab extends React.Component<{}, ITabInterface>{
                         }
                     </div>
                 </div>
-                {
-                    showPager?[
-                        <div key="prev" className={`eboard-icon eboard-icon-left-b tab-prev ${prevDisable?"tab-prev-disable":""}`} onClick={this.onPrevClick}/>,
-                        <div key="next" className={`eboard-icon eboard-icon-right-b tab-next ${nextDisable?"tab-next-disable":""}`} onClick={this.onNextClick}/>
-                    ]:null
-                }
-                <div className="eboard-icon eboard-icon-append-b tab-add" ref={this.addRef} onClick={this.onAddClick}/>
+                <div ref={this.prevRef} className={`eboard-icon eboard-icon-left-b tab-prev ${prevDisable?"tab-prev-disable":""} ${showPager?"":"tab-prev-hide"}`} onClick={this.onPrevClick}/>
+                <div ref={this.nextRef} className={`eboard-icon eboard-icon-right-b tab-next ${nextDisable?"tab-next-disable":""} ${showPager?"":"tab-next-hide"}`} onClick={this.onNextClick}/>
+                <div className={`eboard-icon eboard-icon-append-b tab-add ${showPager?"tab-add-pager":""}`} ref={this.addRef} onClick={this.onAddClick}/>
             </div>
         )
     }

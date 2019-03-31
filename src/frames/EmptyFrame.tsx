@@ -9,18 +9,13 @@ import {IEmptyFrame} from "../interface/IFrame";
 import "../style/frames.less";
 
 
-class EmptyFrame extends React.Component<IEmptyFrame>{
+class EmptyFrame extends React.PureComponent<IEmptyFrame>{
     public static contextType = EBoardContext.Context;
     public context:IEBoardContext;
-    shouldComponentUpdate(
-        nextProps: Readonly<IEmptyFrame>, nextState: Readonly<{}>,
-        nextContext: any): boolean {
-        return false;
-    }
     render(){
         const {activeBoard} = this.context;
         return (
-            <EBoardCanvas className={`board-frame ${activeBoard===this.props.id?"board-frame-active":""}`} frameProperty={this.props}/>
+            <EBoardCanvas className={`board-frame ${activeBoard===this.props.wbNumber?"board-frame-active":""}`} frameProperty={this.props}/>
         )
     }
 }

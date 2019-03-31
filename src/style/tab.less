@@ -35,6 +35,7 @@
   &-container{
     position: absolute;
     width: 100%;
+    z-index: 20;
     &:after{
       position: absolute;
       width: 100%;
@@ -83,6 +84,8 @@
       position: absolute;
       z-index: -1;
       opacity: 0;
+      left: 0;
+      top: 0;
     }
   }
   &-active{
@@ -107,6 +110,11 @@
     &:hover{
       background-color: @tabItemActiveBgColor;
       color: @tabItemAddHoverColor;
+    }
+    &-pager{
+      position: absolute;
+      right:0;
+      top:0;
     }
   }
   &-scroll{
@@ -148,6 +156,10 @@
       pointer-events: none;
       color: @tabControlIconDisableColor!important;
     }
+    &-hide{
+      z-index: -1;
+      opacity: 0;
+    }
   }
   &-prev{
     right:@tabItemAddWidth + @tabControlWidth/2;
@@ -161,11 +173,6 @@
       top: (@tabHeight - @tabControlLineHeight)/2;
       z-index: 1;
     }
-  }
-  &-next ~ &-add{
-    position: absolute;
-    right:0;
-    top:0;
   }
   &-remove{
     font-size: @tabRemoveIconSize!important;

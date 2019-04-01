@@ -8,7 +8,7 @@ import {Canvas} from "./derived/Canvas";
 import {LineBrush} from './derived/LineBrush';
 import {EBoardContext, IEBoardContext} from './EBoardContext';
 import {FRAME_TYPE_ENUM} from "./enums/EBoardEnum";
-import {IEmptyFrame, IImageFrame,IFrame} from "./interface/IFrame";
+import {IFrame, IImageFrame} from "./interface/IFrame";
 
 
 declare interface IEBoardCanvas{
@@ -54,25 +54,42 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
     }
     componentDidMount(): void {
         const container = this.containerRef.current;
-        const {width,height,dimensions} = this.calc();
+        let {width:canvasWidth,height:canvasHeight,dimensions} = this.calc();
         this.fabricCanvas=new Canvas(container,{
             containerClass:this.props.className,
             selection:false,
             skipTargetFind:true
         });
-        this.fabricCanvas.setDimensions({width,height});// 设置样式大小
+        this.fabricCanvas.setDimensions({width:canvasWidth,height:canvasHeight});// 设置样式大小
         this.fabricCanvas.setDimensions(dimensions,{backstoreOnly:true});// 设置canvas 画布大小
-    
+
         const property = this.props.property;
         const {type} = property;
         switch (type) {
             case FRAME_TYPE_ENUM.EMPTY:
                 break;
             case FRAME_TYPE_ENUM.IMAGE:
-                const {image,imageHeight,imageWidth} = property as IImageFrame;
+                const {image,imageHeight,imageWidth,layoutMode} = property as IImageFrame;
                 const imageElement = new Image();
                 imageElement.src=image;
                 const {width,height} = this.fabricCanvas;
+                if(layoutMode==="top_auto"){
+                    // scroll enable
+                    const imageRatio = imageHeight/imageWidth;
+                    if(height/width<imageRatio){
+                        canvasHeight = width*imageRatio;
+                        dimensions.height=dimensions.width*imageRatio;
+                        this.fabricCanvas.setDimensions({width:canvasWidth,height:canvasHeight});// 设置样式大小
+                        this.fabricCanvas.setDimensions(dimensions,{backstoreOnly:true});// 设置canvas 画布大小
+                        this.fabricCanvas.backgroundImage=new fabric.Image(imageElement, {
+                            height: canvasHeight,
+                            left: 0,
+                            top: 0,
+                            width: canvasWidth,
+                        });
+                        break;
+                    }
+                }
                 // calc 图片大小
                 let imageW=0,imageH=0;
                 const xRatio = width / imageWidth;
@@ -93,7 +110,9 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                 this.fabricCanvas.backgroundImage=fabricImage;
                 break;
         }
-    
+        this.fabricCanvas.setDimensions({width:canvasWidth,height:canvasHeight});// 设置样式大小
+        this.fabricCanvas.setDimensions(dimensions,{backstoreOnly:true});// 设置canvas 画布大小
+
         this.fabricCanvas.isDrawingMode=true;
     
         const brush = new LineBrush(this.fabricCanvas);

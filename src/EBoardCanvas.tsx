@@ -8,12 +8,12 @@ import {Canvas} from "./derived/Canvas";
 import {LineBrush} from './derived/LineBrush';
 import {EBoardContext, IEBoardContext} from './EBoardContext';
 import {FRAME_TYPE_ENUM} from "./enums/EBoardEnum";
-import {IEmptyFrame, IImageFrame} from "./interface/IFrame";
+import {IEmptyFrame, IImageFrame,IFrame} from "./interface/IFrame";
 
 
 declare interface IEBoardCanvas{
     className?:string;
-    frameProperty:IEmptyFrame|IImageFrame;
+    property:IFrame;
 }
 
 class EBoardCanvas extends React.Component<IEBoardCanvas>{
@@ -63,7 +63,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
         this.fabricCanvas.setDimensions({width,height});// 设置样式大小
         this.fabricCanvas.setDimensions(dimensions,{backstoreOnly:true});// 设置canvas 画布大小
     
-        const property = this.props.frameProperty;
+        const property = this.props.property;
         const {type} = property;
         switch (type) {
             case FRAME_TYPE_ENUM.EMPTY:

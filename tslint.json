@@ -8,7 +8,12 @@
     "one-variable-per-declaration": false,
     "prefer-const": false,
     "variable-name": false,
-    "interface-name": false
+    "interface-name": false,
+    "no-shadowed-variable": false,
+    "no-empty-interface": false,
+    "ordered-imports": false,
+    "object-literal-sort-keys": false,
+    "no-unused-expression": false
   },
   "linterOptions": {
     "exclude": [

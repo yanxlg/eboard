@@ -6,27 +6,22 @@
 
 import React from "react";
 import {EBoardContext, IEBoardContext} from './EBoardContext';
+import {FRAME_TYPE_ENUM} from "./enums/EBoardEnum";
 import {EmptyFrame} from './frames/EmptyFrame';
 import {ImageFrame} from './frames/ImageFrame';
+import {IImageFrame} from "./interface/IFrame";
 
 class EBoardBody extends React.PureComponent{
     public static contextType = EBoardContext.Context;
     public context:IEBoardContext;
     render(){
-        const {boardMap} = this.context;
-        const boardList = boardMap.toArray();
+        const boardList = EBoardContext.getBoardList();
         return (
             <div className="layout-board-container">
                 {
                     boardList.map((board)=>{
-                        switch (board.type) {
-                            case 'empty':
-                                return <EmptyFrame key={board.id} {...board}/>;
-                            case 'image':
-                                return <ImageFrame key={board.id} {...(board as IImageFrame)}/>;
-                            default:
-                                return  null;
-                        }
+                        const {type} = board;
+                        return type===FRAME_TYPE_ENUM.EMPTY?<EmptyFrame key={board.wbNumber} {...board}/>:<ImageFrame key={board.wbNumber} {...(board as IImageFrame)}/>;
                     })
                 }
             </div>

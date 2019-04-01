@@ -22,5 +22,5 @@
     "arrowShape":"fish",
     "escKey":true,
     "ctrlKey":true,
-    "autoTabLabel": "白板"
+    "defaultName": "白板"
 }

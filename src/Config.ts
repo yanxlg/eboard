@@ -29,7 +29,7 @@ export declare interface IConfig {
     "arrowShape":string,
     "escKey":boolean,
     "ctrlKey":boolean,
-    "autoTabLabel": string
+    "defaultName": string
 }
 
 const config:IConfig = require("./config.json");

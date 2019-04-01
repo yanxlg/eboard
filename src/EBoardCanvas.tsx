@@ -1,18 +1,27 @@
+/**
+ * image 默认contain，支持设置auto
+ */
 import {fabric} from "fabric";
 import {Bind} from "lodash-decorators";
 import React, {RefObject} from 'react';
+import {Canvas} from "./derived/Canvas";
 import {EBoardContext, IEBoardContext} from './EBoardContext';
+import {FRAME_TYPE_ENUM} from "./enums/EBoardEnum";
+import {IEmptyFrame, IImageFrame} from "./interface/IFrame";
+// import {CircleBrush} from "./derived/CircleBrush";
+import {PencilBrush} from "./derived/PencilBrush";
 
-declare interface IEBoardCanvas {
+
+declare interface IEBoardCanvas{
     className?:string;
-    bgImage?:string;
+    frameProperty:IEmptyFrame|IImageFrame;
 }
 
-class EBoardCanvas extends React.PureComponent<IEBoardCanvas>{
+class EBoardCanvas extends React.Component<IEBoardCanvas>{
     public static contextType = EBoardContext.Context;
     public context:IEBoardContext;
     private containerRef:RefObject<HTMLCanvasElement>=React.createRef();
-    private fabricCanvas:fabric.Canvas;
+    private fabricCanvas:Canvas;
     @Bind
     private calc(){
         const parentElement = this.containerRef.current.parentElement.parentElement;
@@ -41,10 +50,13 @@ class EBoardCanvas extends React.PureComponent<IEBoardCanvas>{
             width:w
         };
     }
+    shouldComponentUpdate(nextProps: Readonly<IEBoardCanvas>, nextState: Readonly<{}>, nextContext: any): boolean {
+        return false;
+    }
     componentDidMount(): void {
         const container = this.containerRef.current;
         const {width,height,dimensions} = this.calc();
-        this.fabricCanvas=new fabric.Canvas(container,{
+        this.fabricCanvas=new Canvas(container,{
             containerClass:this.props.className,
             selection:false,
             skipTargetFind:true
@@ -53,17 +65,91 @@ class EBoardCanvas extends React.PureComponent<IEBoardCanvas>{
         this.fabricCanvas.setDimensions(dimensions,{backstoreOnly:true});// 设置canvas 画布大小
     
         this.fabricCanvas.isDrawingMode=true;
-        // @ts-ignore
-        const brush = new fabric.PencilBrush(this.fabricCanvas);
+
+        const property = this.props.frameProperty;
+        const {type} = property;
+        switch (type) {
+            case FRAME_TYPE_ENUM.EMPTY:
+                break;
+            case FRAME_TYPE_ENUM.IMAGE:
+                const {image,imageHeight,imageWidth} = property as IImageFrame;
+                const imageElement = new Image();
+                imageElement.src=image;
+                const {width,height} = this.fabricCanvas;
+                // calc 图片大小
+                let imageW=0,imageH=0;
+                const xRatio = width / imageWidth;
+                const yRatio = height / imageHeight;
+                if(xRatio > yRatio){
+                    imageH=height;
+                    imageW=height*imageWidth/imageHeight;
+                }else{
+                    imageW=width;
+                    imageH=width*imageHeight/imageWidth;
+                }
+                const fabricImage = new fabric.Image(imageElement,{
+                    height:imageH,
+                    left:(width - imageW)/2,
+                    top:(height - imageH)/2,
+                    width:imageW,
+                });
+                this.fabricCanvas.backgroundImage=fabricImage;
+                break;
+        }
+
+
+   /*     const circleBrush = new CircleBrush(this.fabricCanvas);
+        circleBrush.color="red";
+        // 动画
+        circleBrush.onMouseDown(new fabric.Point(0,0));// 中心点
+        fabric.util.animate({
+            byValue:100,
+            duration: 1000,
+            endValue: 100,
+            startValue: 0,
+            onChange(value:number){
+                circleBrush.onMouseMove(new fabric.Point(value,value));// 中心点
+                // circleBrush.render();
+            },
+            onComplete(){
+                circleBrush.onMouseUp();// 中心点
+                console.log("COMPLETE");
+            }
+        });
+        this.fabricCanvas.freeDrawingBrush = circleBrush;
+*/
+
+
+        const brush = new PencilBrush(this.fabricCanvas);
         brush.width=3;
         brush.color="red";
-        // @ts-ignore
         this.fabricCanvas.freeDrawingBrush = brush;
-        
-        const {bgImage} = this.props;
-        if(bgImage){
-            this.fabricCanvas.getElement().parentElement.style.background=`url("${bgImage}")`;
+        brush.onMouseDown(new fabric.Point(0,0));
+        fabric.util.animate({
+            byValue:100,
+            duration: 1000,
+            endValue: 100,
+            startValue: 0,
+            onChange(value:number){
+                brush.onMouseMove(new fabric.Point(value,value));// 中心点
+                // circleBrush.render();
+            },
+            onComplete:()=>{
+                brush.onMouseUp();// 中心点
+                console.log("COMPLETE");
+                console.log(this.fabricCanvas.getObjects())
+            }
+        });
+
+    }
+    componentWillReceiveProps(nextProps: Readonly<IEBoardCanvas>, nextContext: any): void {
+        const {className} = nextProps;
+        if(this.props.className!==className){
+            this.fabricCanvas.setContainerClass(className);
         }
+    }
+    componentWillUnmount(): void {
+        this.fabricCanvas.dispose();
     }
     render(){
         return (

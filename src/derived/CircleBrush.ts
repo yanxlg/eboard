@@ -1,9 +1,9 @@
 import {fabric} from "fabric"
 import {Canvas} from "./Canvas";
-import {ICirclePoint} from "../interface/IFrame";
+import {IBrush, ICirclePoint} from '../interface/IBrush';
 import {Circle} from "./Circle";
 
-class CircleBrush extends fabric.CircleBrush{
+class CircleBrush extends fabric.CircleBrush implements IBrush{
     private canvas:Canvas;
     private points:ICirclePoint[];
     private _render:()=>void;
@@ -54,8 +54,10 @@ class CircleBrush extends fabric.CircleBrush{
         this.shadow && circle.setShadow(this.shadow);
         this.canvas.add(circle);
         this.canvas.renderOnAddRemove = originalRenderOnAddRemove;
-        this.canvas.requestRenderAll();
+        // fix flicker
         fabric.util.requestAnimFrame(()=>{
+            this.canvas.isRendering = 0;
+            this.canvas.renderAll();
             this.canvas.fire('path:created', { path: circle });
             this.canvas.clearContext(this.canvas.contextTop);
             this._resetShadow();

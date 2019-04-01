@@ -5,11 +5,10 @@ import {fabric} from "fabric";
 import {Bind} from "lodash-decorators";
 import React, {RefObject} from 'react';
 import {Canvas} from "./derived/Canvas";
+import {LineBrush} from './derived/LineBrush';
 import {EBoardContext, IEBoardContext} from './EBoardContext';
 import {FRAME_TYPE_ENUM} from "./enums/EBoardEnum";
 import {IEmptyFrame, IImageFrame} from "./interface/IFrame";
-// import {CircleBrush} from "./derived/CircleBrush";
-import {PencilBrush} from "./derived/PencilBrush";
 
 
 declare interface IEBoardCanvas{
@@ -64,8 +63,6 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
         this.fabricCanvas.setDimensions({width,height});// 设置样式大小
         this.fabricCanvas.setDimensions(dimensions,{backstoreOnly:true});// 设置canvas 画布大小
     
-        this.fabricCanvas.isDrawingMode=true;
-
         const property = this.props.frameProperty;
         const {type} = property;
         switch (type) {
@@ -96,31 +93,10 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                 this.fabricCanvas.backgroundImage=fabricImage;
                 break;
         }
-
-
-   /*     const circleBrush = new CircleBrush(this.fabricCanvas);
-        circleBrush.color="red";
-        // 动画
-        circleBrush.onMouseDown(new fabric.Point(0,0));// 中心点
-        fabric.util.animate({
-            byValue:100,
-            duration: 1000,
-            endValue: 100,
-            startValue: 0,
-            onChange(value:number){
-                circleBrush.onMouseMove(new fabric.Point(value,value));// 中心点
-                // circleBrush.render();
-            },
-            onComplete(){
-                circleBrush.onMouseUp();// 中心点
-                console.log("COMPLETE");
-            }
-        });
-        this.fabricCanvas.freeDrawingBrush = circleBrush;
-*/
-
-
-        const brush = new PencilBrush(this.fabricCanvas);
+    
+        this.fabricCanvas.isDrawingMode=true;
+    
+        const brush = new LineBrush(this.fabricCanvas);
         brush.width=3;
         brush.color="red";
         this.fabricCanvas.freeDrawingBrush = brush;
@@ -137,9 +113,9 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
             onComplete:()=>{
                 brush.onMouseUp();// 中心点
                 console.log("COMPLETE");
-                console.log(this.fabricCanvas.getObjects())
             }
         });
+        
 
     }
     componentWillReceiveProps(nextProps: Readonly<IEBoardCanvas>, nextContext: any): void {

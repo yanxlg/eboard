@@ -7,6 +7,7 @@ class Canvas extends fabric.Canvas{
     public container:HTMLDivElement;
     public freeDrawingBrush:fabric.BaseBrush;
     public contextTop:CanvasRenderingContext2D;
+    public isRendering:0|1;
     constructor(element: HTMLCanvasElement | string, options?: ICanvasOptions){
         super(element,options);
         this.container=this.getElement().parentElement as HTMLDivElement;

@@ -1,8 +1,9 @@
 import {fabric} from "fabric";
+import {IBrush} from '../interface/IBrush';
 import {Canvas} from "./Canvas";
 import {Pencil} from "./Pencil";
 
-class PencilBrush extends fabric.PencilBrush{
+class PencilBrush extends fabric.PencilBrush implements IBrush{
     private canvas:Canvas;
     private _render:()=>void;
     public strokeMiterLimit:number;

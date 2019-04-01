@@ -29,9 +29,10 @@ export declare interface IImageFrame extends IBaseFrame{
     imageHeight:number;
 }
 
+
+export declare interface IImagesFrame extends IBaseFrame{
+    children:IImageFrame[]
+}
+
 export type IFrame = IEmptyFrame|IImageFrame;
 
-export declare interface ICirclePoint extends fabric.Point{
-    radius?:number;
-    fill?:string;
-}

@@ -9,6 +9,7 @@ import {LineBrush} from './derived/LineBrush';
 import {EBoardContext, IEBoardContext} from './EBoardContext';
 import {FRAME_TYPE_ENUM} from "./enums/EBoardEnum";
 import {IFrame, IImageFrame} from "./interface/IFrame";
+import {Common} from "./untils/Common";
 
 
 declare interface IEBoardCanvas{
@@ -21,6 +22,24 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
     public context:IEBoardContext;
     private containerRef:RefObject<HTMLCanvasElement>=React.createRef();
     private fabricCanvas:Canvas;
+    private image:HTMLImageElement;
+    private imageWidth:number;
+    private imageHeight:number;
+
+    constructor(props:IEBoardCanvas) {
+        super(props);
+        const {property} = props;
+        if(property.type===FRAME_TYPE_ENUM.IMAGE){
+            this.imageWidth=(property as IImageFrame).imageWidth;
+            this.imageHeight=(property as IImageFrame).imageHeight;
+            this.image=new Image();
+            this.image.src=(property as IImageFrame).image;
+        }
+    }
+    @Bind
+    private onResize(){
+        this.layout();
+    }
     @Bind
     private calc(){
         const parentElement = this.containerRef.current.parentElement.parentElement;
@@ -49,72 +68,87 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
             width:w
         };
     }
+    @Bind
+    private layout(){
+        let {width:canvasWidth,height:canvasHeight,dimensions} = this.calc();
+        const property = this.props.property;
+        const {type} = property;
+        switch (type) {
+            case FRAME_TYPE_ENUM.EMPTY:
+                this.fabricCanvas.setDimensions({width:canvasWidth,height:canvasHeight});// 设置样式大小
+                this.fabricCanvas.setDimensions(dimensions,{backstoreOnly:true});// 设置canvas 画布大小
+                break;
+            case FRAME_TYPE_ENUM.IMAGE:
+                if(!this.imageWidth||!this.imageHeight){
+                    // image size unknow
+                    this.fabricCanvas.setDimensions({width:canvasWidth,height:canvasHeight});// 设置样式大小
+                    this.fabricCanvas.setDimensions(dimensions,{backstoreOnly:true});// 设置canvas 画布大小
+                }
+                // get image size
+                Common.getImageSize(this.image,(size?:{width:number;height:number})=>{
+                   if(void 0 === size){return}
+                   this.imageWidth=size.width;
+                   this.imageHeight=size.height;
+                    const {layoutMode} = property as IImageFrame;
+                    const {width,height} = dimensions;
+                    if(layoutMode==="top_auto"){
+                        // scroll enable
+                        const imageRatio = this.imageHeight/this.imageWidth;
+                        if(height/width<imageRatio){
+                            canvasHeight = width*imageRatio;
+                            dimensions.height=dimensions.width*imageRatio;
+                            this.fabricCanvas.setDimensions({width:canvasWidth,height:canvasHeight});// 设置样式大小
+                            this.fabricCanvas.setDimensions(dimensions,{backstoreOnly:true});// 设置canvas 画布大小
+                            this.fabricCanvas.backgroundImage=new fabric.Image(this.image, {
+                                height: canvasHeight,
+                                left: 0,
+                                top: 0,
+                                width: canvasWidth,
+                            });
+                            return;
+                        }
+                    }
+                    // without scroll
+                    this.fabricCanvas.setDimensions({width:canvasWidth,height:canvasHeight});// 设置样式大小
+                    this.fabricCanvas.setDimensions(dimensions,{backstoreOnly:true});// 设置canvas 画布大小
+
+                    // calc 图片大小
+                    let imageW=0,imageH=0;
+                    const xRatio = width / this.imageWidth;
+                    const yRatio = height / this.imageHeight;
+                    if(xRatio > yRatio){
+                        imageH=height;
+                        imageW=height*this.imageWidth/this.imageHeight;
+                    }else{
+                        imageW=width;
+                        imageH=width*this.imageHeight/this.imageWidth;
+                    }
+                    this.fabricCanvas.backgroundImage=new fabric.Image(this.image, {
+                        height: imageH,
+                        left: (width - imageW) / 2,
+                        top: (height - imageH) / 2,
+                        width: imageW,
+                    });
+                });
+                break;
+            default:
+                break;
+        }
+    }
     shouldComponentUpdate(nextProps: Readonly<IEBoardCanvas>, nextState: Readonly<{}>, nextContext: any): boolean {
         return false;
     }
     componentDidMount(): void {
         const container = this.containerRef.current;
-        let {width:canvasWidth,height:canvasHeight,dimensions} = this.calc();
         this.fabricCanvas=new Canvas(container,{
             containerClass:this.props.className,
             selection:false,
             skipTargetFind:true
         });
-        this.fabricCanvas.setDimensions({width:canvasWidth,height:canvasHeight});// 设置样式大小
-        this.fabricCanvas.setDimensions(dimensions,{backstoreOnly:true});// 设置canvas 画布大小
+        this.layout();
 
-        const property = this.props.property;
-        const {type} = property;
-        switch (type) {
-            case FRAME_TYPE_ENUM.EMPTY:
-                break;
-            case FRAME_TYPE_ENUM.IMAGE:
-                const {image,imageHeight,imageWidth,layoutMode} = property as IImageFrame;
-                const imageElement = new Image();
-                imageElement.src=image;
-                const {width,height} = this.fabricCanvas;
-                if(layoutMode==="top_auto"){
-                    // scroll enable
-                    const imageRatio = imageHeight/imageWidth;
-                    if(height/width<imageRatio){
-                        canvasHeight = width*imageRatio;
-                        dimensions.height=dimensions.width*imageRatio;
-                        this.fabricCanvas.setDimensions({width:canvasWidth,height:canvasHeight});// 设置样式大小
-                        this.fabricCanvas.setDimensions(dimensions,{backstoreOnly:true});// 设置canvas 画布大小
-                        this.fabricCanvas.backgroundImage=new fabric.Image(imageElement, {
-                            height: canvasHeight,
-                            left: 0,
-                            top: 0,
-                            width: canvasWidth,
-                        });
-                        break;
-                    }
-                }
-                // calc 图片大小
-                let imageW=0,imageH=0;
-                const xRatio = width / imageWidth;
-                const yRatio = height / imageHeight;
-                if(xRatio > yRatio){
-                    imageH=height;
-                    imageW=height*imageWidth/imageHeight;
-                }else{
-                    imageW=width;
-                    imageH=width*imageHeight/imageWidth;
-                }
-                const fabricImage = new fabric.Image(imageElement,{
-                    height:imageH,
-                    left:(width - imageW)/2,
-                    top:(height - imageH)/2,
-                    width:imageW,
-                });
-                this.fabricCanvas.backgroundImage=fabricImage;
-                break;
-        }
-        this.fabricCanvas.setDimensions({width:canvasWidth,height:canvasHeight});// 设置样式大小
-        this.fabricCanvas.setDimensions(dimensions,{backstoreOnly:true});// 设置canvas 画布大小
 
         this.fabricCanvas.isDrawingMode=true;
-    
         const brush = new LineBrush(this.fabricCanvas);
         brush.width=3;
         brush.color="red";
@@ -134,7 +168,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                 console.log("COMPLETE");
             }
         });
-        
+
 
     }
     componentWillReceiveProps(nextProps: Readonly<IEBoardCanvas>, nextContext: any): void {

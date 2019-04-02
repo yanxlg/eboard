@@ -4,15 +4,15 @@
  * @time：2019/4/1 11:01
  */
 import React from "react";
-import {IImagesFrame} from "../interface/frame.ts";
+import {IImagesFrame} from "../interface/IFrame";
 
 class ImagesFrame extends React.PureComponent<IImagesFrame>{
-    const {frames} = this.props;
-
     render(){
+        const {children} = this.props;
+        console.log(children);
         return (
             <div>
-            
+            s
             </div>
         )
     }

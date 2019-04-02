@@ -18,6 +18,7 @@ class EBoard extends React.PureComponent{
     private onResize(){
         console.log("resize");
         this.tabRef.current.resize();
+        // eventEmitter 触发整个子组建resize
     }
     public render(){
         return [

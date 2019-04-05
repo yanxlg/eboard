@@ -24,7 +24,7 @@
 @tabControlIconDisableColor:#bbbbbb;
 @tabControlLineHeight:20px;
 @tabControlLineColor:#bbbbbb;
-@tabRemoveIconSize:12px;
+@tabRemoveIconSize:16px;
 @tabRemoveIconLeft:12px;
 @tabRemoveIconColor:#666;
 @tabRemoveIconActiveColor:#fff;
@@ -50,7 +50,6 @@
   &-item{
     display: inline-block;
     vertical-align: middle;
-    //padding: 0 @tabItemPadding;
     height: @tabHeight;
     font-size: @tabFontSize;
     line-height: @tabHeight;
@@ -61,10 +60,9 @@
     margin-right: @tabItemSpacing;
     background-color: @tabItemBgColor;
     position: relative;
-    &:hover{
-      .tab-remove{
+    transition:all .3s cubic-bezier(.645, .045, .355, 1);
+    &:hover &-remove{
         opacity: 1;
-      }
     }
     &-name{
       display: inline-block;
@@ -76,9 +74,11 @@
       white-space: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;
+      vertical-align: middle;
       padding: 0 @tabItemPadding;
       min-width: @tabItemMinWidth;
       max-width: @tabItemMaxWidth;
+      margin-top: -1px;
     }
     &-calc{
       position: absolute;
@@ -86,6 +86,22 @@
       opacity: 0;
       left: 0;
       top: 0;
+    }
+    &-remove{
+      font-size: @tabRemoveIconSize!important;
+      margin-right: @tabItemPadding;
+      display: inline-block;
+      vertical-align: middle;
+      opacity: 0;
+      color: @tabRemoveIconColor;
+      margin-top: -1px;
+      &:hover{
+        color: @tabRemoveIconHoverColor;
+      }
+    }
+    &-can-remove &-name{
+        min-width: @tabItemMinWidth - @tabItemPadding - @tabRemoveIconSize;
+        max-width: @tabItemMaxWidth - @tabItemPadding - @tabRemoveIconSize;
     }
   }
   &-active{
@@ -119,13 +135,13 @@
   }
   &-scroll{
     position: relative;
-    display: inline-block;
     vertical-align: middle;
     max-width: calc(~"100% - @{tabItemAddWidth}");
     padding-right:0;
     transition: max-width 240ms ease;
     white-space: nowrap;
     overflow: hidden;
+    display: inline-block;
     &-pager{
       @right:@tabItemAddWidth+@tabControlWidth;
       max-width:calc(~"100% - @{right}");
@@ -133,7 +149,8 @@
     &-bar{
       position: relative;
       transform: translateX(0);
-      transition: transform 240ms ease;
+      transition: transform 300ms cubic-bezier(.645, .045, .355, 1);
+      display: inline-block;
     }
   }
   &-prev,&-next{
@@ -174,23 +191,6 @@
       z-index: 1;
     }
   }
-  &-remove{
-    font-size: @tabRemoveIconSize!important;
-    margin-right: @tabItemPadding;
-    top: 50%;
-    transform: translateY(-50%);
-    position: relative;
-    float: right;
-    line-height: @tabHeight;
-    margin-top: 1px;
-    opacity: 0;
-    color: @tabRemoveIconColor;
-    &:hover{
-      color: @tabRemoveIconHoverColor;
-    }
-    & ~ .tab-item-name{
-      min-width: @tabItemMinWidth - @tabItemPadding - @tabRemoveIconSize;
-      max-width: @tabItemMaxWidth - @tabItemPadding - @tabRemoveIconSize;
-    }
-  }
+
+
 }

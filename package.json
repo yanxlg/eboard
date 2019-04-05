@@ -6,7 +6,8 @@
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "lodash-decorators": "^6.0.1",
-    "fabric": "^2.7.0"
+    "fabric": "^2.7.0",
+    "antd": "^3.16.1"
   },
   "scripts": {
     "start": "node scripts/start.js",

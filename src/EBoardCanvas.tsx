@@ -4,8 +4,8 @@
 import {fabric} from "fabric";
 import {Bind} from "lodash-decorators";
 import React, {RefObject} from 'react';
+import {ArrowBrush} from './derived/ArrowBrush';
 import {Canvas} from "./derived/Canvas";
-import {LineBrush} from './derived/LineBrush';
 import {EBoardContext, IEBoardContext} from './EBoardContext';
 import {FRAME_TYPE_ENUM} from "./enums/EBoardEnum";
 import {IEmptyFrame, IImageFrame} from "./interface/IFrame";
@@ -96,7 +96,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
     
         this.fabricCanvas.isDrawingMode=true;
     
-        const brush = new LineBrush(this.fabricCanvas);
+        const brush = new ArrowBrush(this.fabricCanvas);
         brush.width=3;
         brush.color="red";
         this.fabricCanvas.freeDrawingBrush = brush;

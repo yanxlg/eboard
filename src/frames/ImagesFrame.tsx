@@ -9,7 +9,7 @@ class ImagesFrame extends React.PureComponent{
     render(){
         return (
             <div>
-            
+                www
             </div>
         )
     }

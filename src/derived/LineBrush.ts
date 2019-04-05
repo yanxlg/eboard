@@ -13,11 +13,11 @@ import {Line} from './Line';
 
 
 class LineBrush extends fabric.PencilBrush implements IBrush{
-    private canvas:Canvas;
+    protected canvas:Canvas;
+    protected _points:fabric.Point[];
+    protected _saveAndTransform:(ctx:CanvasRenderingContext2D)=>void;
     public strokeMiterLimit:number;
     public shadow:fabric.Shadow;
-    private _points:fabric.Point[];
-    private _saveAndTransform:(ctx:CanvasRenderingContext2D)=>void;
     public strokeDashArray:number[]=[10,4];// dot Line
     constructor(canvas:Canvas){
         // @ts-ignore
@@ -31,7 +31,7 @@ class LineBrush extends fabric.PencilBrush implements IBrush{
      * 保证仅存在两个点
      */
     // @ts-ignore
-    private _addPoint(point:fabric.Point) {
+    protected _addPoint(point:fabric.Point) {
         if(this._points.length>1){
             this._points.splice(-1,1,point);
         }else{
@@ -77,7 +77,7 @@ class LineBrush extends fabric.PencilBrush implements IBrush{
         const ctx  = this.canvas.contextTop;
         this.canvas.clearContext(ctx);
     }
-    private _render(){
+    protected _render(){
         let ctx  = this.canvas.contextTop,
             p1 = this._points[0],
             p2 = this._points[1];

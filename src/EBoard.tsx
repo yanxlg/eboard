@@ -3,10 +3,10 @@
  * @author:yanxinaliang
  * @time：2019/3/30 13:54
  */
-import React, {RefObject} from "react";
+import React, {RefObject} from 'react';
 import {EBoardBody} from './EBoardBody';
 import {EBoardContext} from './EBoardContext';
-import {EBoardTab} from "./EBoardTab";
+import {EBoardTab} from './EBoardTab';
 import {ResizeEmitter} from './ResizeEmitter';
 import {Bind} from "lodash-decorators";
 import "./style/layout.less";

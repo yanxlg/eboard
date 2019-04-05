@@ -27,6 +27,7 @@ export declare interface IImageFrame extends IBaseFrame{
     image:string;
     imageWidth:number;
     imageHeight:number;
+    layoutMode?:"center_contain"|"top_auto";
 }
 
 

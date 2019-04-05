@@ -15,7 +15,7 @@ class EmptyFrame extends React.PureComponent<IEmptyFrame>{
     render(){
         const {activeBoard} = this.context;
         return (
-            <EBoardCanvas className={`board-frame ${activeBoard===this.props.wbNumber?"board-frame-active":""}`} frameProperty={this.props}/>
+            <EBoardCanvas className={`board-frame ${activeBoard===this.props.wbNumber?"board-frame-active":""}`} property={this.props}/>
         )
     }
 }

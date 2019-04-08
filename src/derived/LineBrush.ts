@@ -7,54 +7,104 @@
  */
 
 import {fabric} from 'fabric';
-import {IBrush} from '../interface/IBrush';
-import {Canvas} from './Canvas';
+import {Cursor} from '../untils/Cursor';
+import {BaseBrush} from './BaseBrush';
 import {Line} from './Line';
+import {Point} from './Point';
 
 
-class LineBrush extends fabric.PencilBrush implements IBrush{
-    protected canvas:Canvas;
-    protected _points:fabric.Point[];
+class LineBrush extends BaseBrush<Line>{
     protected _saveAndTransform:(ctx:CanvasRenderingContext2D)=>void;
     public strokeMiterLimit:number;
     public shadow:fabric.Shadow;
     public strokeDashArray:number[]=[10,4];// dot Line
-    constructor(canvas:Canvas){
-        // @ts-ignore
-        super(canvas);
+    protected _startPointer:fabric.Point;
+    protected _endPointer:fabric.Point;
+    public cursorType=Cursor.hand;
+    protected onMouseDown(pointer:fabric.Point) {
+        pointer=new Point(pointer);
+        this.objectId=this.idGenerator.getId();
+        this._prepareForDrawing(pointer);
+        this._render();
+    }
+    
+    protected onMouseMove(pointer:fabric.Point) {
+        pointer=new Point(pointer);
+        this._startPointer=this._startPointer||pointer;
+        this._endPointer=pointer;
+        this.canvas.clearContext(this.canvas.contextTop);
+        this._render();
+    }
+    
+    protected onMouseUp() {
+        this._finalizeAndAddPath();
+    }
+    
+    private _prepareForDrawing(pointer:fabric.Point) {
+        this._reset();
+        this._startPointer=pointer;
+        this.canvas.contextTop.moveTo(pointer.x, pointer.y);
+    }
+    
+    private _reset() {
+        this._startPointer=undefined;
+        this._endPointer=undefined;
+        this._setBrushStyles();
+        const color = new fabric.Color(this.color);
+        this.needsFullRender = (color.getAlpha() < 1);
+        this._setShadow();
+    }
+    
+    
+    protected _render() {
+        let ctx  = this.canvas.contextTop,
+            p1 = this._startPointer,
+            p2 = this._endPointer||this._startPointer;
+        this._saveAndTransform(ctx);
+        ctx.beginPath();
+        if (p1 && p2 && p1.x === p2.x && p1.y === p2.y) {
+            const width = this.width / 1000;
+            p1.x -= width;
+            p2.x += width;
+        }
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+        ctx.restore();
+    }
+    
+    protected convertPointsToSVGPath(){
+        let path = [], width = this.width / 1000,
+            p1 = this._startPointer,
+            p2 = this._endPointer||this._startPointer,
+            multSignX = 1, multSignY = 1;
+        path.push('M ', p1.x - multSignX * width, ' ', p1.y - multSignY * width, ' ');
+        path.push('L ', p2.x + multSignX * width, ' ', p2.y + multSignY * width);
+        return path;
+    }
+    
+    protected _finalizeAndAddPath(){
+        const ctx = this.canvas.contextTop;
+        ctx.closePath();
+        const pathData = this.convertPointsToSVGPath().join('');
+        if (pathData === 'M 0 0 Q 0 0 0 0 L 0 0') {
+            this.canvas.requestRenderAll();
+            return;
+        }
+        const path = this.createPath();
+        this.canvas.clearContext(this.canvas.contextTop);
+        this.canvas.add(path);
+        this.canvas.renderAll();
+        path.setCoords();
+        this._resetShadow();
+        this.canvas.fire('path:created', { path});
     }
 
-    /**
-     * @override
-     * @param point
-     * @private
-     * 保证仅存在两个点
-     */
-    // @ts-ignore
-    protected _addPoint(point:fabric.Point) {
-        if(this._points.length>1){
-            this._points.splice(-1,1,point);
-        }else{
-            this._points.push(point);
-        }
-        return true;
-    };
-    public onMouseDown:(pointer:fabric.Point)=>void;
-    public onMouseUp:()=>void;
-    public onMouseMove(pointer:fabric.Point){
-        this._addPoint(pointer);
-        this.clear();
-        this.render();
-    };
-    /**
-     * @override
-     * @param pathData
-     */
-    public createPath(pathData:string):any {
-        const start = this._points[0];
-        const end = this._points.length>1?this._points[1]:this._points[0];
+    public createPath():any {
+        const start = this._startPointer;
+        const end = this._endPointer||this._startPointer;
         const points = [start.x,start.y,end.x,end.y];
-        const path = new Line(points, {
+        const path = new Line(this.objectId,points, {
             fill: null,
             stroke: this.color,
             strokeWidth: this.width,
@@ -72,24 +122,6 @@ class LineBrush extends fabric.PencilBrush implements IBrush{
             path.setShadow(this.shadow);
         }
         return path;
-    }
-    public clear(){
-        const ctx  = this.canvas.contextTop;
-        this.canvas.clearContext(ctx);
-    }
-    protected _render(){
-        let ctx  = this.canvas.contextTop,
-            p1 = this._points[0],
-            p2 = this._points[1];
-        this._saveAndTransform(ctx);
-        ctx.beginPath();
-        ctx.moveTo(p1.x, p1.y);
-        ctx.lineTo(p2.x, p2.y);
-        ctx.stroke();
-        ctx.restore();
-    };
-    public render(){
-        this._render();
     }
 }
 

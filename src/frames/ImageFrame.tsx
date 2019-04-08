@@ -4,20 +4,34 @@
  * @time：2019/3/30 18:25
  * 支持图片布局，center align vertical; contain %
  */
-import React from "react";
+import React, {RefObject} from 'react';
 import {EBoardCanvas} from '../EBoardCanvas';
-import {EBoardContext, IEBoardContext} from '../EBoardContext';
-import {IImageFrame} from "../interface/IFrame";
+import {IImageFrame} from '../interface/IFrame';
 import "../style/frames.less";
+import PerfectScrollbar from "kxt-web/lib/perfectscrollbar";
 
+declare interface IImageFrameProps extends IImageFrame{
+    width:number;
+    height:number;
+    dimensions:{
+        width:number;
+        height:number;
+    }
+}
 
-class ImageFrame extends React.PureComponent<IImageFrame>{
-    public static contextType = EBoardContext.Context;
-    public context:IEBoardContext;
+class ImageFrame extends React.PureComponent<IImageFrameProps>{
+    private scrollRef:RefObject<PerfectScrollbar>=React.createRef();
+    componentDidUpdate(
+        prevProps: Readonly<IImageFrameProps>, prevState: Readonly<{}>,
+        snapshot?: any): void {
+            this.scrollRef.current.update();
+    }
     render(){
-        const {activeBoard} = this.context;
+        const {active,width,height,dimensions} = this.props;
         return (
-            <EBoardCanvas className={`board-frame ${activeBoard===this.props.wbNumber?"board-frame-active":""}`} property={this.props}/>
+            <PerfectScrollbar ref={this.scrollRef} className={`board-frame ${active?"board-frame-active":""}`} style={{width,height}}>
+                <EBoardCanvas property={this.props} dimensions={dimensions} height={height} width={width}/>
+            </PerfectScrollbar>
         )
     }
 }

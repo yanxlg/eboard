@@ -3,34 +3,30 @@
  * @author:yanxinaliang
  * @time：2019/3/30 13:54
  */
-import React, {RefObject} from 'react';
+import React from 'react';
 import {EBoardBody} from './EBoardBody';
 import {EBoardContext} from './EBoardContext';
 import {EBoardTab} from './EBoardTab';
+import {EboardTool} from './EboardTool';
 import {ResizeEmitter} from './ResizeEmitter';
-import {Bind} from "lodash-decorators";
 import "./style/layout.less";
 
 
 class EBoard extends React.PureComponent{
-    private tabRef:RefObject<EBoardTab> = React.createRef();
-    @Bind
-    private onResize(){
-        console.log("resize");
-        this.tabRef.current.resize();
-        // eventEmitter 触发整个子组建resize
+    componentDidMount(): void {
+        document.addEventListener("contextmenu", (event)=>{
+            event.preventDefault();
+        });
     }
     public render(){
-        return [
-            <ResizeEmitter key="resize" onResize={this.onResize}/>,
-            <EBoardContext key={"content"}>
+        return (
+            <EBoardContext>
+                <ResizeEmitter/>
                 <EBoardBody/>
-                <div>
-                    toolbar
-                </div>
-                <EBoardTab ref={this.tabRef}/>
+                <EboardTool/>
+                <EBoardTab/>
             </EBoardContext>
-        ];
+        )
     }
 }
 

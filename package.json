@@ -7,7 +7,9 @@
     "react-dom": "^16.8.6",
     "lodash-decorators": "^6.0.1",
     "fabric": "^2.7.0",
-    "antd": "^3.16.1"
+    "antd": "^3.16.1",
+    "pdfjs-dist": "^2.1.266",
+    "kxt-web": "^1.5.2"
   },
   "scripts": {
     "start": "node scripts/start.js",
@@ -21,6 +23,7 @@
     "@types/react": "^16.8.10",
     "@types/react-dom": "^16.8.3",
     "@types/webpack": "^4.4.26",
+    "@types/pdfjs-dist": "^2.0.0",
     "typescript": "^3.4.1",
     "autoprefixer": "7.1.6",
     "babel-jest": "20.0.3",

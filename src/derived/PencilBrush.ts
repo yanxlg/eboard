@@ -1,23 +1,44 @@
+/**
+ * @Author: yanxinaliang (rainyxlxl@163.com)
+ * @Date: 2019/4/5 16:35
+ * @Last Modified by: yanxinaliang (rainyxlxl@163.com)
+ * @Last Modified time: 2019/4/5 16:35
+ * @disc:Pencil Brush
+ * mouse API 不支持外部调用，外部调用需要考虑objectId匹配情况
+ */
 import {fabric} from "fabric";
-import {IBrush} from '../interface/IBrush';
-import {Canvas} from "./Canvas";
-import {Pencil} from "./Pencil";
+import {IConfig} from '../Config';
+import {Cursor} from '../untils/Cursor';
+import {IDGenerator} from '../untils/IDGenerator';
+import {IBaseBrush} from './BaseBrush';
+import {Canvas} from './Canvas';
+import {Pencil} from './Pencil';
+import {Point} from './Point';
 
-class PencilBrush extends fabric.PencilBrush implements IBrush{
-    private canvas:Canvas;
+class PencilBrush extends fabric.PencilBrush implements IBaseBrush{
+    protected canvas:Canvas;
     private _render:()=>void;
-    public strokeMiterLimit:number;
+    private strokeMiterLimit:number;
     public shadow:fabric.Shadow;
-    constructor(canvas:Canvas){
-        // @ts-ignore
-        super(canvas);
+    public objectMap=new Map<string,Pencil>();
+    protected objectId?:string;
+    protected config:IConfig;
+    private idGenerator:IDGenerator;
+    public cursorType=Cursor.hand;
+    public hasObjectId(objectId:string){
+        return this.objectMap.has(objectId);
     }
-    public onMouseDown:(pointer:fabric.Point)=>void;
-    public onMouseMove:(pointer:fabric.Point)=>void;
-    public onMouseUp:()=>void;
-    // @override
+    public getObject(objectId:string){
+        return this.objectMap.get(objectId);
+    }
+    constructor(canvas:Canvas,config:IConfig,idGenerator:IDGenerator){
+        super();
+        this.canvas=canvas;
+        this.config=config;
+        this.idGenerator=idGenerator;
+    }
     public createPath(pathData:string) {
-        const path = new Pencil(pathData, {
+        const path = new Pencil(this.objectId,pathData, {
             fill: null,
             stroke: this.color,
             strokeWidth: this.width,
@@ -36,6 +57,22 @@ class PencilBrush extends fabric.PencilBrush implements IBrush{
         }
         return path;
     }
+    protected onMouseDown(pointer:fabric.Point){
+        pointer=new Point(pointer);
+        this.objectId=this.idGenerator.getId();
+        // @ts-ignore
+        super.onMouseDown(pointer);
+    };
+    protected onMouseMove(pointer:fabric.Point){
+        pointer=new Point(pointer);
+        // @ts-ignore
+        super.onMouseMove(pointer);
+    };
+    protected onMouseUp(){
+        // @ts-ignore
+        super.onMouseUp();
+        this.objectId=undefined;
+    };
     public clear(){
         const ctx  = this.canvas.contextTop;
         this.canvas.clearContext(ctx);

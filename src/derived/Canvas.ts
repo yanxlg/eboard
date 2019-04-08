@@ -15,6 +15,12 @@ class Canvas extends fabric.Canvas{
     public setContainerClass(className:string){
         this.container.className=className;
     }
+    public addClass(className:string){
+        this.container.classList.add(className);
+    }
+    public removeClass(className:string){
+        this.container.classList.remove(className);
+    }
     public fire:(eventName:string,eventData:any)=>void;
 }
 

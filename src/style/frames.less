@@ -12,14 +12,46 @@
     top: 0;
     z-index: 1;
     opacity: 0;
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
+    overflow: hidden;
+    transition: width 300ms cubic-bezier(.645, .045, .355, 1),
+                height 300ms cubic-bezier(.645, .045, .355, 1),
+                opacity 300ms cubic-bezier(.645, .045, .355, 1);
     &-active{
-        z-index: 2;
-        opacity: 1;
+        z-index: 2!important;
+        opacity: 1!important;
     }
     &s{
-    
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        opacity: 0;
+        & .board-frame{
+            animation: boardFrameHide 240ms ease;
+        }
+        & .board-frame-active{
+            animation: boardFrameShow 240ms ease!important;
+        }
+    }
+}
+@keyframes  boardFrameHide{
+    from{
+        opacity: 1;
+        transform: translate3d(0%,0,0);
+    }
+    to{
+        opacity: 0.2;
+        transform: translate3d(-100%,0,0);
+    }
+}
+
+@keyframes boardFrameShow {
+    from{
+        opacity: 0.2;
+        transform: translate3d(100%,0,0);
+    }
+    to{
+        opacity: 1;
+        transform: translate3d(0,0,0);
     }
 }

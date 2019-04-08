@@ -1,12 +1,11 @@
-import {Bind} from "lodash-decorators";
-import React, {RefObject} from "react";
+import {Bind} from 'lodash-decorators';
+import React, {RefObject} from 'react';
 import {EBoardTabItem} from './components/tabItem';
-import {EBoardContext, IEBoardContext} from "./EBoardContext";
+import {EBoardContext, EventList, IEBoardContext} from './EBoardContext';
+import {FRAME_TYPE_ENUM} from './enums/EBoardEnum';
+import './font/iconfont.css';
 import {IEmptyFrame, IFrame} from './interface/IFrame';
-import "./font/iconfont.css";
-import "./style/tab.less";
-import {FRAME_TYPE_ENUM} from "./enums/EBoardEnum";
-
+import './style/tab.less';
 
 declare interface ITabInterface{
     showPager:boolean;
@@ -26,9 +25,10 @@ class EBoardTab extends React.PureComponent<{}, ITabInterface>{
     private prevRef:RefObject<HTMLDivElement>=React.createRef();
     private nextRef:RefObject<HTMLDivElement>=React.createRef();
     private calcItem:HTMLDivElement;
-    constructor(props:{}){
+    constructor(props:{},context:IEBoardContext){
         super(props);
         this.state={showPager:false,scrollOffset:0,prevDisable:true,nextDisable:true};
+        context.eventEmitter.on(EventList.Resize, this.resize);
     }
     private static getElementTotalWidth(element:HTMLDivElement){
         const style = document.defaultView.getComputedStyle(element,null);

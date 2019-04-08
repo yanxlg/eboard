@@ -8,6 +8,8 @@
 export declare interface ICirclePoint extends fabric.Point{
     radius?:number;
     fill?:string;
+    rx?:number;
+    ry?:number;
 }
 
 export declare interface IBrush {

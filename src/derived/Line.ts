@@ -10,8 +10,9 @@ import {ILineOptions} from 'fabric/fabric-impl';
 
 class Line extends fabric.Line{
     public objectId:string;
-    constructor(points?: number[], objObjects?: ILineOptions){
+    constructor(objectId:string,points?: number[], objObjects?: ILineOptions){
         super(points,objObjects);
+        this.objectId=objectId;
     }
 }
 

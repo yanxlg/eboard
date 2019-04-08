@@ -4,18 +4,28 @@
  */
 import React from "react";
 import {EBoardCanvas} from '../EBoardCanvas';
-import {EBoardContext, IEBoardContext} from '../EBoardContext';
 import {IEmptyFrame} from "../interface/IFrame";
 import "../style/frames.less";
 
 
-class EmptyFrame extends React.PureComponent<IEmptyFrame>{
-    public static contextType = EBoardContext.Context;
-    public context:IEBoardContext;
+
+declare interface IEmptyFrameProps extends IEmptyFrame{
+    width:number;
+    height:number;
+    dimensions:{
+        width:number;
+        height:number;
+    }
+}
+
+
+class EmptyFrame extends React.PureComponent<IEmptyFrameProps>{
     render(){
-        const {activeBoard} = this.context;
+        const {width,height,dimensions,active} = this.props;
         return (
-            <EBoardCanvas className={`board-frame ${activeBoard===this.props.wbNumber?"board-frame-active":""}`} property={this.props}/>
+            <div className={`board-frame ${active?"board-frame-active":""}`} style={{width,height}}>
+                <EBoardCanvas property={this.props} width={width} height={height} dimensions={dimensions}/>
+            </div>
         )
     }
 }

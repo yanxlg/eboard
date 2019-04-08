@@ -1,0 +1,79 @@
+/**
+ * @Author: yanxinaliang (rainyxlxl@163.com)
+ * @Date: 2019/4/7 22:52
+ * @Last Modified by: yanxinaliang (rainyxlxl@163.com)
+ * @Last Modified time: 2019/4/7 22:52
+ * @disc:Pagination
+ */
+@import "cursor";
+@bottom:20px;
+@height:28px;
+@fontSize:12px;
+@fontColor:#666;
+@splitPadding:5px;
+@iconSize:12px;
+@inputWidth:38px;
+@inputHeight:24px;
+@inputBorderColor:#09ca51;
+
+
+.board-pagination{
+    position: absolute;
+    bottom: @bottom;
+    left: 50%;
+    transform: translateX(-50%);
+    height: @height;
+    background-color: #ddd;
+    border-radius: @height;
+    color: @fontColor;
+    font-size: @fontSize;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 @height/2;
+    &-current{
+    
+    }
+    &-split{
+        padding: 0 @splitPadding;
+    }
+    &-total{
+    
+    }
+    &-control{
+        padding: 0 @height;
+    }
+    &-input{
+        width: @inputWidth!important;
+        height: @inputHeight!important;
+        border-radius: 0!important;
+        text-align: center;
+        padding: 0;
+        &:focus,&:hover{
+            border-color: @inputBorderColor!important;
+        }
+    }
+    &-prev,&-next,&-go{
+        font-size: @iconSize!important;
+        position: absolute;
+        width: @height;
+        height: @height;
+        text-align: center;
+        background-color: transparent;
+        line-height: @height;
+        border: none;
+        outline: none;
+        &:extend(.cursor-pointer);
+    }
+    &-prev{
+        left: 0;
+    }
+    &-next{
+        right: 0;
+        position: relative!important;
+    }
+    &-go{
+        right: 0;
+    }
+}

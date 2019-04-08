@@ -11,12 +11,13 @@ import {FRAME_TYPE_ENUM} from "../enums/EBoardEnum";
 export declare interface ITab{
     canRemove?:boolean;
     icon?:string;
-    name:string;
-    wbNumber:string;
+    name?:string;
+    wbNumber?:string;
 }
 
 export declare interface IBaseFrame extends ITab{
     type:FRAME_TYPE_ENUM;
+    active?:boolean;
 }
 
 export declare interface IEmptyFrame extends IBaseFrame{
@@ -32,8 +33,9 @@ export declare interface IImageFrame extends IBaseFrame{
 
 
 export declare interface IImagesFrame extends IBaseFrame{
-    children:IImageFrame[]
+    children:Map<number,IImageFrame>;
+    pageNo:number;
 }
 
-export type IFrame = IEmptyFrame|IImageFrame;
+export type IFrame = IEmptyFrame|IImageFrame|IImagesFrame;
 

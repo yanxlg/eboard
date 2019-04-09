@@ -13,7 +13,7 @@ class ResizeEmitter extends React.PureComponent{
     public context:IEBoardContext;
     private iframeRef:RefObject<HTMLIFrameElement>=React.createRef();
     @Bind
-    @Debounce(300)
+    @Debounce(50)
     private onResize(){
         const iframe = this.iframeRef.current;
         const {offsetWidth,offsetHeight} = iframe;

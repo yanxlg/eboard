@@ -14,8 +14,7 @@ import {PencilBrush} from './derived/PencilBrush';
 import {RectBrush} from './derived/RectBrush';
 import {SquareBrush} from './derived/SquareBrush';
 import {StarBrush} from './derived/StarBrush';
-import {FRAME_TYPE_ENUM} from "./enums/EBoardEnum";
-import {IEmptyFrame, IFrame, IImageFrame} from "./interface/IFrame";
+import {IFrame} from "./interface/IFrame";
 import {EventEmitter} from './untils/EventMitter';
 import {IDGenerator} from './untils/IDGenerator';
 import {EMap} from "./untils/Map";
@@ -56,21 +55,9 @@ class EBoardContext extends React.PureComponent<{},IEBoardContext>{
     constructor(props:{}){
         super(props);
         const boardMap = new EMap<string,IFrame>();
-        const frame:IEmptyFrame= {type:FRAME_TYPE_ENUM.EMPTY,wbNumber:"111",name:"白板"};
-        const frame1:IEmptyFrame= {type:FRAME_TYPE_ENUM.EMPTY,wbNumber:"222",name:"白板"};
-        const frame2:IEmptyFrame= {type:FRAME_TYPE_ENUM.EMPTY,wbNumber:"333",name:"白板"};
-        const frame3:IImageFrame= {type:FRAME_TYPE_ENUM.IMAGE,wbNumber:"444",name:"图片",image:"http://pic15.nipic.com/20110628/1369025_192645024000_2.jpg",imageWidth:150,imageHeight:100};
-        boardMap.set("111",frame);
-        boardMap.set("222",frame1);
-        boardMap.set("333",frame2);
-        boardMap.set("444",frame3);
-        const map = new Map<number,IImageFrame>();
-        map.set(1,{
-            type:FRAME_TYPE_ENUM.IMAGE,wbNumber:"444",name:"图片",image:"http://pic15.nipic.com/20110628/1369025_192645024000_2.jpg",imageWidth:150,imageHeight:100
-        });
+       
     
-    
-        const map1 = new Map<number,IImageFrame>();
+ /*       const map1 = new Map<number,IImageFrame>();
         map1.set(1,{
             type:FRAME_TYPE_ENUM.IMAGE,
             wbNumber:"444",
@@ -93,7 +80,7 @@ class EBoardContext extends React.PureComponent<{},IEBoardContext>{
             wbNumber:"12",
             children:map1,
             pageNo:1,
-        });
+        });*/
         this.state={
             activeBoard:"444",
             boardMap,

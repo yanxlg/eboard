@@ -16,7 +16,8 @@ declare interface IImageFrameProps extends IImageFrame{
     dimensions:{
         width:number;
         height:number;
-    }
+    };
+    active:boolean;
 }
 
 class ImageFrame extends React.PureComponent<IImageFrameProps>{

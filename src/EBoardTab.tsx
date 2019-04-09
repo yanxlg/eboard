@@ -112,7 +112,7 @@ class EBoardTab extends React.PureComponent<{}, ITabInterface>{
         const addBtn = this.addRef.current;
         const prevBtn = this.prevRef.current;
         const nextBtn = this.nextRef.current;
-        const addWidth = addFrame?this.calcItemWidth(addFrame.name,addFrame.canRemove):0;
+        const addWidth = addFrame?this.calcItemWidth(addFrame.tab.name,addFrame.tab.canRemove):0;
         const {scrollWidth,offsetWidth} = scroll;
         const {showPager} = this.state;
         const nextShowPager = scrollWidth+addWidth>container.offsetWidth-addBtn.offsetWidth;
@@ -137,10 +137,12 @@ class EBoardTab extends React.PureComponent<{}, ITabInterface>{
     private onAddClick(){
         const {config} = this.context;
         const frame:IEmptyFrame = {
-            canRemove:true,
-            name:config.defaultName,
             type:FRAME_TYPE_ENUM.EMPTY,
             wbNumber:Date.now().toString(),
+            tab:{
+                canRemove:true,
+                name:config.defaultName,
+            }
         };
         this.add(frame);
     }
@@ -221,8 +223,8 @@ class EBoardTab extends React.PureComponent<{}, ITabInterface>{
                 <div className={`tab-scroll ${showPager?"tab-scroll-pager":""}`} ref={this.scrollRef}>
                     <div className="tab-scroll-bar" style={{transform:`translateX(-${scrollOffset}px)`}}>
                         {
-                            boardList.map((tab,index)=>(
-                                <EBoardTabItem {...tab} key={tab.wbNumber} activeNumber={activeBoard} onClick={this.onItemClick} onRemove={this.onItemRemove}/>
+                            boardList.map((frame,index)=>(
+                                <EBoardTabItem {...frame.tab} wbNumber={frame.wbNumber} key={frame.wbNumber} activeNumber={activeBoard} onClick={this.onItemClick} onRemove={this.onItemRemove}/>
                             ))
                         }
                     </div>

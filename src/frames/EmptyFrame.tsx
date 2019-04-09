@@ -15,7 +15,8 @@ declare interface IEmptyFrameProps extends IEmptyFrame{
     dimensions:{
         width:number;
         height:number;
-    }
+    };
+    active:boolean;
 }
 
 

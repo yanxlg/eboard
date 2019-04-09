@@ -10,6 +10,7 @@ import React,{MouseEvent} from 'react';
 import {ITab} from '../interface/IFrame';
 
 declare interface IEBoardTabItemProps extends ITab{
+    wbNumber:string;
     activeNumber:string;
     onClick:(wbNumber:string,element:HTMLDivElement)=>void;
     onRemove:(wbNumber:string)=>void;
@@ -39,6 +40,7 @@ class EBoardTabItem extends React.PureComponent<IEBoardTabItemProps>{
                     ):null
                 }
             </div>
+            
         )
     }
 }

@@ -7,7 +7,7 @@ import React from 'react';
 import {EBoardBody} from './EBoardBody';
 import {EBoardContext} from './EBoardContext';
 import {EBoardTab} from './EBoardTab';
-import {EboardTool} from './EboardTool';
+import {EBoardTool} from './EBoardTool';
 import {ResizeEmitter} from './ResizeEmitter';
 import "./style/layout.less";
 
@@ -23,7 +23,7 @@ class EBoard extends React.PureComponent{
             <EBoardContext>
                 <ResizeEmitter/>
                 <EBoardBody/>
-                <EboardTool/>
+                <EBoardTool/>
                 <EBoardTab/>
             </EBoardContext>
         )

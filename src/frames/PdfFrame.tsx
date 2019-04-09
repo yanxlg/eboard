@@ -6,7 +6,6 @@
 import {Bind} from 'lodash-decorators';
 import React from "react";
 import {EBoardContext, IEBoardContext} from '../EBoardContext';
-import {FRAME_TYPE_ENUM} from '../enums/EBoardEnum';
 import {IImagesFrame} from '../interface/IFrame';
 import {ImageFrame} from './ImageFrame';
 import PDFJS, {
@@ -23,6 +22,7 @@ declare interface IPdfFrameProps extends IImagesFrame{
         height:number;
     };
     pdfUrl:string;
+    active:boolean;
 }
 
 class PdfFrame extends React.PureComponent<IPdfFrameProps>{
@@ -53,7 +53,7 @@ class PdfFrame extends React.PureComponent<IPdfFrameProps>{
                 page.render(renderContext).promise.then(()=>{
                     console.log(this._cacheCanvas.toDataURL("image/png"));
                     console.log(props.wbNumber);
-                    const frameMap = context.boardMap.get(props.wbNumber) as IImagesFrame;
+             /*       const frameMap = context.boardMap.get(props.wbNumber) as IImagesFrame;
                     frameMap.children.set(1,{
                         type:FRAME_TYPE_ENUM.IMAGE,
                         wbNumber:"444",
@@ -63,7 +63,7 @@ class PdfFrame extends React.PureComponent<IPdfFrameProps>{
                         imageWidth:0,
                         layoutMode:"top_auto"
                     });
-                    context.updateBoardMap(context.boardMap);
+                    context.updateBoardMap(context.boardMap);*/
                 },()=>{
                     console.log("error");
                 });
@@ -72,10 +72,10 @@ class PdfFrame extends React.PureComponent<IPdfFrameProps>{
     }
     @Bind
     private getChildes(){
-        const {children,wbNumber,pageNo,width,height,dimensions} = this.props;
+        const {frames,wbNumber,pageNo,width,height,dimensions} = this.props;
         let imageFrames:React.ReactNode[]=[];
-        children.forEach((child,key)=>{
-            imageFrames.push(<ImageFrame {...child} key={key} wbNumber={`${wbNumber}.${key}`} active={pageNo===key} width={width} height={height} dimensions={dimensions}/>);
+        frames.forEach((frame,key)=>{
+            frame.render&&imageFrames.push(<ImageFrame {...frame} key={key} wbNumber={`${wbNumber}.${key}`} active={pageNo===key} width={width} height={height} dimensions={dimensions}/>);
         });
         return imageFrames;
     }

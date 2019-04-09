@@ -6,15 +6,21 @@
  * @disc:Pagination
  */
 @import "cursor";
-@bottom:20px;
-@height:28px;
-@fontSize:12px;
+@bottom:30px;
+@height:44px;
+@fontSize:18px;
 @fontColor:#666;
 @splitPadding:5px;
-@iconSize:12px;
-@inputWidth:38px;
-@inputHeight:24px;
+@inputWidth:40px;
+@inputHeight:26px;
 @inputBorderColor:#09ca51;
+@currentColor:#333;
+@totalColor:#fff;
+@btnBgColor:#666666;
+@btnColor:#ffffff;
+@btnSize:35px;
+@btnRight:5px;
+@iconColor:#fff;
 
 
 .board-pagination{
@@ -33,13 +39,14 @@
     justify-content: center;
     padding: 0 @height/2;
     &-current{
-    
+        color: @currentColor;
     }
     &-split{
         padding: 0 @splitPadding;
+        color: @totalColor;
     }
     &-total{
-    
+        color: @totalColor;
     }
     &-control{
         padding: 0 @height;
@@ -53,9 +60,11 @@
         &:focus,&:hover{
             border-color: @inputBorderColor!important;
         }
+        margin-right: @btnRight!important;
     }
     &-prev,&-next,&-go{
-        font-size: @iconSize!important;
+        color: @iconColor;
+        font-size: @inputHeight*0.8!important;
         position: absolute;
         width: @height;
         height: @height;
@@ -65,6 +74,11 @@
         border: none;
         outline: none;
         &:extend(.cursor-pointer);
+        &.disabled{
+            pointer-events: none;
+            opacity:0.3;
+            &:extend(.cursor-not-allowed);
+        }
     }
     &-prev{
         left: 0;
@@ -74,6 +88,14 @@
         position: relative!important;
     }
     &-go{
-        right: 0;
+        background-color: @btnBgColor;
+        color: @btnColor;
+        width: @btnSize;
+        height: @btnSize;
+        border-radius: @btnSize;
+        outline: none;
+        font-size: @fontSize!important;
+        right: @btnRight;
+        line-height: @btnSize;
     }
 }

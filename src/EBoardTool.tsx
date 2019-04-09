@@ -4,7 +4,7 @@
  * @time：2019/4/6 19:22
  */
 import {Bind} from 'lodash-decorators';
-import React,{MouseEvent} from "react";
+import React, {MouseEvent} from 'react';
 import {ArrowBrush} from './derived/ArrowBrush';
 import {CircleBrush} from './derived/CircleBrush';
 import {EllipseBrush} from './derived/EllipseBrush';
@@ -15,12 +15,9 @@ import {SquareBrush} from './derived/SquareBrush';
 import {StarBrush} from './derived/StarBrush';
 import {EBoardContext, IEBoardContext} from './EBoardContext';
 import {FRAME_TYPE_ENUM} from './enums/EBoardEnum';
-import {IImagesFrame} from './interface/IFrame';
+import {IImageFrame, IImagesFrame} from './interface/IFrame';
 
-
-
-
-class EboardTool extends React.PureComponent{
+class EBoardTool extends React.PureComponent{
     public static contextType = EBoardContext.Context;
     public context:IEBoardContext;
     @Bind
@@ -38,30 +35,52 @@ class EboardTool extends React.PureComponent{
                 break;
             case "circle":
                 this.context.setBrush(CircleBrush);
-                break
+                break;
             case "ellipse":
                 this.context.setBrush(EllipseBrush);
-                break
+                break;
             case "rect":
                 this.context.setBrush(RectBrush);
-                break
+                break;
             case "square":
                 this.context.setBrush(SquareBrush);
-                break
+                break;
             case "star":
                 this.context.setBrush(StarBrush);
-                break
-            case "next":
-                const {boardMap,activeBoard} = this.context;
-                (boardMap.get("555") as IImagesFrame).children.set(2,{
-                    type:FRAME_TYPE_ENUM.IMAGE,wbNumber:"444",name:"图片",image:"http://pic.58pic.com/58pic/13/48/85/35m58PIChbY_1024.jpg",imageWidth:740,imageHeight:929,
-                    layoutMode:"top_auto"
-                });
-                (boardMap.get("555") as IImagesFrame).pageNo=2;
-                EBoardContext.updateBoardMap(boardMap,activeBoard);
                 break;
         }
-    
+    }
+    @Bind
+    private addImagesGroup(){
+        const images:string[]=["http://pic15.nipic.com/20110628/1369025_192645024000_2.jpg",
+            "http://pic1.nipic.com/2008-08-14/2008814183939909_2.jpg",
+            "http://pic31.nipic.com/20130804/7487939_090818211000_2.jpg",
+            "http://pic.58pic.com/58pic/13/74/78/73I58PICGfm_1024.jpg",
+            "http://pic75.nipic.com/file/20150821/9448607_145742365000_2.jpg"];
+        const {boardMap} = this.context;
+        const wbNumber = Date.now().toString();
+        const frames = new Map<number,IImageFrame>();
+        images.map((image,index)=>{
+            const _index = index+1;
+            frames.set(_index,{
+                type:FRAME_TYPE_ENUM.IMAGE,
+                wbNumber:wbNumber+"."+index,
+                image,
+                layoutMode:"top_auto",
+                render:_index===1
+            });
+        });
+        const frame:IImagesFrame={
+            type:FRAME_TYPE_ENUM.IMAGES,
+            wbNumber,
+            tab:{
+                name:"图片组"
+            },
+            frames,
+            pageNo:1
+        };
+        boardMap.set(wbNumber,frame);
+        this.context.updateBoardMap(boardMap);
     }
     render(){
         return (
@@ -74,10 +93,10 @@ class EboardTool extends React.PureComponent{
                 <button onClick={this.onClick}>rect</button>
                 <button onClick={this.onClick}>square</button>
                 <button onClick={this.onClick}>star</button>
-                <button onClick={this.onClick}>next</button>
+                <button onClick={this.addImagesGroup}>添加图片组</button>
             </div>
         )
     }
 }
 
-export {EboardTool};
+export {EBoardTool};

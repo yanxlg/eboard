@@ -5,8 +5,11 @@
  * @Last Modified time: 2019/4/5 16:35
  * @disc:Pencil Brush
  * mouse API 不支持外部调用，外部调用需要考虑objectId匹配情况
+ *
+ * pointerEvent 支持，fix touch事件issue  后期考虑优化兼容方案
  */
 import {fabric} from "fabric";
+import {Bind} from 'lodash-decorators';
 import {IConfig} from '../Config';
 import {Cursor} from '../untils/Cursor';
 import {IDGenerator} from '../untils/IDGenerator';
@@ -62,16 +65,32 @@ class PencilBrush extends fabric.PencilBrush implements IBaseBrush{
         this.objectId=this.idGenerator.getId();
         // @ts-ignore
         super.onMouseDown(pointer);
+        // 绑定pointer事件
+        document.addEventListener("pointermove",this.pointerEvent);
     };
-    protected onMouseMove(pointer:fabric.Point){
+    @Bind
+    private pointerEvent(e:any){
+        // !this.allowTouchScrolling && e.preventDefault && e.preventDefault();
+        const pointer = this.canvas.getPointer(e);
+        this._onMouseMove(new fabric.Point(pointer.x,pointer.y));
+        // 执行一次
+    }
+    @Bind
+    private _onMouseMove(pointer:fabric.Point){
         pointer=new Point(pointer);
         // @ts-ignore
         super.onMouseMove(pointer);
+    }
+    protected onMouseMove(pointer:fabric.Point){
+        this._onMouseMove(pointer);
+        // 不能内部
+        document.removeEventListener("pointermove",this.pointerEvent);
     };
     protected onMouseUp(){
         // @ts-ignore
         super.onMouseUp();
         this.objectId=undefined;
+        document.removeEventListener("pointermove",this.pointerEvent);
     };
     public clear(){
         const ctx  = this.canvas.contextTop;

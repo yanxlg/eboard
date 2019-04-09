@@ -12,12 +12,12 @@ export declare interface ITab{
     canRemove?:boolean;
     icon?:string;
     name?:string;
-    wbNumber?:string;
 }
 
-export declare interface IBaseFrame extends ITab{
+export declare interface IBaseFrame{
     type:FRAME_TYPE_ENUM;
-    active?:boolean;
+    wbNumber:string;
+    tab?:ITab
 }
 
 export declare interface IEmptyFrame extends IBaseFrame{
@@ -26,16 +26,16 @@ export declare interface IEmptyFrame extends IBaseFrame{
 
 export declare interface IImageFrame extends IBaseFrame{
     image:string;
-    imageWidth:number;
-    imageHeight:number;
     layoutMode?:"center_contain"|"top_auto";
+    render:boolean;// 是否渲染
 }
 
 
 export declare interface IImagesFrame extends IBaseFrame{
-    children:Map<number,IImageFrame>;
+    frames:Map<number,IImageFrame>;
     pageNo:number;
 }
+
 
 export type IFrame = IEmptyFrame|IImageFrame|IImagesFrame;
 

@@ -34,8 +34,6 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
         super(props);
         const {property} = props;
         if(property.type===FRAME_TYPE_ENUM.IMAGE){
-            this.imageWidth=(property as IImageFrame).imageWidth;
-            this.imageHeight=(property as IImageFrame).imageHeight;
             this.image=new Image();
             this.image.src=(property as IImageFrame).image;
         }

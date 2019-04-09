@@ -84,7 +84,7 @@ class EBoardBody extends React.PureComponent<{},IEboardBodyState>{
                             <EmptyFrame active={activeBoard===board.wbNumber} key={board.wbNumber} {...board} width={width} height={height} dimensions={dimensions}/>:
                             type===FRAME_TYPE_ENUM.IMAGE?<ImageFrame active={activeBoard===board.wbNumber} key={board.wbNumber} {...(board as IImageFrame)} dimensions={dimensions} height={height} width={width}/>:
                                 type===FRAME_TYPE_ENUM.IMAGES?<ImagesFrame active={activeBoard===board.wbNumber} type={FRAME_TYPE_ENUM.IMAGES} key={board.wbNumber} {...board as IImagesFrame} dimensions={dimensions} width={width} height={height}/>:
-                            type===FRAME_TYPE_ENUM.PDF?<PdfFrame key={board.wbNumber} width={width} height={height} dimensions={dimensions} pdfUrl={""} pageNo={1} type={FRAME_TYPE_ENUM.PDF} {...board as IImagesFrame}/>:null;
+                            type===FRAME_TYPE_ENUM.PDF?<PdfFrame key={board.wbNumber} active={activeBoard===board.wbNumber} width={width} height={height} dimensions={dimensions} pdfUrl={""} pageNo={1} type={FRAME_TYPE_ENUM.PDF} {...board as IImagesFrame}/>:null;
                     })
                 }
             </div>

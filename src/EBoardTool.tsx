@@ -15,7 +15,12 @@ import {SquareBrush} from './derived/SquareBrush';
 import {StarBrush} from './derived/StarBrush';
 import {EBoardContext, IEBoardContext} from './EBoardContext';
 import {FRAME_TYPE_ENUM} from './enums/EBoardEnum';
-import {IImageFrame, IImagesFrame} from './interface/IFrame';
+import {
+    IImageFrame,
+    IImagesFrame,
+    IPdfFrame,
+    IPdfItemFrame,
+} from './interface/IFrame';
 
 class EBoardTool extends React.PureComponent{
     public static contextType = EBoardContext.Context;
@@ -52,11 +57,11 @@ class EBoardTool extends React.PureComponent{
     }
     @Bind
     private addImagesGroup(){
-        const images:string[]=["http://pic15.nipic.com/20110628/1369025_192645024000_2.jpg",
-            "http://pic1.nipic.com/2008-08-14/2008814183939909_2.jpg",
-            "http://pic31.nipic.com/20130804/7487939_090818211000_2.jpg",
-            "http://pic.58pic.com/58pic/13/74/78/73I58PICGfm_1024.jpg",
-            "http://pic75.nipic.com/file/20150821/9448607_145742365000_2.jpg"];
+        const images:string[]=[require("./frames/1.jpg"),
+            require("./frames/2.jpg"),
+            require("./frames/3.jpg"),
+            require("./frames/4.jpg"),
+            require("./frames/5.jpg")];
         const {boardMap} = this.context;
         const wbNumber = Date.now().toString();
         const frames = new Map<number,IImageFrame>();
@@ -82,6 +87,32 @@ class EBoardTool extends React.PureComponent{
         boardMap.set(wbNumber,frame);
         this.context.updateBoardMap(boardMap);
     }
+    @Bind
+    private addPdfGroup(){
+        const {boardMap} = this.context;
+        const wbNumber = Date.now().toString();
+        const frames = new Map<number,IPdfItemFrame>();
+        frames.set(1,{
+            type:FRAME_TYPE_ENUM.PDFTASK,
+            pageNo:1,
+            render:true,
+            layoutMode:"top_auto",
+            wbNumber:wbNumber+".1",
+        });
+        // pdf loading
+        const frame:IPdfFrame={
+            type:FRAME_TYPE_ENUM.PDF,
+            wbNumber,
+            tab:{
+                name:"Pdf"
+            },
+            frames,
+            pageNo:1,
+            filePath:"https://res2dev.9itest.com/resource2/1000/document/20190404/d6e7818316644e7c82191d298a0c5345.pdf"
+        };
+        boardMap.set(wbNumber,frame);
+        this.context.updateBoardMap(boardMap);
+    }
     render(){
         return (
             <div style={{position:"absolute",zIndex:10,top:100}}>
@@ -94,6 +125,7 @@ class EBoardTool extends React.PureComponent{
                 <button onClick={this.onClick}>square</button>
                 <button onClick={this.onClick}>star</button>
                 <button onClick={this.addImagesGroup}>添加图片组</button>
+                <button onClick={this.addPdfGroup}>显示pdf</button>
             </div>
         )
     }

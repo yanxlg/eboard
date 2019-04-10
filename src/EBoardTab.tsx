@@ -57,6 +57,7 @@ class EBoardTab extends React.PureComponent<{}, ITabInterface>{
     
     @Bind
     private scrollToView(element:HTMLDivElement,removeElement?:HTMLDivElement,resize?:boolean){
+        if(!element){return;}
         const scroll = this.scrollRef.current;
         let {offsetLeft:elementLeft} = element;
         const {scrollOffset} = this.state;

@@ -41,7 +41,8 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
     
     @Bind
     private layout(props:IEBoardCanvas){
-        let {width:canvasWidth,height:canvasHeight,dimensions,property} = props;
+        let {width:canvasWidth,height:canvasHeight,property} = props;
+        const dimensions = Object.assign({},props.dimensions);
         const {type} = property;
         switch (type) {
             case FRAME_TYPE_ENUM.EMPTY:
@@ -75,6 +76,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                                 top: 0,
                                 width: dimensions.width,
                             });
+                            this.fabricCanvas.renderAll();
                             return;
                         }
                     }
@@ -99,6 +101,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                         top: (height - imageH) / 2,
                         width: imageW,
                     });
+                    this.fabricCanvas.renderAll();
                 });
                 break;
             default:

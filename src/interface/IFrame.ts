@@ -37,5 +37,17 @@ export declare interface IImagesFrame extends IBaseFrame{
 }
 
 
-export type IFrame = IEmptyFrame|IImageFrame|IImagesFrame;
+export declare interface IPdfItemFrame extends IBaseFrame{
+    pageNo:number;
+    layoutMode?:"center_contain"|"top_auto";
+    render:boolean;// 是否渲染
+}
+
+export declare interface IPdfFrame extends IBaseFrame{
+    frames:Map<number,IPdfItemFrame>;
+    pageNo:number;
+    filePath:string;
+}
+
+export type IFrame = IEmptyFrame|IImageFrame|IImagesFrame|IPdfFrame;
 

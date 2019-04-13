@@ -1,0 +1,158 @@
+/**
+ * @Author: yanxinaliang (rainyxlxl@163.com)
+ * @Date: 2019/4/11 21:25
+ * @Last Modified by: yanxinaliang (rainyxlxl@163.com)
+ * @Last Modified time: 2019/4/11 21:25
+ * @disc:工具栏
+ */
+@import "cursor";
+
+@padToolbarBgColor:#eeeeee;
+@padToolbarHeight:30px;
+@padToolbarSpacing:2px;
+@padToolbarBorder:#bbb;
+@padToolbarPaddingLeft:20px;
+@padToolbarActiveBg:#4c84ff;
+@padToolbarIconSize:18px;
+@padToolbarItemColor:#666;
+@padToolItemBorder:#bbb;
+@dotSize:4px;
+@panelWidth:160px;
+@panelPadding:15px;
+
+
+.board-tool{
+    position: absolute;
+    width: 100%;
+    height: @padToolbarHeight;
+    background-color: @padToolbarBgColor;
+    top: 50px;
+    &-wrap{
+        display: inline-block;
+    }
+    &-item{
+        position: relative;
+        width: @padToolbarHeight;
+        height: @padToolbarHeight;
+        display: inline-block;
+        text-align: center;
+        font-size: @padToolbarIconSize;
+        color: #000;
+        &:extend(.cursor-pointer);
+        vertical-align: middle;
+        box-sizing: border-box;
+        outline: none;
+        padding: 0;
+        border: none;
+        background-color: transparent;
+        border-radius: @padToolbarHeight;
+        &:hover,&.active{
+            background-color: #4c84ff;
+        }
+        &-text{
+            position: absolute;
+            width: 60%;
+            left: 20%;
+            height: 2px;
+            bottom: (@padToolbarHeight - @padToolbarIconSize)/4;
+        }
+        &-shape{
+            width: @dotSize;
+            height: @dotSize;
+            position: absolute;
+            background-color: red;
+            right: (@padToolbarHeight - @padToolbarIconSize)/2;
+            bottom: (@padToolbarHeight - @padToolbarIconSize)/2;
+            border-radius: @dotSize;
+        }
+    }
+    &-panel{
+        position: absolute;
+        width: @panelWidth;
+        padding: @panelPadding;
+        background-color: #cccccc;
+        border-radius: 8px;
+        overflow: hidden;
+        opacity: 0;
+        transition: opacity 240ms cubic-bezier(.645, .045, .355, 1),left 240ms ease,top 240ms ease;
+        &-show{
+            opacity: 1!important;
+        }
+        &-header{
+            border-bottom: 1px solid #555555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-bottom: @panelPadding;
+        }
+        &-sub{
+            padding-bottom: 0!important;
+            border-bottom: none;
+        }
+        &-body{
+            line-height: 0;
+            padding-top: @panelPadding;
+        }
+        &-item{
+            display: flex;
+            flex: 1;
+            //min-width: 25%;
+            justify-content: center;
+        }
+        &-color{
+            width: 25%;
+            padding-top: 25%;
+            position: relative;
+            display: inline-block;
+            height: 0;
+            &:extend(.cursor-pointer);
+            background-size: 80%;
+            &-inner{
+                position: absolute;
+                width: 60%;
+                height: 60%;
+                left: 20%;
+                top: 20%;
+                border-radius: 100%;
+            }
+            &:hover,&.active{
+                &:after{
+                    border: 1px solid #666e7b;
+                }
+            }
+            &:after{
+                content: "";
+                position: absolute;
+                width: 80%;
+                height: 80%;
+                left: 10%;
+                top: 10%;
+                border-radius: 80%;
+            }
+        }
+        &-dot{
+            display: inline-block;
+            background: #000;
+            border-radius: 999px;
+            &:extend(.cursor-pointer);
+            &:hover,&.active{
+                background: white!important;
+            }
+        }
+        &-shape{
+            font-size: 14px;
+            &:extend(.cursor-pointer);
+            &:hover,&.active{
+                color: white!important;
+            }
+        }
+        &-font{
+            display: inline-block;
+            &:extend(.cursor-pointer);
+            font-weight: bold;
+            &:hover,&.active{
+                color: white!important;
+            }
+        }
+    }
+}

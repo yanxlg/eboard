@@ -17,10 +17,12 @@ class LineBrush extends BaseBrush<Line>{
     protected _saveAndTransform:(ctx:CanvasRenderingContext2D)=>void;
     public strokeMiterLimit:number;
     public shadow:fabric.Shadow;
-    public strokeDashArray:number[]=[10,4];// dot Line
     protected _startPointer:fabric.Point;
     protected _endPointer:fabric.Point;
     public cursorType=Cursor.hand;
+    public set dashed(dashed:boolean){
+        this.strokeDashArray=dashed?[10,4]:undefined;
+    }
     protected onMouseDown(pointer:fabric.Point) {
         pointer=new Point(pointer);
         this.objectId=this.idGenerator.getId();
@@ -50,7 +52,7 @@ class LineBrush extends BaseBrush<Line>{
         this._startPointer=undefined;
         this._endPointer=undefined;
         this._setBrushStyles();
-        const color = new fabric.Color(this.color);
+        const color = new fabric.Color(this.stroke);
         this.needsFullRender = (color.getAlpha() < 1);
         this._setShadow();
     }
@@ -60,8 +62,12 @@ class LineBrush extends BaseBrush<Line>{
         let ctx  = this.canvas.contextTop,
             p1 = this._startPointer,
             p2 = this._endPointer||this._startPointer;
+        const oldFillColor = ctx.fillStyle;
+        ctx.fillStyle=ctx.strokeStyle;
+        ctx.strokeStyle = this.stroke;
         this._saveAndTransform(ctx);
         ctx.beginPath();
+        ctx.lineWidth=this.width;
         if (p1 && p2 && p1.x === p2.x && p1.y === p2.y) {
             const width = this.width / 1000;
             p1.x -= width;
@@ -71,6 +77,7 @@ class LineBrush extends BaseBrush<Line>{
         ctx.lineTo(p2.x, p2.y);
         ctx.stroke();
         ctx.restore();
+        ctx.fillStyle=oldFillColor;
     }
     
     protected convertPointsToSVGPath(){
@@ -106,7 +113,7 @@ class LineBrush extends BaseBrush<Line>{
         const points = [start.x,start.y,end.x,end.y];
         const path = new Line(this.objectId,points, {
             fill: null,
-            stroke: this.color,
+            stroke: this.stroke,
             strokeWidth: this.width,
             strokeLineCap: this.strokeLineCap,
             strokeMiterLimit: this.strokeMiterLimit,

@@ -17,6 +17,15 @@ class Common {
             callback();
         }
     }
+    public static imgeLoaded(image:HTMLImageElement,callback:()=>void){
+        if(image.complete){
+            callback();
+        }else{
+            image.onload=()=>{
+                callback();
+            }
+        }
+    }
     public static sin18:number=Math.abs(Math.sin(18/180 * Math.PI));
     public static sin36:number=Math.sin(36/180 * Math.PI);
     public static sin72:number=Math.sin(72/180 * Math.PI);

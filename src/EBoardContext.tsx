@@ -5,22 +5,13 @@
  */
 import {Bind} from "lodash-decorators";
 import React from "react";
-import {Config,IConfig} from './Config';
-import {ArrowBrush} from './derived/ArrowBrush';
-import {CircleBrush} from './derived/CircleBrush';
-import {EllipseBrush} from './derived/EllipseBrush';
-import {LineBrush} from './derived/LineBrush';
-import {PencilBrush} from './derived/PencilBrush';
-import {RectBrush} from './derived/RectBrush';
-import {SquareBrush} from './derived/SquareBrush';
-import {StarBrush} from './derived/StarBrush';
+import {Config, IConfig, SHAPE_TYPE, TOOL_TYPE} from './Config';
 import {IFrame} from "./interface/IFrame";
 import {EventEmitter} from './untils/EventMitter';
 import {IDGenerator} from './untils/IDGenerator';
 import {EMap} from "./untils/Map";
 
 
-type BrushClassType = typeof PencilBrush|typeof LineBrush|typeof ArrowBrush|typeof CircleBrush|typeof EllipseBrush|typeof RectBrush|typeof SquareBrush|typeof StarBrush;
 
 
 export declare interface IEBoardContext{
@@ -30,16 +21,25 @@ export declare interface IEBoardContext{
     boardMap:EMap<string,IFrame>,
     eventEmitter:EventEmitter<EventList>;
     idGenerator:IDGenerator;
-    brush?:BrushClassType;
     brushOptions?:any;
-    setBrush:(brushClass:BrushClassType,brushOptions?:any)=>void;
     updateBoardMap:(boards:EMap<string,IFrame>)=>void;
+    setToolProps:(props:IToolProps)=>void;
 }
 
 const Context=React.createContext(null);
 
 export enum EventList {
     Resize="resize",
+}
+
+declare interface IToolProps {
+    toolType?:TOOL_TYPE;
+    shapeType?:SHAPE_TYPE;
+    pencilWidth?:number;
+    pencilColor?:string;
+    shapeColor?:string;
+    fontSize?:number;
+    fontColor?:string;
 }
 
 
@@ -88,8 +88,8 @@ class EBoardContext extends React.PureComponent<{},IEBoardContext>{
             lock:false,
             eventEmitter:this.eventEmitter,
             idGenerator:this.idGenerator,
-            setBrush:this.setBrush,
-            updateBoardMap:this.updateBoardMap
+            updateBoardMap:this.updateBoardMap,
+            setToolProps:this.setToolProps
         };
         EBoardContext.getBoardList=this.getBoardList;
         EBoardContext.updateBoardMap=this.updateBoardMap;
@@ -113,10 +113,9 @@ class EBoardContext extends React.PureComponent<{},IEBoardContext>{
         })
     }
     @Bind
-    private setBrush(brush:BrushClassType,brushOptions?:any){
+    private setToolProps(props:IToolProps){
         this.setState({
-            brush,
-            brushOptions
+            config:Object.assign({},this.state.config,props)
         })
     }
     render(){

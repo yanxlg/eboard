@@ -103,8 +103,8 @@ class ArrowBrush extends LineBrush{
     }
     public createPath(pathData?:string):any {
         const path = new Arrow(this.objectId,pathData, {
-            stroke: this.color,
-            fill:this.color,
+            stroke: this.stroke,
+            fill:this.stroke,
             strokeWidth: this.width,
             strokeLineCap: this.strokeLineCap,
             strokeMiterLimit: this.strokeMiterLimit,
@@ -215,6 +215,7 @@ class ArrowBrush extends LineBrush{
             p1 = this._startPointer,
             p2 = this._endPointer||this._startPointer;
         const oldFillColor = ctx.fillStyle;
+        ctx.strokeStyle=this.stroke;
         ctx.fillStyle=ctx.strokeStyle;
         this._saveAndTransform(ctx);
         ctx.beginPath();

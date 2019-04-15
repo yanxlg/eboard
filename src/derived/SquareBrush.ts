@@ -6,6 +6,9 @@
  * @disc:SquuareBrush
  */
 import {fabric} from 'fabric';
+import {Bind, Debounce} from 'lodash-decorators';
+import {SHAPE_TYPE} from '../Config';
+import {MessageTag} from '../static/MessageTag';
 import {BaseBrush} from './BaseBrush';
 import {Point} from './Point';
 import {Square} from './Square';
@@ -24,10 +27,11 @@ class SquareBrush extends BaseBrush<Square>{
     protected centerPoint:Point;
     protected angle:number=0;
     protected rx:number=0;
+    protected ry:number=0;
     
     protected onMouseDown(pointer:fabric.Point) {
         this.centerPoint=new Point(pointer);
-        this.objectId=this.idGenerator.getId();
+        this.objectId=this.context.idGenerator.getId();
         this._reset();
     }
     private calcQuadrant(point:{x:number,y:number}){
@@ -69,7 +73,7 @@ class SquareBrush extends BaseBrush<Square>{
     protected calcPoints(pointer:fabric.Point){
         const xOffset = Math.pow(pointer.x-this.centerPoint.x,2);
         const yOffset = Math.pow(pointer.y-this.centerPoint.y,2);
-        this.rx=Math.sqrt(xOffset + yOffset) / Math.sqrt(2);
+        this.ry=this.rx=Math.sqrt(xOffset + yOffset) / Math.sqrt(2);
         this.angle = this.calcAngle(pointer) - 45;
     }
     protected onMouseMove(pointer:fabric.Point) {
@@ -78,6 +82,7 @@ class SquareBrush extends BaseBrush<Square>{
         this.calcPoints(pointer);
         this.canvas.clearContext(this.canvas.contextTop);
         this._render();
+        this.dispatchMessage(this.objectId,this.centerPoint,this.rx,this.ry,this.angle);
     }
     protected onMouseUp() {
         this._finalizeAndAddPath();
@@ -122,7 +127,6 @@ class SquareBrush extends BaseBrush<Square>{
             originY: 'center',
             fill:this.fill,
             stroke:this.stroke,
-            strokeDashArray:this.strokeDashArray,
             strokeWidth:this.width,
             width,
             height,
@@ -136,6 +140,24 @@ class SquareBrush extends BaseBrush<Square>{
             this._resetShadow();
             this.canvas.renderOnAddRemove = originalRenderOnAddRemove;
         });
+    }
+    
+    @Bind
+    @Debounce(40,{maxWait:40,trailing:true})
+    protected dispatchMessage(objectId:string,center:Point,rx:number,ry:number,angle:number){
+        const message = {
+            objectId,
+            tag:MessageTag.Shape,
+            type:SHAPE_TYPE.Square,
+            stroke: this.stroke,
+            strokeWidth: this.width,
+            left:center.x,
+            top:center.y,
+            width:rx*2,
+            height:ry*2,
+            angle
+        };
+        this.context.onMessageListener&&this.context.onMessageListener(message);
     }
 }
 

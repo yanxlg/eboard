@@ -8,9 +8,12 @@ import {SHAPE_TYPE, TOOL_TYPE} from './Config';
 import {ArrowBrush} from './derived/ArrowBrush';
 import {Canvas} from './derived/Canvas';
 import {CircleBrush} from './derived/CircleBrush';
+import {EraserBrush} from './derived/EraserBrush';
+import {FeruleBrush} from './derived/FeruleBrush';
 import {LineBrush} from './derived/LineBrush';
 import {PencilBrush} from './derived/PencilBrush';
 import {RectBrush} from './derived/RectBrush';
+import {SelectBrush} from './derived/SelectBrush';
 import {StarBrush} from './derived/StarBrush';
 import {EBoardContext, IEBoardContext} from './EBoardContext';
 import {FRAME_TYPE_ENUM} from './enums/EBoardEnum';
@@ -37,6 +40,8 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
     private readonly image:HTMLImageElement;
     private imageWidth:number;
     private imageHeight:number;
+    private bgObject:fabric.Image;
+    private brush:any;
     constructor(props:IEBoardCanvas,context:IEBoardContext) {
         super(props);
         const {property} = props;
@@ -77,7 +82,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                             this.fabricCanvas.setDimensions({width:canvasWidth,height:canvasWidth*imageRatio});// 设置样式大小
                             this.fabricCanvas.setDimensions(dimensions,{backstoreOnly:true});// 设置canvas 画布大小
                             Common.imgeLoaded(this.image,()=>{
-                                this.fabricCanvas.backgroundImage=new fabric.Image(this.image, {
+                                this.bgObject = new fabric.Image(this.image, {
                                     height: size.height,
                                     left: 0,
                                     top: 0,
@@ -85,6 +90,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                                     scaleX:dimensions.width/size.width,
                                     scaleY:dimensions.height/size.height
                                 });
+                                this.fabricCanvas.backgroundImage=this.bgObject;
                                 this.fabricCanvas.renderAll();
                             });
                             return;
@@ -106,7 +112,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                         imageH=width*this.imageHeight/this.imageWidth;
                     }
                     Common.imgeLoaded(this.image,()=>{
-                        this.fabricCanvas.backgroundImage=new fabric.Image(this.image, {
+                        this.bgObject = new fabric.Image(this.image, {
                             height: size.height,
                             left: (width - imageW) / 2,
                             top: (height - imageH) / 2,
@@ -114,6 +120,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                             scaleX:imageW/size.width,
                             scaleY:imageH/size.height
                         });
+                        this.fabricCanvas.backgroundImage=this.bgObject;
                         this.fabricCanvas.renderAll();
                     });
                 });
@@ -129,16 +136,26 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
     private initBrush(context:IEBoardContext){
         const {config} = context;
         const {toolType,shapeType,shapeColor,pencilColor,pencilWidth,strokeWidth} = config;
+        if(this.brush&&this.brush.destroy){
+            this.brush.destroy();
+        }
         switch (toolType) {
             case TOOL_TYPE.Select:
+                this.fabricCanvas.isDrawingMode=false;
+                this.fabricCanvas.freeDrawingBrush=null;
+                this.fabricCanvas.freeDrawingCursor=null;
+                this.fabricCanvas.setCursor(Cursor.default);
+                this.fabricCanvas.defaultCursor=Cursor.default;
+                this.brush = new SelectBrush(this.fabricCanvas,this.context);
                 break;
             case TOOL_TYPE.Pencil:
                 this.fabricCanvas.isDrawingMode=true;
-                let pencilBrush = new PencilBrush(this.fabricCanvas,this.context.config,this.context.idGenerator);
-                this.fabricCanvas.freeDrawingCursor=pencilBrush.cursorType||Cursor.cross;
-                pencilBrush.width=pencilWidth;
-                pencilBrush.color=pencilColor;
-                this.fabricCanvas.freeDrawingBrush = pencilBrush;
+                this.brush = new PencilBrush(this.fabricCanvas,this.context);
+                this.fabricCanvas.setCursor(this.brush.cursorType);
+                this.fabricCanvas.freeDrawingCursor=this.brush.cursorType;
+                this.brush.width=pencilWidth;
+                this.brush.color=pencilColor;
+                this.fabricCanvas.freeDrawingBrush = this.brush;
                 break;
             case TOOL_TYPE.Text:
                 this.fabricCanvas.isDrawingMode=true;
@@ -154,48 +171,50 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                 switch (shapeType) {
                     case SHAPE_TYPE.Arrow:
                         this.fabricCanvas.isDrawingMode=true;
-                        let arrowBrush = new ArrowBrush(this.fabricCanvas,this.context.config,this.context.idGenerator);
-                        this.fabricCanvas.freeDrawingCursor=arrowBrush.cursorType||Cursor.cross;
-                        arrowBrush.width=strokeWidth;
-                        arrowBrush.stroke=shapeColor;
-                        arrowBrush.fill=shapeColor;
-                        this.fabricCanvas.freeDrawingBrush = arrowBrush;
+                        this.brush = new ArrowBrush(this.fabricCanvas,this.context);
+                        this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
+                        this.brush.width=strokeWidth;
+                        this.brush.stroke=shapeColor;
+                        this.brush.fill=shapeColor;
+                        this.fabricCanvas.freeDrawingBrush = this.brush;
                         break;
                     case SHAPE_TYPE.Line:
                         this.fabricCanvas.isDrawingMode=true;
-                        let lineBrush = new LineBrush(this.fabricCanvas,this.context.config,this.context.idGenerator);
-                        this.fabricCanvas.freeDrawingCursor=lineBrush.cursorType||Cursor.cross;
-                        lineBrush.width=strokeWidth;
-                        lineBrush.stroke=shapeColor;
-                        this.fabricCanvas.freeDrawingBrush = lineBrush;
+                        this.brush = new LineBrush(this.fabricCanvas,this.context);
+                        this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
+                        this.brush.width=strokeWidth;
+                        this.brush.stroke=shapeColor;
+                        this.fabricCanvas.freeDrawingBrush = this.brush;
                         break;
                     case SHAPE_TYPE.Circle:
                         this.fabricCanvas.isDrawingMode=true;
-                        let circleBrush = new CircleBrush(this.fabricCanvas,this.context.config,this.context.idGenerator);
-                        this.fabricCanvas.freeDrawingCursor=circleBrush.cursorType||Cursor.cross;
-                        circleBrush.fill=shapeColor;
-                        this.fabricCanvas.freeDrawingBrush = circleBrush;
+                        this.brush = new CircleBrush(this.fabricCanvas,this.context);
+                        this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
+                        this.brush.fill=shapeColor;
+                        this.fabricCanvas.freeDrawingBrush = this.brush;
                         break;
                     case SHAPE_TYPE.HollowCircle:
                         this.fabricCanvas.isDrawingMode=true;
-                        let circleBrush_1 = new CircleBrush(this.fabricCanvas,this.context.config,this.context.idGenerator);
-                        this.fabricCanvas.freeDrawingCursor=circleBrush_1.cursorType||Cursor.cross;
-                        circleBrush_1.stroke=shapeColor;
-                        this.fabricCanvas.freeDrawingBrush = circleBrush_1;
+                        this.brush = new CircleBrush(this.fabricCanvas,this.context);
+                        this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
+                        this.brush.stroke=shapeColor;
+                        this.brush.width=strokeWidth;
+                        this.fabricCanvas.freeDrawingBrush = this.brush;
                         break;
                     case SHAPE_TYPE.Star:
                         this.fabricCanvas.isDrawingMode=true;
-                        let starBrush = new StarBrush(this.fabricCanvas,this.context.config,this.context.idGenerator);
-                        this.fabricCanvas.freeDrawingCursor=starBrush.cursorType||Cursor.cross;
-                        starBrush.fill=shapeColor;
-                        this.fabricCanvas.freeDrawingBrush = starBrush;
+                        this.brush = new StarBrush(this.fabricCanvas,this.context);
+                        this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
+                        this.brush.fill=shapeColor;
+                        this.fabricCanvas.freeDrawingBrush = this.brush;
                         break;
                     case SHAPE_TYPE.HollowStar:
                         this.fabricCanvas.isDrawingMode=true;
-                        let starBrush_1 = new StarBrush(this.fabricCanvas,this.context.config,this.context.idGenerator);
-                        this.fabricCanvas.freeDrawingCursor=starBrush_1.cursorType||Cursor.cross;
-                        starBrush_1.stroke=shapeColor;
-                        this.fabricCanvas.freeDrawingBrush = starBrush_1;
+                        this.brush = new StarBrush(this.fabricCanvas,this.context);
+                        this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
+                        this.brush.stroke=shapeColor;
+                        this.brush.width=strokeWidth;
+                        this.fabricCanvas.freeDrawingBrush = this.brush;
                         break;
                     case SHAPE_TYPE.Triangle:
                /*         let triangleBrush = new StarBrush(this.fabricCanvas,this.context.config,this.context.idGenerator);
@@ -211,20 +230,41 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                         break;
                     case SHAPE_TYPE.Rect:
                         this.fabricCanvas.isDrawingMode=true;
-                        const rectBrush = new RectBrush(this.fabricCanvas,this.context.config,this.context.idGenerator);
-                        this.fabricCanvas.freeDrawingCursor=rectBrush.cursorType||Cursor.cross;
-                        rectBrush.fill=shapeColor;
-                        this.fabricCanvas.freeDrawingBrush = rectBrush;
+                        this.brush = new RectBrush(this.fabricCanvas,this.context);
+                        this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
+                        this.brush.fill=shapeColor;
+                        this.fabricCanvas.freeDrawingBrush = this.brush;
                         break;
                     case SHAPE_TYPE.HollowRect:
                         this.fabricCanvas.isDrawingMode=true;
-                        const rectBrush_1 = new RectBrush(this.fabricCanvas,this.context.config,this.context.idGenerator);
-                        this.fabricCanvas.freeDrawingCursor=rectBrush_1.cursorType||Cursor.cross;
-                        rectBrush_1.stroke=shapeColor;
-                        this.fabricCanvas.freeDrawingBrush = rectBrush_1;
+                        this.brush = new RectBrush(this.fabricCanvas,this.context);
+                        this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
+                        this.brush.stroke=shapeColor;
+                        this.fabricCanvas.freeDrawingBrush = this.brush;
                         break;
                 }
                 break;
+            case TOOL_TYPE.Eraser:
+                this.fabricCanvas.isDrawingMode=false;
+                this.brush = new EraserBrush(this.fabricCanvas);
+                this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
+                this.fabricCanvas.freeDrawingBrush=null;
+                break;
+            case TOOL_TYPE.Ferule:
+                this.fabricCanvas.isDrawingMode=false;
+                this.fabricCanvas.freeDrawingBrush=null;
+                this.fabricCanvas.freeDrawingCursor=null;
+                this.fabricCanvas.setCursor(this.brush.cursorType);
+                this.brush = new FeruleBrush(this.fabricCanvas);
+                this.fabricCanvas.defaultCursor=this.brush.cursorType;
+                break;
+        }
+    }
+    public clear(){
+        this.fabricCanvas.clear();
+        // 背景图需要保留
+        if(this.bgObject){
+            this.fabricCanvas.backgroundImage=this.bgObject;
         }
     }
     componentDidMount(): void {
@@ -266,6 +306,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
         this.initBrush(nextContext);
     }
     componentWillUnmount(): void {
+        this.bgObject=null;
         this.fabricCanvas.dispose();
     }
     render(){

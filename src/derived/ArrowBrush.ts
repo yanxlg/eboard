@@ -7,8 +7,12 @@
  */
 
 import {fabric} from 'fabric';
+import {Bind, Debounce} from 'lodash-decorators';
+import {SHAPE_TYPE} from '../Config';
+import {MessageTag} from '../static/MessageTag';
 import {Arrow} from './Arrow';
 import {LineBrush} from './LineBrush';
+import {Point} from './Point';
 
 export enum ArrowType{
     Prev="prev",
@@ -106,10 +110,6 @@ class ArrowBrush extends LineBrush{
             stroke: this.stroke,
             fill:this.stroke,
             strokeWidth: this.width,
-            strokeLineCap: this.strokeLineCap,
-            strokeMiterLimit: this.strokeMiterLimit,
-            strokeLineJoin: this.strokeLineJoin,
-            strokeDashArray: this.strokeDashArray,
         });
         let position = new fabric.Point(path.left + path.width / 2, path.top + path.height / 2);
         position = path.translateToGivenOrigin(position, 'center', 'center', path.originX, path.originY);
@@ -230,6 +230,28 @@ class ArrowBrush extends LineBrush{
         ctx.restore();
         ctx.fillStyle=oldFillColor;
     };
+    
+    /**
+     * @Override
+     * @param objectId
+     * @param start
+     * @param end
+     */
+    @Bind
+    @Debounce(40,{maxWait:40,trailing:true})
+    protected dispatchMessage(objectId:string,start:Point,end:Point){
+        const message = {
+            objectId,
+            tag:MessageTag.Shape,
+            startPoint:start,
+            endPoint:end,
+            type:SHAPE_TYPE.Arrow,
+            stroke: this.stroke,
+            strokeWidth: this.width,
+            arrowType:this.arrowType
+        };
+        this.context.onMessageListener&&this.context.onMessageListener(message);
+    }
 }
 
 export {ArrowBrush}

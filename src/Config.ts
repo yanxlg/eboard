@@ -30,6 +30,8 @@ export enum SHAPE_TYPE {
     HollowStar = "hollowStar",
     HollowTriangle = "hollowTriangle",
     HollowRect = "hollowRect",
+    Square="Square",
+    HollowSquare="HollowSquare",
 }
 
 

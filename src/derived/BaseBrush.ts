@@ -6,8 +6,7 @@
  * @disc:BaseBrush
  */
 import {fabric} from "fabric";
-import {IConfig} from '../Config';
-import {IDGenerator} from '../untils/IDGenerator';
+import {IEBoardContext} from '../EBoardContext';
 import {Canvas} from './Canvas';
 
 export declare interface IBaseBrush{
@@ -28,16 +27,14 @@ class BaseBrush<InstanceType extends fabric.Object> extends fabric.BaseBrush imp
     protected needsFullRender:boolean;
     protected _setShadow:()=>void;
     protected _resetShadow:()=>void;
-    protected config:IConfig;
-    protected idGenerator:IDGenerator;
+    protected context:IEBoardContext;
     public fill?:string;
     public stroke?:string;
     public cursorType:string;
-    constructor(canvas:Canvas,config:IConfig,idGenerator:IDGenerator){
+    constructor(canvas:Canvas,context:IEBoardContext){
         super();
         this.canvas=canvas;
-        this.config=config;
-        this.idGenerator=idGenerator;
+        this.context=context;
     }
     public hasObjectId(objectId:string){
         return this.objectMap.has(objectId);

@@ -10,6 +10,7 @@ import {FRAME_TYPE_ENUM} from '../enums/EBoardEnum';
 import {IImageFrame, IPdfItemFrame} from '../interface/IFrame';
 import "../style/frames.less";
 import PerfectScrollbar from "kxt-web/lib/perfectscrollbar";
+import {FrameMap} from '../static/FrameMap';
 
 declare interface IPdfItemFrameProps extends IPdfItemFrame{
     width:number;
@@ -29,6 +30,7 @@ declare interface IPdfItemFrameState {
 
 class PdfItemFrame extends React.PureComponent<IPdfItemFrameProps,IPdfItemFrameState>{
     private scrollRef:RefObject<PerfectScrollbar>=React.createRef();
+    private eBoardCanvasRef:RefObject<EBoardCanvas>=React.createRef();
     private readonly _cacheCanvas:HTMLCanvasElement;
     constructor(props:IPdfItemFrameProps){
         super(props);
@@ -57,12 +59,19 @@ class PdfItemFrame extends React.PureComponent<IPdfItemFrameProps,IPdfItemFrameS
                     dataUrl:""
                 })
             });
-        })
+        });
+        FrameMap.setChild(props.wbNumber,props.pageNo,this);
     }
     componentDidUpdate(
         prevProps: Readonly<IPdfItemFrameProps>, prevState: Readonly<{}>,
         snapshot?: any): void {
         this.scrollRef.current.update();
+    }
+    componentWillUnmount(): void {
+        FrameMap.removeChild(this.props.wbNumber,this.props.pageNo);
+    }
+    public clear(){
+        this.eBoardCanvasRef.current.clear();
     }
     render(){
         const {active,width,height,dimensions,render,wbNumber} = this.props;
@@ -78,7 +87,7 @@ class PdfItemFrame extends React.PureComponent<IPdfItemFrameProps,IPdfItemFrameS
             <PerfectScrollbar ref={this.scrollRef} className={`board-frame ${active?"board-frame-active":""}`} style={{width,height}}>
                 {
                     void 0 === dataUrl?null:
-                        <EBoardCanvas property={imageFrameOptions} dimensions={dimensions} height={height} width={width}/>
+                        <EBoardCanvas ref={this.eBoardCanvasRef} property={imageFrameOptions} dimensions={dimensions} height={height} width={width}/>
                 }
             </PerfectScrollbar>
         )

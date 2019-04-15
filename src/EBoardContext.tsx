@@ -24,6 +24,7 @@ export declare interface IEBoardContext{
     brushOptions?:any;
     updateBoardMap:(boards:EMap<string,IFrame>)=>void;
     setToolProps:(props:IToolProps)=>void;
+    onMessageListener:(message:object)=>void;
 }
 
 const Context=React.createContext(null);
@@ -42,8 +43,11 @@ declare interface IToolProps {
     fontColor?:string;
 }
 
+declare interface IEboardContextProps {
+    onMessageListener:(message:object)=>void;
+}
 
-class EBoardContext extends React.PureComponent<{},IEBoardContext>{
+class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardContext>{
     public static Context=Context;
     public static Provider=Context.Provider;
     public static Consumer=Context.Consumer;
@@ -52,35 +56,9 @@ class EBoardContext extends React.PureComponent<{},IEBoardContext>{
     public static updateActiveBoard:(wbNumber:string)=>void;
     public eventEmitter:EventEmitter<EventList>=new EventEmitter<EventList>();
     public idGenerator:IDGenerator = new IDGenerator(111,"ds");
-    constructor(props:{}){
+    constructor(props:IEboardContextProps){
         super(props);
         const boardMap = new EMap<string,IFrame>();
-       
-    
- /*       const map1 = new Map<number,IImageFrame>();
-        map1.set(1,{
-            type:FRAME_TYPE_ENUM.IMAGE,
-            wbNumber:"444",
-            name:"图片",
-            image:"http://pic15.nipic.com/20110628/1369025_192645024000_2.jpg",
-            imageWidth:150,
-            imageHeight:100
-        });
-        
-        boardMap.set("1",{
-            type:FRAME_TYPE_ENUM.IMAGES,
-            name:"images",
-            wbNumber:"1",
-            children:map,
-            pageNo:1,
-        });
-        boardMap.set("12",{
-            type:FRAME_TYPE_ENUM.PDF,
-            name:"pdf",
-            wbNumber:"12",
-            children:map1,
-            pageNo:1,
-        });*/
         this.state={
             activeBoard:"444",
             boardMap,
@@ -89,7 +67,8 @@ class EBoardContext extends React.PureComponent<{},IEBoardContext>{
             eventEmitter:this.eventEmitter,
             idGenerator:this.idGenerator,
             updateBoardMap:this.updateBoardMap,
-            setToolProps:this.setToolProps
+            setToolProps:this.setToolProps,
+            onMessageListener:props.onMessageListener
         };
         EBoardContext.getBoardList=this.getBoardList;
         EBoardContext.updateBoardMap=this.updateBoardMap;

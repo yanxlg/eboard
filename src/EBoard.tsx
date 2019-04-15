@@ -3,6 +3,7 @@
  * @author:yanxinaliang
  * @time：2019/3/30 13:54
  */
+import {Bind} from 'lodash-decorators';
 import React from 'react';
 import {EBoardBody} from './EBoardBody';
 import {EBoardContext} from './EBoardContext';
@@ -18,9 +19,13 @@ class EBoard extends React.PureComponent{
             event.preventDefault();
         });
     }
+    @Bind
+    private onMessageListener(message:object){
+        console.log(message);
+    }
     public render(){
         return (
-            <EBoardContext>
+            <EBoardContext onMessageListener={this.onMessageListener}>
                 <ResizeEmitter/>
                 <EBoardBody/>
                 <EBoardTool/>

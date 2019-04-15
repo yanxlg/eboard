@@ -7,6 +7,9 @@
  * 细微偏移
  */
 import {fabric} from 'fabric';
+import {Bind, Debounce} from 'lodash-decorators';
+import {SHAPE_TYPE} from '../Config';
+import {MessageTag} from '../static/MessageTag';
 import {Common} from '../untils/Common';
 import {BaseBrush} from './BaseBrush';
 import {Point} from './Point';
@@ -96,7 +99,7 @@ class StarBrush extends BaseBrush<Star>{
     }
     protected onMouseDown(pointer:fabric.Point) {
         this._startPoint=new Point(pointer);
-        this.objectId=this.idGenerator.getId();
+        this.objectId=this.context.idGenerator.getId();
         this._reset();
     }
     protected onMouseMove(pointer:fabric.Point) {
@@ -106,7 +109,7 @@ class StarBrush extends BaseBrush<Star>{
         this._points = StarBrush.calcPointsByRadius(this._startPoint,radius,angle);
         this.canvas.clearContext(this.canvas.contextTop);
         this._render();
-        
+        this.dispatchMessage(this.objectId,this._points);
     }
     protected onMouseUp() {
         this._finalizeAndAddPath();
@@ -123,6 +126,9 @@ class StarBrush extends BaseBrush<Star>{
     protected _render() {
         let ctx  = this.canvas.contextTop;
         this._saveAndTransform(ctx);
+        ctx.fillStyle = this.fill;
+        ctx.strokeStyle = this.stroke;
+        ctx.lineWidth=this.width;
         ctx.beginPath();
         const points = this._points;
         points.forEach((point,index)=>{
@@ -133,7 +139,8 @@ class StarBrush extends BaseBrush<Star>{
             }
         });
         ctx.closePath();
-        ctx.stroke();
+        this.fill&&ctx.fill();
+        this.stroke&&ctx.stroke();
         ctx.restore();
     }
     
@@ -143,7 +150,6 @@ class StarBrush extends BaseBrush<Star>{
         const square = new Star(this.objectId,this._points,{
             fill:this.fill,
             stroke:this.stroke,
-            strokeDashArray:this.strokeDashArray,
             strokeWidth:this.width,
         });
         this.canvas.add(square);
@@ -154,6 +160,19 @@ class StarBrush extends BaseBrush<Star>{
             this._resetShadow();
             this.canvas.renderOnAddRemove = originalRenderOnAddRemove;
         });
+    }
+    @Bind
+    @Debounce(40,{maxWait:40,trailing:true})
+    protected dispatchMessage(objectId:string,points:Point[]){
+        const message = {
+            objectId,
+            tag:MessageTag.Shape,
+            points,
+            type:SHAPE_TYPE.Star,
+            stroke: this.stroke,
+            strokeWidth: this.width,
+        };
+        this.context.onMessageListener&&this.context.onMessageListener(message);
     }
 }
 

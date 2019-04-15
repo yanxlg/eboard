@@ -9,6 +9,7 @@ import {Pagination} from '../components/pagination';
 import {EBoardContext, IEBoardContext} from '../EBoardContext';
 import {IImagesFrame} from '../interface/IFrame';
 import "../style/frames.less";
+import {FrameMap} from '../static/FrameMap';
 import {ImageFrame} from './ImageFrame';
 
 
@@ -34,14 +35,15 @@ class ImagesFrame extends React.PureComponent<IImagesFrameProps,IImagesFrameStat
         super(props);
         this.state={
             animationClass:"board-frames-right"
-        }
+        };
+        FrameMap.setChild(props.wbNumber,undefined,this);
     }
     @Bind
     private getChildes(){
         const {frames,wbNumber,pageNo,width,height,dimensions} = this.props;
         let imageFrames:React.ReactNode[]=[];
         frames.forEach((frame,key)=>{
-            frame.render&&imageFrames.push(<ImageFrame {...frame} key={key} wbNumber={`${wbNumber}.${key}`} active={pageNo===key} width={width} height={height} dimensions={dimensions}/>);
+            frame.render&&imageFrames.push(<ImageFrame {...frame} key={key} wbNumber={wbNumber} pageNo={key} active={pageNo===key} width={width} height={height} dimensions={dimensions}/>);
         });
         return imageFrames;
     }
@@ -58,6 +60,12 @@ class ImagesFrame extends React.PureComponent<IImagesFrameProps,IImagesFrameStat
         this.setState({
             animationClass:oldPageNo<pageNo?"board-frames-right":"board-frames-left"
         })
+    }
+    componentWillUnmount(): void {
+        FrameMap.removeChild(this.props.wbNumber);
+    }
+    public clear(){
+        // TODO All children clear...
     }
     render(){
         const {active,width,height,frames} = this.props;

@@ -1,10 +1,12 @@
 import {fabric} from "fabric"
+import {Bind, Debounce} from 'lodash-decorators';
+import {SHAPE_TYPE} from '../Config';
+import {MessageTag} from '../static/MessageTag';
+import {Common} from '../untils/Common';
 import {BaseBrush} from './BaseBrush';
 import {IBrush} from '../interface/IBrush';
 import {Circle} from "./Circle";
 import {Point} from './Point';
-
-const piBy2 = Math.PI * 2;
 
 class CircleBrush extends BaseBrush<Circle> implements IBrush{
     protected _startPoint:Point;
@@ -16,7 +18,7 @@ class CircleBrush extends BaseBrush<Circle> implements IBrush{
         ctx.lineWidth=this.width;
         ctx.beginPath();
         ctx.transform(1, 0, 0, 1, pointer.x, pointer.y);
-        ctx.arc(0, 0, pointer.radius, 0, piBy2, false);
+        ctx.arc(0, 0, pointer.radius, 0, Common.piBy2, false);
         ctx.closePath();
         this.fill&&ctx.fill();
         this.stroke&&ctx.stroke();
@@ -25,7 +27,7 @@ class CircleBrush extends BaseBrush<Circle> implements IBrush{
     // @override
     protected onMouseDown(pointer:fabric.Point){
         pointer=new Point(pointer);
-        this.objectId=this.idGenerator.getId();
+        this.objectId=this.context.idGenerator.getId();
         this._startPoint = pointer;
         this._startPoint.radius=0;
         this.canvas.clearContext(this.canvas.contextTop);
@@ -38,6 +40,7 @@ class CircleBrush extends BaseBrush<Circle> implements IBrush{
             Math.pow(pointer.y-this._startPoint.y,2)));
         this.canvas.clearContext(this.canvas.contextTop);
         this.drawDot(this._startPoint);
+        this.dispatchMessage(this.objectId,this._startPoint);
     };
     // @override
     protected onMouseUp(){
@@ -63,6 +66,24 @@ class CircleBrush extends BaseBrush<Circle> implements IBrush{
             this.canvas.renderOnAddRemove = originalRenderOnAddRemove;
         });
     };
+    
+    @Bind
+    @Debounce(40,{maxWait:40,trailing:true})
+    private dispatchMessage(objectId:string,center:Point){
+        const {x,y,radius} = center;
+        const message = {
+            objectId,
+            tag:MessageTag.Shape,
+            type:SHAPE_TYPE.Circle,
+            radius,
+            left: x,
+            top: y,
+            fill:this.fill,
+            stroke:this.stroke,
+            strokeWidth:this.width
+        };
+        this.context.onMessageListener&&this.context.onMessageListener(message);
+    }
 }
 
 export {CircleBrush}

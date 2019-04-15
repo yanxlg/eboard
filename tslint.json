@@ -14,7 +14,8 @@
     "ordered-imports": false,
     "object-literal-sort-keys": false,
     "no-unused-expression": false,
-    "no-bitwise": false
+    "no-bitwise": false,
+    "no-string-literal": false
   },
   "linterOptions": {
     "exclude": [

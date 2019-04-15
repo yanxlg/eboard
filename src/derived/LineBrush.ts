@@ -7,6 +7,9 @@
  */
 
 import {fabric} from 'fabric';
+import {Bind, Debounce} from 'lodash-decorators';
+import {SHAPE_TYPE} from '../Config';
+import {MessageTag} from '../static/MessageTag';
 import {Cursor} from '../untils/Cursor';
 import {BaseBrush} from './BaseBrush';
 import {Line} from './Line';
@@ -17,17 +20,18 @@ class LineBrush extends BaseBrush<Line>{
     protected _saveAndTransform:(ctx:CanvasRenderingContext2D)=>void;
     public strokeMiterLimit:number;
     public shadow:fabric.Shadow;
-    protected _startPointer:fabric.Point;
-    protected _endPointer:fabric.Point;
+    protected _startPointer:Point;
+    protected _endPointer:Point;
     public cursorType=Cursor.hand;
     public set dashed(dashed:boolean){
         this.strokeDashArray=dashed?[10,4]:undefined;
     }
     protected onMouseDown(pointer:fabric.Point) {
         pointer=new Point(pointer);
-        this.objectId=this.idGenerator.getId();
+        this.objectId=this.context.idGenerator.getId();
         this._prepareForDrawing(pointer);
         this._render();
+        this.dispatchMessage(this.objectId,this._startPointer,this._endPointer);
     }
     
     protected onMouseMove(pointer:fabric.Point) {
@@ -36,13 +40,14 @@ class LineBrush extends BaseBrush<Line>{
         this._endPointer=pointer;
         this.canvas.clearContext(this.canvas.contextTop);
         this._render();
+        this.dispatchMessage(this.objectId,this._startPointer,this._endPointer);
     }
     
     protected onMouseUp() {
         this._finalizeAndAddPath();
     }
     
-    private _prepareForDrawing(pointer:fabric.Point) {
+    private _prepareForDrawing(pointer:Point) {
         this._reset();
         this._startPointer=pointer;
         this.canvas.contextTop.moveTo(pointer.x, pointer.y);
@@ -115,10 +120,6 @@ class LineBrush extends BaseBrush<Line>{
             fill: null,
             stroke: this.stroke,
             strokeWidth: this.width,
-            strokeLineCap: this.strokeLineCap,
-            strokeMiterLimit: this.strokeMiterLimit,
-            strokeLineJoin: this.strokeLineJoin,
-            strokeDashArray: this.strokeDashArray,
         });
         let position = new fabric.Point(path.left + path.width / 2, path.top + path.height / 2);
         position = path.translateToGivenOrigin(position, 'center', 'center', path.originX, path.originY);
@@ -129,6 +130,20 @@ class LineBrush extends BaseBrush<Line>{
             path.setShadow(this.shadow);
         }
         return path;
+    }
+    @Bind
+    @Debounce(40,{maxWait:40,trailing:true})
+    protected dispatchMessage(objectId:string,start:Point,end:Point){
+        const message = {
+            objectId,
+            tag:MessageTag.Shape,
+            startPoint:start,
+            endPoint:end,
+            type:SHAPE_TYPE.Line,
+            stroke: this.stroke,
+            strokeWidth: this.width,
+        };
+        this.context.onMessageListener&&this.context.onMessageListener(message);
     }
 }
 

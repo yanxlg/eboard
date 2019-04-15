@@ -9,6 +9,7 @@ import {EBoardCanvas} from '../EBoardCanvas';
 import {IImageFrame} from '../interface/IFrame';
 import "../style/frames.less";
 import PerfectScrollbar from "kxt-web/lib/perfectscrollbar";
+import {FrameMap} from '../static/FrameMap';
 
 declare interface IImageFrameProps extends IImageFrame{
     width:number;
@@ -18,20 +19,32 @@ declare interface IImageFrameProps extends IImageFrame{
         height:number;
     };
     active:boolean;
+    pageNo?:number;
 }
 
 class ImageFrame extends React.PureComponent<IImageFrameProps>{
+    private eBoardCanvasRef:RefObject<EBoardCanvas>=React.createRef();
     private scrollRef:RefObject<PerfectScrollbar>=React.createRef();
+    constructor(props:IImageFrameProps){
+        super(props);
+        FrameMap.setChild(props.wbNumber,props.pageNo,this);
+    }
     componentDidUpdate(
         prevProps: Readonly<IImageFrameProps>, prevState: Readonly<{}>,
         snapshot?: any): void {
             this.scrollRef.current.update();
     }
+    componentWillUnmount(): void {
+        FrameMap.removeChild(this.props.wbNumber,this.props.pageNo);
+    }
+    public clear(){
+        this.eBoardCanvasRef.current.clear();
+    }
     render(){
         const {active,width,height,dimensions} = this.props;
         return (
             <PerfectScrollbar ref={this.scrollRef} className={`board-frame ${active?"board-frame-active":""}`} style={{width,height}}>
-                <EBoardCanvas property={this.props} dimensions={dimensions} height={height} width={width}/>
+                <EBoardCanvas ref={this.eBoardCanvasRef} property={this.props} dimensions={dimensions} height={height} width={width}/>
             </PerfectScrollbar>
         )
     }

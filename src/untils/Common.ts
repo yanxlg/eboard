@@ -36,6 +36,7 @@ class Common {
     public static cos108:number=Math.cos(108/180 * Math.PI);
     public static cos144:number=Math.cos(144/180 * Math.PI);
     public static angleRatio:number=Math.PI/180;
+    public static piBy2:number = Math.PI * 2;
 }
 
 export {Common}

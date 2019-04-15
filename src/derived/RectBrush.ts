@@ -6,11 +6,14 @@
  * @disc:RectBrush
  */
 import {fabric} from 'fabric';
+import {Bind, Debounce} from 'lodash-decorators';
+import {SHAPE_TYPE} from '../Config';
+import {MessageTag} from '../static/MessageTag';
+import {Point} from './Point';
 import {Rect} from './Rect';
 import {SquareBrush} from './SquareBrush';
 
 class RectBrush extends SquareBrush{
-    private ry:number=0;
     protected calcPoints(pointer:fabric.Point){
         this.rx=Math.abs(pointer.x-this.centerPoint.x);
         this.ry=Math.abs(pointer.y-this.centerPoint.y);
@@ -57,6 +60,22 @@ class RectBrush extends SquareBrush{
             this._resetShadow();
             this.canvas.renderOnAddRemove = originalRenderOnAddRemove;
         });
+    }
+    @Bind
+    @Debounce(40,{maxWait:40,trailing:true})
+    protected dispatchMessage(objectId:string,center:Point,rx:number,ry:number,angle:number){
+        const message = {
+            objectId,
+            tag:MessageTag.Shape,
+            type:SHAPE_TYPE.Rect,
+            stroke: this.stroke,
+            strokeWidth: this.width,
+            left:center.x,
+            top:center.y,
+            width:rx*2,
+            height:ry*2,
+        };
+        this.context.onMessageListener&&this.context.onMessageListener(message);
     }
 }
 

@@ -16,6 +16,7 @@ import {
     IPdfItemFrame,
 } from './interface/IFrame';
 import './style/tool.less';
+import {FrameMap} from './static/FrameMap';
 
 declare interface IEBoardToolState {
     shapeType?:string;
@@ -143,7 +144,17 @@ class EBoardTool extends React.Component<{},IEBoardToolState>{
                 });
                 break;
             case "清空":
-                // this.context.setToolType(TOOL_TYPE.Clear);
+                const {boardMap,activeBoard} = this.context;
+                const frame = boardMap.get(activeBoard);
+                const {pageNo,frames} = frame as any;
+                if(void 0 !== pageNo&&frames){
+                    const parent = FrameMap.frameMap.get(activeBoard);
+                    const child = parent&&parent.childFrames.get(pageNo);
+                    child&&child.clear();
+                }else{
+                    const parent = FrameMap.frameMap.get(activeBoard);
+                    parent&&parent.frame.clear();
+                }
                 break;
             case "教鞭":
                 this.context.setToolProps({

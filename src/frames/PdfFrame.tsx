@@ -13,6 +13,7 @@ import PDFJS, {
     PDFDocumentProxy,
     PDFLoadingTask,
 } from 'pdfjs-dist';
+import {FrameMap} from '../static/FrameMap';
 import {PdfItemFrame} from './PdfItemFrame';
 
 
@@ -51,6 +52,7 @@ class PdfFrame extends React.PureComponent<IPdfFrameProps,IPdfFrameState>{
                 pdf
             });
         });
+        FrameMap.setChild(props.wbNumber,undefined,this);
     }
     @Bind
     private getChildes(){
@@ -58,7 +60,7 @@ class PdfFrame extends React.PureComponent<IPdfFrameProps,IPdfFrameState>{
         let pdfItemFrames:React.ReactNode[]=[];
         const {pdf} = this.state;
         frames.forEach((frame,key)=>{
-            frame.render&&pdfItemFrames.push(<PdfItemFrame pdf={pdf} {...frame} key={key} wbNumber={`${wbNumber}.${key}`} active={pageNo===key} width={width} height={height} dimensions={dimensions}/>);
+            frame.render&&pdfItemFrames.push(<PdfItemFrame pdf={pdf} {...frame} key={key} wbNumber={wbNumber} active={pageNo===key} width={width} height={height} dimensions={dimensions}/>);
         });
         return pdfItemFrames;
     }
@@ -86,6 +88,12 @@ class PdfFrame extends React.PureComponent<IPdfFrameProps,IPdfFrameState>{
         this.setState({
             animationClass:oldPageNo<pageNo?"board-frames-right":"board-frames-left"
         })
+    }
+    componentWillUnmount(): void {
+        FrameMap.removeChild(this.props.wbNumber);
+    }
+    public clear(){
+        // TODO All children clear...
     }
     render(){
         const {active,width,height} = this.props;

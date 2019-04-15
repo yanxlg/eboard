@@ -92,9 +92,6 @@ class PdfFrame extends React.PureComponent<IPdfFrameProps,IPdfFrameState>{
     componentWillUnmount(): void {
         FrameMap.removeChild(this.props.wbNumber);
     }
-    public clear(){
-        // TODO All children clear...
-    }
     render(){
         const {active,width,height} = this.props;
         const {pdf,total,animationClass} = this.state;

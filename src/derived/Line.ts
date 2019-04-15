@@ -7,11 +7,13 @@
  */
 import {fabric} from "fabric";
 import {ILineOptions} from 'fabric/fabric-impl';
+import {IEBoardContext} from '../EBoardContext';
+import {Common} from '../untils/Common';
 
 class Line extends fabric.Line{
     public objectId:string;
-    constructor(objectId:string,points?: number[], objObjects?: ILineOptions){
-        super(points,objObjects);
+    constructor(objectId:string,context:IEBoardContext,points?: number[], objObjects?: ILineOptions){
+        super(points,Common.filterParams(objObjects,context));
         this.objectId=objectId;
     }
 }

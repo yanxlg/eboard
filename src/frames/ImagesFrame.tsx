@@ -64,9 +64,6 @@ class ImagesFrame extends React.PureComponent<IImagesFrameProps,IImagesFrameStat
     componentWillUnmount(): void {
         FrameMap.removeChild(this.props.wbNumber);
     }
-    public clear(){
-        // TODO All children clear...
-    }
     render(){
         const {active,width,height,frames} = this.props;
         const {animationClass} = this.state;

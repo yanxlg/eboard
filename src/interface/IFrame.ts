@@ -28,6 +28,7 @@ export declare interface IImageFrame extends IBaseFrame{
     image:string;
     layoutMode?:"center_contain"|"top_auto";
     render:boolean;// 是否渲染
+    pageNo?:number;
 }
 
 

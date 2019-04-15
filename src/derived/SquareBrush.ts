@@ -120,7 +120,7 @@ class SquareBrush extends BaseBrush<Square>{
         this.canvas.renderOnAddRemove = false;
         const width = this.rx*2;
         const height = this.rx*2;
-        const square = new Square(this.objectId,{
+        const square = new Square(this.objectId,this.context,{
             left:this.centerPoint.x,
             top:this.centerPoint.y,
             originX: 'center',
@@ -155,7 +155,9 @@ class SquareBrush extends BaseBrush<Square>{
             top:center.y,
             width:rx*2,
             height:ry*2,
-            angle
+            angle,
+            wbNumber:this.wbNumber,
+            pageNo:this.pageNo
         };
         this.context.onMessageListener&&this.context.onMessageListener(message);
     }

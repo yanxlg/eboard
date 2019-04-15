@@ -147,7 +147,7 @@ class StarBrush extends BaseBrush<Star>{
     protected _finalizeAndAddPath(){
         const originalRenderOnAddRemove = this.canvas.renderOnAddRemove;
         this.canvas.renderOnAddRemove = false;
-        const square = new Star(this.objectId,this._points,{
+        const square = new Star(this.objectId,this.context,this._points,{
             fill:this.fill,
             stroke:this.stroke,
             strokeWidth:this.width,
@@ -171,6 +171,8 @@ class StarBrush extends BaseBrush<Star>{
             type:SHAPE_TYPE.Star,
             stroke: this.stroke,
             strokeWidth: this.width,
+            wbNumber:this.wbNumber,
+            pageNo:this.pageNo
         };
         this.context.onMessageListener&&this.context.onMessageListener(message);
     }

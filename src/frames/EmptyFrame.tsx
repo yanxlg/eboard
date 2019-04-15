@@ -30,9 +30,6 @@ class EmptyFrame extends React.PureComponent<IEmptyFrameProps>{
     componentWillUnmount(): void {
         FrameMap.removeChild(this.props.wbNumber);
     }
-    public clear(){
-        this.eBoardCanvasRef.current.clear();
-    }
     render(){
         const {width,height,dimensions,active} = this.props;
         return (

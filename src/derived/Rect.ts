@@ -7,11 +7,13 @@
  */
 import {fabric} from 'fabric';
 import {IRectOptions} from 'fabric/fabric-impl';
+import {IEBoardContext} from '../EBoardContext';
+import {Common} from '../untils/Common';
 
 class Rect extends fabric.Rect{
     public objectId:string;
-    constructor(objectId:string,options?: IRectOptions){
-        super(options);
+    constructor(objectId:string,context:IEBoardContext,options?: IRectOptions){
+        super(Common.filterParams(options,context));
         this.objectId=objectId;
     }
 }

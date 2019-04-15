@@ -106,7 +106,7 @@ class ArrowBrush extends LineBrush{
         return path;
     }
     public createPath(pathData?:string):any {
-        const path = new Arrow(this.objectId,pathData, {
+        const path = new Arrow(this.objectId,this.context,pathData, {
             stroke: this.stroke,
             fill:this.stroke,
             strokeWidth: this.width,
@@ -248,7 +248,9 @@ class ArrowBrush extends LineBrush{
             type:SHAPE_TYPE.Arrow,
             stroke: this.stroke,
             strokeWidth: this.width,
-            arrowType:this.arrowType
+            arrowType:this.arrowType,
+            wbNumber:this.wbNumber,
+            pageNo:this.pageNo
         };
         this.context.onMessageListener&&this.context.onMessageListener(message);
     }

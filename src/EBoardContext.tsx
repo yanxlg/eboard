@@ -31,6 +31,7 @@ const Context=React.createContext(null);
 
 export enum EventList {
     Resize="resize",
+    Clear="clear",
 }
 
 declare interface IToolProps {

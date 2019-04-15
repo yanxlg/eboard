@@ -6,17 +6,17 @@
 import {Bind} from 'lodash-decorators';
 import React, {MouseEvent} from 'react';
 import {SHAPE_TYPE, TOOL_TYPE} from './Config';
-import {EBoardContext, IEBoardContext} from './EBoardContext';
+import {EBoardContext, EventList, IEBoardContext} from './EBoardContext';
 import {FRAME_TYPE_ENUM} from './enums/EBoardEnum';
 import './font/iconfont.css';
 
 import {
-    IImageFrame, IImagesFrame,
+    IImageFrame,
+    IImagesFrame,
     IPdfFrame,
     IPdfItemFrame,
 } from './interface/IFrame';
 import './style/tool.less';
-import {FrameMap} from './static/FrameMap';
 
 declare interface IEBoardToolState {
     shapeType?:string;
@@ -144,17 +144,14 @@ class EBoardTool extends React.Component<{},IEBoardToolState>{
                 });
                 break;
             case "清空":
-                const {boardMap,activeBoard} = this.context;
+                const {boardMap,activeBoard,eventEmitter} = this.context;
                 const frame = boardMap.get(activeBoard);
-                const {pageNo,frames} = frame as any;
-                if(void 0 !== pageNo&&frames){
-                    const parent = FrameMap.frameMap.get(activeBoard);
-                    const child = parent&&parent.childFrames.get(pageNo);
-                    child&&child.clear();
-                }else{
-                    const parent = FrameMap.frameMap.get(activeBoard);
-                    parent&&parent.frame.clear();
-                }
+                const {pageNo} = frame as any;
+                eventEmitter.trigger(EventList.Clear,{
+                    wbNumber:activeBoard,
+                    pageNo,
+                    evented:true
+                });
                 break;
             case "教鞭":
                 this.context.setToolProps({
@@ -317,8 +314,8 @@ class EBoardTool extends React.Component<{},IEBoardToolState>{
                     <button className={`board-tool-item eboard-icon eboard-icon-jiaobian ${toolType===TOOL_TYPE.Ferule?" active":""}`} onClick={this.onClick} title="教鞭" onMouseEnter={this.showPanel}/>
                     <button className="board-tool-item eboard-icon eboard-icon-revoke" onClick={this.onClick} title="撤销" onMouseEnter={this.showPanel}/>
                     <button className="board-tool-item eboard-icon eboard-icon-redo" onClick={this.onClick} title="反撤销" onMouseEnter={this.showPanel}/>
-                    <button className="board-tool-item" onClick={this.addPdfGroup}>显示pdf</button>
-                    <button className="board-tool-item" onClick={this.addImagesGroup}>显示图片</button>
+                    <button className="board-tool-item" onClick={this.addPdfGroup}>pdf</button>
+                    <button className="board-tool-item" onClick={this.addImagesGroup}>png</button>
                     <div className={`board-tool-panel ${showPanel?"board-tool-panel-show":""}`} style={{left,top}}>
                         {
                             type==="pencil"?(

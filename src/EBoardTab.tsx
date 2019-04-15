@@ -6,6 +6,7 @@ import {FRAME_TYPE_ENUM} from './enums/EBoardEnum';
 import './font/iconfont.css';
 import {IEmptyFrame, IFrame} from './interface/IFrame';
 import './style/tab.less';
+import {MessageTag} from './static/MessageTag';
 
 declare interface ITabInterface{
     showPager:boolean;
@@ -128,11 +129,19 @@ class EBoardTab extends React.PureComponent<{}, ITabInterface>{
     @Bind
     private onItemRemove(wbNumber:string){
         this.remove(wbNumber);
+        this.context.onMessageListener({
+            tag:MessageTag.RemoveFrame,
+            wbNumber
+        });
     }
     @Bind
     private onItemClick(wbNumber:string,element:HTMLDivElement){
         this.scrollToView(element);
         EBoardContext.updateActiveBoard(wbNumber);
+        this.context.onMessageListener({
+            tag:MessageTag.SwitchToFrame,
+            wbNumber
+        });
     }
     @Bind
     private onAddClick(){
@@ -146,6 +155,10 @@ class EBoardTab extends React.PureComponent<{}, ITabInterface>{
             }
         };
         this.add(frame);
+        this.context.onMessageListener({
+            tag:MessageTag.CreateFrame,
+            frame
+        });
     }
     @Bind
     private onPrevClick(){

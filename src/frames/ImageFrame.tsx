@@ -19,7 +19,6 @@ declare interface IImageFrameProps extends IImageFrame{
         height:number;
     };
     active:boolean;
-    pageNo?:number;
 }
 
 class ImageFrame extends React.PureComponent<IImageFrameProps>{
@@ -36,9 +35,6 @@ class ImageFrame extends React.PureComponent<IImageFrameProps>{
     }
     componentWillUnmount(): void {
         FrameMap.removeChild(this.props.wbNumber,this.props.pageNo);
-    }
-    public clear(){
-        this.eBoardCanvasRef.current.clear();
     }
     render(){
         const {active,width,height,dimensions} = this.props;

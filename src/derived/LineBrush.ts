@@ -116,7 +116,7 @@ class LineBrush extends BaseBrush<Line>{
         const start = this._startPointer;
         const end = this._endPointer||this._startPointer;
         const points = [start.x,start.y,end.x,end.y];
-        const path = new Line(this.objectId,points, {
+        const path = new Line(this.objectId,this.context,points, {
             fill: null,
             stroke: this.stroke,
             strokeWidth: this.width,
@@ -142,6 +142,8 @@ class LineBrush extends BaseBrush<Line>{
             type:SHAPE_TYPE.Line,
             stroke: this.stroke,
             strokeWidth: this.width,
+            wbNumber:this.wbNumber,
+            pageNo:this.pageNo
         };
         this.context.onMessageListener&&this.context.onMessageListener(message);
     }

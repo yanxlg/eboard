@@ -10,6 +10,7 @@ import {ActiveSelection, Group, IEvent} from 'fabric/fabric-impl';
 import {Bind} from 'lodash-decorators';
 import {IEBoardContext} from '../EBoardContext';
 import {IObject} from '../interface/IBrush';
+import {MessageTag} from '../static/MessageTag';
 import {Cursor} from '../untils/Cursor';
 import {IDGenerator} from '../untils/IDGenerator';
 import {Canvas} from './Canvas';
@@ -21,13 +22,19 @@ import {Clipboard} from "../untils/Clipboard";
 class SelectBrush {
     public cursorType=Cursor.ferule;
     public canvas:Canvas;
+    private context:IEBoardContext;
     private clipBoard = new Clipboard();
     private _position?:{x:number;y:number};
     private containsProperties=["borderColor","cornerColor","cornerStrokeColor","cornerStyle","transparentCorners","cornerSize","borderScaleFactor","selectable","id","sourceId"];
     private _cacheObjectsTransforms:any={};
     private idGenerator:IDGenerator;
-    constructor(canvas:Canvas,context:IEBoardContext){
+    private wbNumber:string;
+    private pageNo?:number;
+    constructor(canvas:Canvas,context:IEBoardContext,wbNumber:string,pageNo?:number){
         this.canvas=canvas;
+        this.wbNumber=wbNumber;
+        this.pageNo=pageNo;
+        this.context=context;
         this.canvas.selection=true;
         this.canvas.skipTargetFind=false;
         this.idGenerator=context.idGenerator;
@@ -62,17 +69,38 @@ class SelectBrush {
             switch (action){
                 case "drag":
                     console.log({prevState:this._cacheObjectsTransforms});
+                    this.context.onMessageListener({
+                        tag:MessageTag.SelectionMove,
+                        objectIds:ids,
+                        transform:objectsTransform,
+                        wbNumber:this.wbNumber,
+                        pageNo:this.pageNo
+                    });
                     // data = this.transform(ids,objectsTransform,MessageTag.SelectionMove);
                     // this.canvas.eventBus.trigger("object:modified",{...data,prevState:this._cacheObjectsTransforms});
                     break;
                 case "rotate":
                     console.log({prevState:this._cacheObjectsTransforms});
+                    this.context.onMessageListener({
+                        tag:MessageTag.SelectionRotate,
+                        objectIds:ids,
+                        transform:objectsTransform,
+                        wbNumber:this.wbNumber,
+                        pageNo:this.pageNo
+                    });
                     // data = this.transform(ids,objectsTransform,MessageTag.SelectionRotate);
                     // this.canvas.eventBus.trigger("object:modified",{...data,prevState:this._cacheObjectsTransforms});
                     break;
                 case "scale":
                 case "scaleX":
                 case "scaleY":
+                    this.context.onMessageListener({
+                        tag:MessageTag.SelectionScale,
+                        objectIds:ids,
+                        transform:objectsTransform,
+                        wbNumber:this.wbNumber,
+                        pageNo:this.pageNo
+                    });
                     console.log({prevState:this._cacheObjectsTransforms});
                     // data = this.transform(ids,objectsTransform,MessageTag.SelectionScale);
                     // this.canvas.eventBus.trigger("object:modified",{...data,prevState:this._cacheObjectsTransforms});

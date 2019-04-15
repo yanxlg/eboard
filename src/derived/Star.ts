@@ -7,11 +7,13 @@
  */
 import {fabric} from 'fabric';
 import {IPolylineOptions} from 'fabric/fabric-impl';
+import {IEBoardContext} from '../EBoardContext';
+import {Common} from '../untils/Common';
 
 class Star extends fabric.Polygon{
     public objectId:string;
-    constructor(objectId:string,points: Array<{ x: number; y: number }>, options?: IPolylineOptions) {
-        super(points, options);
+    constructor(objectId:string,context:IEBoardContext,points: Array<{ x: number; y: number }>, options?: IPolylineOptions) {
+        super(points, Common.filterParams(options,context));
         this.objectId = objectId;
     }
 }

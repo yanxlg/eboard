@@ -1,0 +1,112 @@
+/**
+ * @Author: yanxinaliang (rainyxlxl@163.com)
+ * @Date: 2019/4/15 15:33
+ * @Last Modified by: yanxinaliang (rainyxlxl@163.com)
+ * @Last Modified time: 2019/4/15 15:33
+ * @disc:TextboxBrush
+ */
+import {IEvent} from 'fabric/fabric-impl';
+import {Bind} from 'lodash-decorators';
+import {TOOL_TYPE} from '../Config';
+import {IEBoardContext} from '../EBoardContext';
+import {MessageTag} from '../static/MessageTag';
+import {Cursor} from '../untils/Cursor';
+import {Canvas} from './Canvas';
+import {Point} from './Point';
+import {TextBox} from './TextBox';
+
+class TextBoxBrush{
+    public cursorType=Cursor.text;
+    public canvas:Canvas;
+    private context:IEBoardContext;
+    public fontSize:number;
+    public fontColor:string;
+    private instance:TextBox;
+    private _cacheBeforeText:string;
+    private objectId:string;
+    private static fontFamily:string='Microsoft YaHei,"Times New Roman"';
+    private wbNumber:string;
+    private pageNo?:number;
+    constructor(canvas:Canvas,context:IEBoardContext,wbNumber:string,pageNo?:number){
+        this.canvas=canvas;
+        this.context=context;
+        this.wbNumber=wbNumber;
+        this.pageNo=pageNo;
+        canvas.on("mouse:down",this.onMouseDown);
+    }
+    @Bind
+    private onMouseDown(e:IEvent){
+        if(void 0 !== this.instance){
+            window.removeEventListener("mouseDown",this.onMouseUp);
+            this.canvas.renderOnAddRemove=false;
+            this.instance.exitEditing();
+            if("" === this.instance.text){
+                this.canvas.remove(this.instance);
+                this.instance=undefined as any;
+            }
+            this.instance=undefined as any;
+            this.canvas.renderAll();
+            this.canvas.renderOnAddRemove=true;
+            return;
+        }
+        window.addEventListener("mouseDown",this.onMouseUp);
+        const _p = this.canvas.getPointer(e.e);
+        const pointer=new Point(_p.x,_p.y);
+        this.objectId=this.context.idGenerator.getId();
+        this.instance = new TextBox(this.objectId,this.context,'',{
+            left:pointer.x,
+            top:pointer.y,
+            fontSize:this.fontSize,
+            fill:this.fontColor,
+            fontFamily:TextBoxBrush.fontFamily,
+        });
+        this._cacheBeforeText="";
+        this.instance.on("changed",()=>{
+            console.log(this._cacheBeforeText);
+            this.context.onMessageListener({
+                type:TOOL_TYPE.Text,
+                left:pointer.x,
+                top:pointer.y,
+                text:this.instance.text,
+                tag:MessageTag.Shape,
+                objectId:this.objectId,
+                fill:this.fontColor,
+                fontSize:this.fontSize,
+                wbNumber:this.wbNumber,
+                pageNo:this.pageNo
+            })
+           /* const data = this.throw();
+            if(data){
+                // save state
+                // this.eBoardCanvas.eventBus.trigger("object:added",{...data,beforeText:this._cacheBeforeText});
+                this._cacheBeforeText=data.text||"";
+            }*/
+        });
+        this.canvas.add(this.instance);
+        this.instance.enterEditing();// 进入编辑模式
+    };
+    @Bind
+    private onMouseUp(){
+        if(this.instance){
+            this.canvas.renderOnAddRemove=false;
+            this.instance.exitEditing();
+            if("" === this.instance.text){
+                this.canvas.remove(this.instance);
+                this.instance=undefined;
+            }
+            this.instance=undefined;
+            this.canvas.renderAll();
+            this.canvas.renderOnAddRemove=true;
+        }
+        this.instance=undefined;
+        this.objectId=undefined;
+        window.removeEventListener("mouseDown",this.onMouseUp);
+    }
+    @Bind
+    public destroy(){
+        this.canvas.off("mouse:down",this.onMouseDown);
+        window.removeEventListener("mouseDown",this.onMouseUp);
+    }
+}
+
+export {TextBoxBrush}

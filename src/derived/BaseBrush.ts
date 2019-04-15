@@ -31,10 +31,14 @@ class BaseBrush<InstanceType extends fabric.Object> extends fabric.BaseBrush imp
     public fill?:string;
     public stroke?:string;
     public cursorType:string;
-    constructor(canvas:Canvas,context:IEBoardContext){
+    protected wbNumber:string;
+    protected pageNo?:number;
+    constructor(canvas:Canvas,context:IEBoardContext,wbNumber:string,pageNo?:number){
         super();
         this.canvas=canvas;
         this.context=context;
+        this.wbNumber=wbNumber;
+        this.pageNo=pageNo;
     }
     public hasObjectId(objectId:string){
         return this.objectMap.has(objectId);

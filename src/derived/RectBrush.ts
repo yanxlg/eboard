@@ -40,7 +40,7 @@ class RectBrush extends SquareBrush{
         this.canvas.renderOnAddRemove = false;
         const width = this.rx*2;
         const height = this.ry*2;
-        const rect = new Rect(this.objectId,{
+        const rect = new Rect(this.objectId,this.context,{
             left:this.centerPoint.x,
             top:this.centerPoint.y,
             originX: 'center',
@@ -74,6 +74,8 @@ class RectBrush extends SquareBrush{
             top:center.y,
             width:rx*2,
             height:ry*2,
+            wbNumber:this.wbNumber,
+            pageNo:this.pageNo
         };
         this.context.onMessageListener&&this.context.onMessageListener(message);
     }

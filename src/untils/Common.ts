@@ -1,4 +1,5 @@
 import Timer = NodeJS.Timer;
+import {IEBoardContext} from '../EBoardContext';
 
 class Common {
     public static getImageSize(image:HTMLImageElement,callback:({width,height}?:{width:number;height:number})=>void){
@@ -37,6 +38,19 @@ class Common {
     public static cos144:number=Math.cos(144/180 * Math.PI);
     public static angleRatio:number=Math.PI/180;
     public static piBy2:number = Math.PI * 2;
+    public static filterParams(options: any, context: IEBoardContext) {
+        const config=context.config;
+        return Object.assign({
+            borderColor:config.borderColor,
+            cornerColor:config.cornerColor,
+            cornerStrokeColor:config.cornerStrokeColor,
+            cornerStyle:config.cornerStyle,
+            transparentCorners:config.transparentCorners,
+            strokeLineCap:config.strokeLineCap,
+            cornerSize:config.cornerSize,
+            borderScaleFactor:config.borderWidth
+        },options);
+    }
 }
 
 export {Common}

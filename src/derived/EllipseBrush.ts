@@ -39,7 +39,7 @@ class EllipseBrush extends CircleBrush{
         const originalRenderOnAddRemove = this.canvas.renderOnAddRemove;
         this.canvas.renderOnAddRemove = false;
         const {x,y,rx,ry} = this._startPoint;
-        const ellipse = new Ellipse(this.objectId,{
+        const ellipse = new Ellipse(this.objectId,this.context,{
             left: x,
             top: y,
             rx,

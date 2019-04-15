@@ -47,7 +47,7 @@ class CircleBrush extends BaseBrush<Circle> implements IBrush{
         const originalRenderOnAddRemove = this.canvas.renderOnAddRemove;
         this.canvas.renderOnAddRemove = false;
         const {x,y,radius} = this._startPoint;
-        const circle = new Circle(this.objectId,{
+        const circle = new Circle(this.objectId,this.context,{
             radius,
             left: x,
             top: y,
@@ -80,7 +80,9 @@ class CircleBrush extends BaseBrush<Circle> implements IBrush{
             top: y,
             fill:this.fill,
             stroke:this.stroke,
-            strokeWidth:this.width
+            strokeWidth:this.width,
+            wbNumber:this.wbNumber,
+            pageNo:this.pageNo
         };
         this.context.onMessageListener&&this.context.onMessageListener(message);
     }

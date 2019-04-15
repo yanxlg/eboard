@@ -70,18 +70,16 @@ class PdfItemFrame extends React.PureComponent<IPdfItemFrameProps,IPdfItemFrameS
     componentWillUnmount(): void {
         FrameMap.removeChild(this.props.wbNumber,this.props.pageNo);
     }
-    public clear(){
-        this.eBoardCanvasRef.current.clear();
-    }
     render(){
-        const {active,width,height,dimensions,render,wbNumber} = this.props;
+        const {active,width,height,dimensions,render,wbNumber,pageNo} = this.props;
         const {dataUrl} = this.state;
         const imageFrameOptions:IImageFrame={
             image:dataUrl,
             layoutMode:"top_auto",
             render,
             type:FRAME_TYPE_ENUM.IMAGE,
-            wbNumber
+            wbNumber,
+            pageNo
         };
         return (
             <PerfectScrollbar ref={this.scrollRef} className={`board-frame ${active?"board-frame-active":""}`} style={{width,height}}>

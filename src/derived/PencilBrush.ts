@@ -29,19 +29,19 @@ class PencilBrush extends fabric.PencilBrush implements IBaseBrush{
     private _points:Point[];
     private context:IEBoardContext;
     private wbNumber:string;
-    private pageNo?:number;
+    private pageNum?:number;
     public hasObjectId(objectId:string){
         return this.objectMap.has(objectId);
     }
     public getObject(objectId:string){
         return this.objectMap.get(objectId);
     }
-    constructor(canvas:Canvas,context:IEBoardContext,wbNumber:string,pageNo?:number){
+    constructor(canvas:Canvas,context:IEBoardContext,wbNumber:string,pageNum?:number){
         super();
         this.canvas=canvas;
         this.context=context;
         this.wbNumber=wbNumber;
-        this.pageNo=pageNo;
+        this.pageNum=pageNum;
     }
     public createPath(pathData:string) {
         const path = new Pencil(this.objectId,this.context,pathData, {
@@ -107,11 +107,13 @@ class PencilBrush extends fabric.PencilBrush implements IBaseBrush{
             tag:MessageTag.Shape,
             type:TOOL_TYPE.Pencil,
             objectId,
-            points,
-            stroke: this.color,
-            strokeWidth: this.width,
             wbNumber:this.wbNumber,
-            pageNo:this.pageNo
+            pageNum:this.pageNum,
+            attributes:{
+                points,
+                stroke: this.color,
+                strokeWidth: this.width
+            },
         };
         this.context.onMessageListener&&this.context.onMessageListener(message);
     }

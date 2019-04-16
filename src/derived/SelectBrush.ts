@@ -29,11 +29,11 @@ class SelectBrush {
     private _cacheObjectsTransforms:any={};
     private idGenerator:IDGenerator;
     private wbNumber:string;
-    private pageNo?:number;
-    constructor(canvas:Canvas,context:IEBoardContext,wbNumber:string,pageNo?:number){
+    private pageNum?:number;
+    constructor(canvas:Canvas,context:IEBoardContext,wbNumber:string,pageNum?:number){
         this.canvas=canvas;
         this.wbNumber=wbNumber;
-        this.pageNo=pageNo;
+        this.pageNum=pageNum;
         this.context=context;
         this.canvas.selection=true;
         this.canvas.skipTargetFind=false;
@@ -72,9 +72,9 @@ class SelectBrush {
                     this.context.onMessageListener({
                         tag:MessageTag.SelectionMove,
                         objectIds:ids,
-                        transform:objectsTransform,
+                        attributes:objectsTransform,
                         wbNumber:this.wbNumber,
-                        pageNo:this.pageNo
+                        pageNum:this.pageNum,
                     });
                     // data = this.transform(ids,objectsTransform,MessageTag.SelectionMove);
                     // this.canvas.eventBus.trigger("object:modified",{...data,prevState:this._cacheObjectsTransforms});
@@ -84,9 +84,9 @@ class SelectBrush {
                     this.context.onMessageListener({
                         tag:MessageTag.SelectionRotate,
                         objectIds:ids,
-                        transform:objectsTransform,
+                        attributes:objectsTransform,
                         wbNumber:this.wbNumber,
-                        pageNo:this.pageNo
+                        pageNum:this.pageNum,
                     });
                     // data = this.transform(ids,objectsTransform,MessageTag.SelectionRotate);
                     // this.canvas.eventBus.trigger("object:modified",{...data,prevState:this._cacheObjectsTransforms});
@@ -97,9 +97,9 @@ class SelectBrush {
                     this.context.onMessageListener({
                         tag:MessageTag.SelectionScale,
                         objectIds:ids,
-                        transform:objectsTransform,
+                        attributes:objectsTransform,
                         wbNumber:this.wbNumber,
-                        pageNo:this.pageNo
+                        pageNum:this.pageNum
                     });
                     console.log({prevState:this._cacheObjectsTransforms});
                     // data = this.transform(ids,objectsTransform,MessageTag.SelectionScale);

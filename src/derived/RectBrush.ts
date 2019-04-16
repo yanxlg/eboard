@@ -68,14 +68,16 @@ class RectBrush extends SquareBrush{
             objectId,
             tag:MessageTag.Shape,
             type:SHAPE_TYPE.Rect,
-            stroke: this.stroke,
-            strokeWidth: this.width,
-            left:center.x,
-            top:center.y,
-            width:rx*2,
-            height:ry*2,
             wbNumber:this.wbNumber,
-            pageNo:this.pageNo
+            pageNum:this.pageNum,
+            attributes:{
+                stroke: this.stroke,
+                strokeWidth: this.width,
+                left:center.x,
+                top:center.y,
+                width:rx*2,
+                height:ry*2
+            }
         };
         this.context.onMessageListener&&this.context.onMessageListener(message);
     }

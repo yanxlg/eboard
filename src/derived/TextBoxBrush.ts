@@ -26,12 +26,12 @@ class TextBoxBrush{
     private objectId:string;
     private static fontFamily:string='Microsoft YaHei,"Times New Roman"';
     private wbNumber:string;
-    private pageNo?:number;
-    constructor(canvas:Canvas,context:IEBoardContext,wbNumber:string,pageNo?:number){
+    private pageNum?:number;
+    constructor(canvas:Canvas,context:IEBoardContext,wbNumber:string,pageNum?:number){
         this.canvas=canvas;
         this.context=context;
         this.wbNumber=wbNumber;
-        this.pageNo=pageNo;
+        this.pageNum=pageNum;
         canvas.on("mouse:down",this.onMouseDown);
     }
     @Bind
@@ -64,16 +64,18 @@ class TextBoxBrush{
         this.instance.on("changed",()=>{
             console.log(this._cacheBeforeText);
             this.context.onMessageListener({
-                type:TOOL_TYPE.Text,
-                left:pointer.x,
-                top:pointer.y,
-                text:this.instance.text,
                 tag:MessageTag.Shape,
-                objectId:this.objectId,
-                fill:this.fontColor,
-                fontSize:this.fontSize,
+                type:TOOL_TYPE.Text,
                 wbNumber:this.wbNumber,
-                pageNo:this.pageNo
+                pageNum:this.pageNum,
+                objectId:this.objectId,
+                attributes:{
+                    left:pointer.x,
+                    top:pointer.y,
+                    text:this.instance.text,
+                    fill:this.fontColor,
+                    fontSize:this.fontSize
+                }
             })
            /* const data = this.throw();
             if(data){

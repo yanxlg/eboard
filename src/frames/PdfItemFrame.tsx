@@ -36,8 +36,8 @@ class PdfItemFrame extends React.PureComponent<IPdfItemFrameProps,IPdfItemFrameS
         super(props);
         this.state={};
         this._cacheCanvas=document.createElement("canvas");
-        const {pdf,pageNo} = props;
-        pdf.getPage(pageNo).then(page=>{
+        const {pdf,pageNum} = props;
+        pdf.getPage(pageNum).then(page=>{
             const canvas = this._cacheCanvas;
             const defaultViewport = page.getViewport(1/window.devicePixelRatio);
             // defaultViewport.width
@@ -60,7 +60,7 @@ class PdfItemFrame extends React.PureComponent<IPdfItemFrameProps,IPdfItemFrameS
                 })
             });
         });
-        FrameMap.setChild(props.wbNumber,props.pageNo,this);
+        FrameMap.setChild(props.wbNumber,props.pageNum,this);
     }
     componentDidUpdate(
         prevProps: Readonly<IPdfItemFrameProps>, prevState: Readonly<{}>,
@@ -68,18 +68,18 @@ class PdfItemFrame extends React.PureComponent<IPdfItemFrameProps,IPdfItemFrameS
         this.scrollRef.current.update();
     }
     componentWillUnmount(): void {
-        FrameMap.removeChild(this.props.wbNumber,this.props.pageNo);
+        FrameMap.removeChild(this.props.wbNumber,this.props.pageNum);
     }
     render(){
-        const {active,width,height,dimensions,render,wbNumber,pageNo} = this.props;
+        const {active,width,height,dimensions,render,wbNumber,pageNum} = this.props;
         const {dataUrl} = this.state;
         const imageFrameOptions:IImageFrame={
             image:dataUrl,
             layoutMode:"top_auto",
             render,
-            type:FRAME_TYPE_ENUM.IMAGE,
+            wbType:FRAME_TYPE_ENUM.IMAGE,
             wbNumber,
-            pageNo
+            pageNum
         };
         return (
             <PerfectScrollbar ref={this.scrollRef} className={`board-frame ${active?"board-frame-active":""}`} style={{width,height}}>

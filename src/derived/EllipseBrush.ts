@@ -6,11 +6,14 @@
  * @disc:EllipseBrush
  */
 import {fabric} from 'fabric';
+import {Bind, Debounce} from 'lodash-decorators';
+import {SHAPE_TYPE} from '../Config';
+import {MessageTag} from '../static/MessageTag';
+import {Common} from '../untils/Common';
 import {CircleBrush} from './CircleBrush';
 import {Ellipse} from './Ellipse';
 import {Point} from './Point';
 
-const piBy2 = Math.PI * 2;
 class EllipseBrush extends CircleBrush{
     protected drawDot(pointer:Point) {
         const ctx = this.canvas.contextTop;
@@ -20,10 +23,10 @@ class EllipseBrush extends CircleBrush{
         ctx.lineWidth=this.width;
         ctx.beginPath();
         if(ctx.ellipse){
-            ctx.ellipse(pointer.x,pointer.y,pointer.rx,pointer.ry,0,0,piBy2,false);
+            ctx.ellipse(pointer.x,pointer.y,pointer.rx,pointer.ry,0,0,Common.piBy2,false);
         }else{
             ctx.transform(1, 0, 0, pointer.ry / pointer.rx, pointer.x, pointer.y);
-            ctx.arc(0, 0 , pointer.rx, 0, piBy2, false);
+            ctx.arc(0, 0 , pointer.rx, 0, Common.piBy2, false);
         }
         this.fill&&ctx.fill();
         this.stroke&&ctx.stroke();
@@ -34,6 +37,7 @@ class EllipseBrush extends CircleBrush{
         this._startPoint.ry=~~ (0.5 + Math.abs(pointer.y-this._startPoint.y));
         this.canvas.clearContext(this.canvas.contextTop);
         this.drawDot(this._startPoint);
+        this.dispatchMessage(this.objectId,this._startPoint);
     };
     protected onMouseUp(){
         const originalRenderOnAddRemove = this.canvas.renderOnAddRemove;
@@ -58,7 +62,29 @@ class EllipseBrush extends CircleBrush{
             this._resetShadow();
             this.canvas.renderOnAddRemove = originalRenderOnAddRemove;
         });
-    };
+    };  @Bind
+    @Debounce(40,{maxWait:40,trailing:true})
+    private dispatchMessage(objectId:string,center:Point){
+        const {x,y,radius} = center;
+        const message = {
+            objectId,
+            tag:MessageTag.Shape,
+            shapeType:SHAPE_TYPE.Ellipse,
+            wbNumber:this.wbNumber,
+            pageNum:this.pageNum,
+            attributes:{
+                radius,
+                left: x,
+                top: y,
+                fill:this.fill,
+                stroke:this.stroke,
+                strokeWidth:this.width,
+                rx:center.rx,
+                ry:center.ry
+            }
+        };
+        this.context.onMessageListener&&this.context.onMessageListener(message);
+    }
 }
 
 export {EllipseBrush};

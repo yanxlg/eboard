@@ -31,7 +31,9 @@ export enum SHAPE_TYPE {
     HollowTriangle = "hollowTriangle",
     HollowRect = "hollowRect",
     Square="Square",
-    HollowSquare="HollowSquare",
+    HollowSquare="hollowSquare",
+    Ellipse="ellipse",
+    HollowEllipse="hollowEllipse"
 }
 
 

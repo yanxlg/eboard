@@ -23,6 +23,11 @@ class EBoard extends React.PureComponent{
     private onMessageListener(message:object){
         console.log(message);
     }
+    @Bind
+    public dispatchMessage(){
+       console.log("我将收到的消息纷发到不同的brush");
+       
+    }
     public render(){
         return (
             <EBoardContext onMessageListener={this.onMessageListener}>

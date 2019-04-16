@@ -250,7 +250,7 @@ class ArrowBrush extends LineBrush{
             strokeWidth: this.width,
             arrowType:this.arrowType,
             wbNumber:this.wbNumber,
-            pageNo:this.pageNo
+            pageNum:this.pageNum
         };
         this.context.onMessageListener&&this.context.onMessageListener(message);
     }

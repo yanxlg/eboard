@@ -26,7 +26,7 @@ class ImageFrame extends React.PureComponent<IImageFrameProps>{
     private scrollRef:RefObject<PerfectScrollbar>=React.createRef();
     constructor(props:IImageFrameProps){
         super(props);
-        FrameMap.setChild(props.wbNumber,props.pageNo,this);
+        FrameMap.setChild(props.wbNumber,props.pageNum,this);
     }
     componentDidUpdate(
         prevProps: Readonly<IImageFrameProps>, prevState: Readonly<{}>,
@@ -34,7 +34,7 @@ class ImageFrame extends React.PureComponent<IImageFrameProps>{
             this.scrollRef.current.update();
     }
     componentWillUnmount(): void {
-        FrameMap.removeChild(this.props.wbNumber,this.props.pageNo);
+        FrameMap.removeChild(this.props.wbNumber,this.props.pageNum);
     }
     render(){
         const {active,width,height,dimensions} = this.props;

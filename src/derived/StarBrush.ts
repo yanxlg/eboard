@@ -167,12 +167,14 @@ class StarBrush extends BaseBrush<Star>{
         const message = {
             objectId,
             tag:MessageTag.Shape,
-            points,
             type:SHAPE_TYPE.Star,
-            stroke: this.stroke,
-            strokeWidth: this.width,
             wbNumber:this.wbNumber,
-            pageNo:this.pageNo
+            pageNum:this.pageNum,
+            attributes:{
+                points,
+                stroke: this.stroke,
+                strokeWidth: this.width
+            }
         };
         this.context.onMessageListener&&this.context.onMessageListener(message);
     }

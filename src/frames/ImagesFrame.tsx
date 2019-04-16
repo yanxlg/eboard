@@ -40,25 +40,25 @@ class ImagesFrame extends React.PureComponent<IImagesFrameProps,IImagesFrameStat
     }
     @Bind
     private getChildes(){
-        const {frames,wbNumber,pageNo,width,height,dimensions} = this.props;
+        const {frames,wbNumber,pageNum,width,height,dimensions} = this.props;
         let imageFrames:React.ReactNode[]=[];
         frames.forEach((frame,key)=>{
-            frame.render&&imageFrames.push(<ImageFrame {...frame} key={key} wbNumber={wbNumber} pageNo={key} active={pageNo===key} width={width} height={height} dimensions={dimensions}/>);
+            frame.render&&imageFrames.push(<ImageFrame {...frame} key={key} wbNumber={wbNumber} pageNum={key} active={pageNum===key} width={width} height={height} dimensions={dimensions}/>);
         });
         return imageFrames;
     }
     @Bind
-    private onPageChange(pageNo:number){
+    private onPageChange(pageNum:number){
         const {wbNumber} = this.props;
         const {boardMap} = this.context;
         let imagesFrame = boardMap.get(wbNumber) as IImagesFrame;
-        const oldPageNo = imagesFrame.pageNo;
-        if(oldPageNo===pageNo){return}
-        imagesFrame.pageNo=pageNo;
-        imagesFrame.frames.get(pageNo).render=true;
+        const oldPageNo = imagesFrame.pageNum;
+        if(oldPageNo===pageNum){return}
+        imagesFrame.pageNum=pageNum;
+        imagesFrame.frames.get(pageNum).render=true;
         this.context.updateBoardMap(boardMap);
         this.setState({
-            animationClass:oldPageNo<pageNo?"board-frames-right":"board-frames-left"
+            animationClass:oldPageNo<pageNum?"board-frames-right":"board-frames-left"
         })
     }
     componentWillUnmount(): void {

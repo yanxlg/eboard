@@ -179,21 +179,19 @@ class EBoardTool extends React.Component<{},IEBoardToolState>{
         images.map((image,index)=>{
             const _index = index+1;
             frames.set(_index,{
-                type:FRAME_TYPE_ENUM.IMAGE,
-                wbNumber:wbNumber+"."+index,
+                wbType:FRAME_TYPE_ENUM.IMAGE,
+                wbNumber,
                 image,
                 layoutMode:"top_auto",
                 render:_index===1
             });
         });
         const frame:IImagesFrame={
-            type:FRAME_TYPE_ENUM.IMAGES,
+            wbType:FRAME_TYPE_ENUM.IMAGES,
             wbNumber,
-            tab:{
-                name:"图片组"
-            },
+            wbName:"图片组",
             frames,
-            pageNo:1
+            pageNum:1
         };
         boardMap.set(wbNumber,frame);
         this.context.updateBoardMap(boardMap);
@@ -204,21 +202,19 @@ class EBoardTool extends React.Component<{},IEBoardToolState>{
         const wbNumber = Date.now().toString();
         const frames = new Map<number,IPdfItemFrame>();
         frames.set(1,{
-            type:FRAME_TYPE_ENUM.PDFTASK,
-            pageNo:1,
+            wbType:FRAME_TYPE_ENUM.PDFTASK,
+            pageNum:1,
             render:true,
             layoutMode:"top_auto",
-            wbNumber:wbNumber+".1",
+            wbNumber,
         });
         // pdf loading
         const frame:IPdfFrame={
-            type:FRAME_TYPE_ENUM.PDF,
+            wbType:FRAME_TYPE_ENUM.PDF,
             wbNumber,
-            tab:{
-                name:"Pdf"
-            },
+            wbName:"Pdf",
             frames,
-            pageNo:1,
+            pageNum:1,
             filePath:"https://res2dev.9itest.com/resource2/1000/document/20190404/d6e7818316644e7c82191d298a0c5345.pdf"
         };
         boardMap.set(wbNumber,frame);

@@ -114,7 +114,7 @@ class EBoardTab extends React.PureComponent<{}, ITabInterface>{
         const addBtn = this.addRef.current;
         const prevBtn = this.prevRef.current;
         const nextBtn = this.nextRef.current;
-        const addWidth = addFrame?this.calcItemWidth(addFrame.tab.name,addFrame.tab.canRemove):0;
+        const addWidth = addFrame?this.calcItemWidth(addFrame.wbName,addFrame.canRemove):0;
         const {scrollWidth,offsetWidth} = scroll;
         const {showPager} = this.state;
         const nextShowPager = scrollWidth+addWidth>container.offsetWidth-addBtn.offsetWidth;
@@ -147,12 +147,10 @@ class EBoardTab extends React.PureComponent<{}, ITabInterface>{
     private onAddClick(){
         const {config} = this.context;
         const frame:IEmptyFrame = {
-            type:FRAME_TYPE_ENUM.EMPTY,
+            wbType:FRAME_TYPE_ENUM.EMPTY,
             wbNumber:Date.now().toString(),
-            tab:{
-                canRemove:true,
-                name:config.defaultName,
-            }
+            canRemove:true,
+            wbName:config.defaultName,
         };
         this.add(frame);
         this.context.onMessageListener({
@@ -238,7 +236,7 @@ class EBoardTab extends React.PureComponent<{}, ITabInterface>{
                     <div className="tab-scroll-bar" style={{transform:`translateX(-${scrollOffset}px)`}}>
                         {
                             boardList.map((frame,index)=>(
-                                <EBoardTabItem {...frame.tab} wbNumber={frame.wbNumber} key={frame.wbNumber} activeNumber={activeBoard} onClick={this.onItemClick} onRemove={this.onItemRemove}/>
+                                <EBoardTabItem wbName={frame.wbName} canRemove={frame.canRemove} wbIcon={frame.wbIcon} wbNumber={frame.wbNumber} key={frame.wbNumber} activeNumber={activeBoard} onClick={this.onItemClick} onRemove={this.onItemRemove}/>
                             ))
                         }
                     </div>

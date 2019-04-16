@@ -18,12 +18,12 @@ class EraserBrush{
     public canvas:Canvas;
     private context:IEBoardContext;
     private wbNumber:string;
-    private pageNo:number;
-    constructor(canvas:Canvas,context:IEBoardContext,wbNumber:string,pageNo?:number){
+    private pageNum:number;
+    constructor(canvas:Canvas,context:IEBoardContext,wbNumber:string,pageNum?:number){
         this.canvas=canvas;
         this.context=context;
         this.wbNumber=wbNumber;
-        this.pageNo=pageNo;
+        this.pageNum=pageNum;
         canvas.skipTargetFind=false;
         canvas.on("mouse:over",this.onSelected);
         canvas.on("mouse:out",this.onUnSelected);
@@ -58,7 +58,7 @@ class EraserBrush{
                 tag:MessageTag.Delete,
                 objectId:target.objectId,
                 wbNumber:this.wbNumber,
-                pageNo:this.pageNo
+                pageNum:this.pageNum
             });
         }
     }

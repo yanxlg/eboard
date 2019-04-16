@@ -18,12 +18,12 @@ class FeruleBrush{
     public canvas:Canvas;
     private context:IEBoardContext;
     private wbNumber:string;
-    private pageNo?:number;
-    constructor(canvas:Canvas,context:IEBoardContext,wbNumber:string,pageNo?:number){
+    private pageNum?:number;
+    constructor(canvas:Canvas,context:IEBoardContext,wbNumber:string,pageNum?:number){
         this.canvas=canvas;
         this.context=context;
         this.wbNumber=wbNumber;
-        this.pageNo=pageNo;
+        this.pageNum=pageNum;
         canvas.on("mouse:move",this.onMouseMove);
     }
     @Bind
@@ -37,9 +37,9 @@ class FeruleBrush{
     private dispatchMessage(pointer:Point){
         this.context.onMessageListener({
             tag:MessageTag.Cursor,
-            pointer,
+            attributes:pointer,
             wbNumber:this.wbNumber,
-            pageNo:this.pageNo
+            pageNum:this.pageNum
         });
     }
     @Bind

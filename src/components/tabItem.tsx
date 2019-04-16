@@ -28,11 +28,11 @@ class EBoardTabItem extends React.PureComponent<IEBoardTabItemProps>{
         this.props.onRemove(this.props.wbNumber);
     }
     render(){
-        const {activeNumber,wbNumber,name,canRemove} = this.props;
+        const {activeNumber,wbNumber,wbName,canRemove} = this.props;
         return (
             <div data-e-id={wbNumber} className={`tab-item ${activeNumber===wbNumber?"tab-active":""} ${canRemove!==false?"tab-item-can-remove":""}`} onClick={this.onClick}>
                 <span className="tab-item-name">
-                    {name}
+                    {wbName}
                 </span>
                 {
                     canRemove!==false?(

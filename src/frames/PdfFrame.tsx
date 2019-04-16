@@ -56,37 +56,37 @@ class PdfFrame extends React.PureComponent<IPdfFrameProps,IPdfFrameState>{
     }
     @Bind
     private getChildes(){
-        const {frames,wbNumber,pageNo,width,height,dimensions} = this.props;
+        const {frames,wbNumber,pageNum,width,height,dimensions} = this.props;
         let pdfItemFrames:React.ReactNode[]=[];
         const {pdf} = this.state;
         frames.forEach((frame,key)=>{
-            frame.render&&pdfItemFrames.push(<PdfItemFrame pdf={pdf} {...frame} key={key} wbNumber={wbNumber} active={pageNo===key} width={width} height={height} dimensions={dimensions}/>);
+            frame.render&&pdfItemFrames.push(<PdfItemFrame pdf={pdf} {...frame} key={key} wbNumber={wbNumber} active={pageNum===key} width={width} height={height} dimensions={dimensions}/>);
         });
         return pdfItemFrames;
     }
     @Bind
-    private onPageChange(pageNo:number){
+    private onPageChange(pageNum:number){
         const {wbNumber} = this.props;
         const {boardMap} = this.context;
         let pdfFrame = boardMap.get(wbNumber) as IPdfFrame;
-        const oldPageNo = pdfFrame.pageNo;
-        if(oldPageNo===pageNo){return}
-        pdfFrame.pageNo=pageNo;
-        const pdfItemFrame = pdfFrame.frames.get(pageNo);
+        const oldPageNo = pdfFrame.pageNum;
+        if(oldPageNo===pageNum){return}
+        pdfFrame.pageNum=pageNum;
+        const pdfItemFrame = pdfFrame.frames.get(pageNum);
         if(pdfItemFrame){
             pdfItemFrame.render=true;
         }else{
-            pdfFrame.frames.set(pageNo,{
-                type:FRAME_TYPE_ENUM.PDFTASK,
-                pageNo,
+            pdfFrame.frames.set(pageNum,{
+                wbType:FRAME_TYPE_ENUM.PDFTASK,
+                pageNum,
                 render:true,
                 layoutMode:"top_auto",
-                wbNumber:wbNumber+"."+pageNo,
+                wbNumber:wbNumber+"."+pageNum,
             });
         }
         this.context.updateBoardMap(boardMap);
         this.setState({
-            animationClass:oldPageNo<pageNo?"board-frames-right":"board-frames-left"
+            animationClass:oldPageNo<pageNum?"board-frames-right":"board-frames-left"
         })
     }
     componentWillUnmount(): void {

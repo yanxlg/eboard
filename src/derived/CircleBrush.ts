@@ -74,15 +74,17 @@ class CircleBrush extends BaseBrush<Circle> implements IBrush{
         const message = {
             objectId,
             tag:MessageTag.Shape,
-            type:SHAPE_TYPE.Circle,
-            radius,
-            left: x,
-            top: y,
-            fill:this.fill,
-            stroke:this.stroke,
-            strokeWidth:this.width,
+            shapeType:SHAPE_TYPE.Circle,
             wbNumber:this.wbNumber,
-            pageNo:this.pageNo
+            pageNum:this.pageNum,
+            attributes:{
+                radius,
+                left: x,
+                top: y,
+                fill:this.fill,
+                stroke:this.stroke,
+                strokeWidth:this.width,
+            }
         };
         this.context.onMessageListener&&this.context.onMessageListener(message);
     }

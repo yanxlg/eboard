@@ -10,14 +10,13 @@ import {FRAME_TYPE_ENUM} from "../enums/EBoardEnum";
 
 export declare interface ITab{
     canRemove?:boolean;
-    icon?:string;
-    name?:string;
+    wbIcon?:string;
+    wbName?:string;
 }
 
-export declare interface IBaseFrame{
-    type:FRAME_TYPE_ENUM;
+export declare interface IBaseFrame extends ITab{
+    wbType:FRAME_TYPE_ENUM;
     wbNumber:string;
-    tab?:ITab
 }
 
 export declare interface IEmptyFrame extends IBaseFrame{
@@ -28,25 +27,25 @@ export declare interface IImageFrame extends IBaseFrame{
     image:string;
     layoutMode?:"center_contain"|"top_auto";
     render:boolean;// 是否渲染
-    pageNo?:number;
+    pageNum?:number;
 }
 
 
 export declare interface IImagesFrame extends IBaseFrame{
     frames:Map<number,IImageFrame>;
-    pageNo:number;
+    pageNum:number;
 }
 
 
 export declare interface IPdfItemFrame extends IBaseFrame{
-    pageNo:number;
+    pageNum:number;
     layoutMode?:"center_contain"|"top_auto";
     render:boolean;// 是否渲染
 }
 
 export declare interface IPdfFrame extends IBaseFrame{
     frames:Map<number,IPdfItemFrame>;
-    pageNo:number;
+    pageNum:number;
     filePath:string;
 }
 

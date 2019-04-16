@@ -18,15 +18,15 @@ import {TextBox} from './TextBox';
 class TextBoxBrush{
     public cursorType=Cursor.text;
     public canvas:Canvas;
-    private context:IEBoardContext;
+    private readonly context:IEBoardContext;
     public fontSize:number;
     public fontColor:string;
     private instance:TextBox;
     private _cacheBeforeText:string;
     private objectId:string;
-    private static fontFamily:string='Microsoft YaHei,"Times New Roman"';
-    private wbNumber:string;
-    private pageNum?:number;
+    public static fontFamily:string='Microsoft YaHei,"Times New Roman"';
+    private readonly wbNumber:string;
+    private readonly pageNum?:number;
     constructor(canvas:Canvas,context:IEBoardContext,wbNumber:string,pageNum?:number){
         this.canvas=canvas;
         this.context=context;

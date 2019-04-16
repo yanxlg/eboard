@@ -12,15 +12,11 @@ import {Canvas} from './Canvas';
 export declare interface IBaseBrush{
     clear:()=>void;
     render:()=>void;
-    objectMap:Map<string,fabric.Object>;
-    hasObjectId:(objectId:string)=>boolean;
-    getObject:(objectId:string)=>fabric.Object;
     cursorType:string;
 }
 
 class BaseBrush<InstanceType extends fabric.Object> extends fabric.BaseBrush implements IBaseBrush{
     protected canvas:Canvas;
-    public objectMap=new Map<string,InstanceType>();
     protected objectId?:string;
     protected _setBrushStyles:()=>void;
     protected _saveAndTransform:(ctx:CanvasRenderingContext2D)=>void;
@@ -39,12 +35,6 @@ class BaseBrush<InstanceType extends fabric.Object> extends fabric.BaseBrush imp
         this.context=context;
         this.wbNumber=wbNumber;
         this.pageNum=pageNum;
-    }
-    public hasObjectId(objectId:string){
-        return this.objectMap.has(objectId);
-    }
-    public getObject(objectId:string){
-        return this.objectMap.get(objectId);
     }
     public clear(){
         const ctx  = this.canvas.contextTop;

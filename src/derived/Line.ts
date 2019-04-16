@@ -9,12 +9,17 @@ import {fabric} from "fabric";
 import {ILineOptions} from 'fabric/fabric-impl';
 import {IEBoardContext} from '../EBoardContext';
 import {Common} from '../untils/Common';
+import {Point} from './Point';
 
 class Line extends fabric.Line{
     public objectId:string;
-    constructor(objectId:string,context:IEBoardContext,points?: number[], objObjects?: ILineOptions){
+    public startPoint:Point;
+    public endPoint:Point;
+    constructor(objectId:string,context:IEBoardContext,points: number[], objObjects?: ILineOptions){
         super(points,Common.filterParams(objObjects,context));
         this.objectId=objectId;
+        this.startPoint=new Point(points[0],points[1]);
+        this.endPoint=new Point(points[2],points[3]);
     }
 }
 

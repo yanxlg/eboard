@@ -3,16 +3,14 @@
  * @author:yanxinaliang
  * @time：2019/3/30 14:28
  */
-import {Bind} from "lodash-decorators";
-import React from "react";
+import {Bind} from 'lodash-decorators';
+import React from 'react';
 import {Config, IConfig, SHAPE_TYPE, TOOL_TYPE} from './Config';
-import {IFrame} from "./interface/IFrame";
+import {IFrame, IMessage} from './interface/IFrame';
+import {MessageTag} from './static/MessageTag';
 import {EventEmitter} from './untils/EventMitter';
 import {IDGenerator} from './untils/IDGenerator';
-import {EMap} from "./untils/Map";
-
-
-
+import {EMap} from './untils/Map';
 
 export declare interface IEBoardContext{
     lock:boolean;
@@ -32,6 +30,10 @@ const Context=React.createContext(null);
 export enum EventList {
     Resize="resize",
     Clear="clear",
+    DrawPencil="drawPencil",
+    DrawText="drawText",
+    DrawLine="drawLine",
+    DrawArrow="drawArrow",
 }
 
 declare interface IToolProps {
@@ -97,6 +99,77 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
         this.setState({
             config:Object.assign({},this.state.config,props)
         })
+    }
+    @Bind
+    public dispatchMessage(message:IMessage,timestamp:number){
+        console.log("我将收到的消息纷发到不同的brush");
+        const {tag,wbNumber,pageNum,shapeType,objectId,attributes} = message;
+        switch (tag) {
+            case MessageTag.CreateFrame:
+                break;
+            case MessageTag.Shape:
+                switch (shapeType) {
+                    case TOOL_TYPE.Pencil:
+                        this.state.eventEmitter.trigger(EventList.DrawPencil,{
+                            wbNumber,
+                            pageNum,
+                            objectId,
+                            attributes,
+                            timestamp
+                        });
+                        break;
+                    case TOOL_TYPE.Text:
+                        this.state.eventEmitter.trigger(EventList.DrawText,{
+                            wbNumber,
+                            pageNum,
+                            objectId,
+                            attributes,
+                            timestamp
+                        });
+                        break;
+                    case SHAPE_TYPE.Line:
+                        this.state.eventEmitter.trigger(EventList.DrawLine,{
+                            wbNumber,
+                            pageNum,
+                            objectId,
+                            attributes,
+                            timestamp
+                        });
+                        break;
+                    case SHAPE_TYPE.Arrow:
+                        this.state.eventEmitter.trigger(EventList.DrawArrow,{
+                            wbNumber,
+                            pageNum,
+                            objectId,
+                            attributes,
+                            timestamp
+                        });
+                        break;
+                    case SHAPE_TYPE.Rect:
+                        break;
+                    case SHAPE_TYPE.HollowRect:
+                        break;
+                    case SHAPE_TYPE.Circle:
+                        break;
+                    case SHAPE_TYPE.HollowCircle:
+                        break;
+                    case SHAPE_TYPE.Star:
+                        break;
+                    case SHAPE_TYPE.HollowStar:
+                        break;
+                    case SHAPE_TYPE.Triangle:
+                        break;
+                    case SHAPE_TYPE.HollowTriangle:
+                        break;
+                }
+                break;
+            case MessageTag.Clear:
+                this.state.eventEmitter.trigger(EventList.Clear,{
+                    wbNumber,
+                    pageNum,
+                });
+                break;
+        }
     }
     render(){
         return (

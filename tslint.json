@@ -15,7 +15,8 @@
     "object-literal-sort-keys": false,
     "no-unused-expression": false,
     "no-bitwise": false,
-    "no-string-literal": false
+    "no-string-literal": false,
+    "comment-format": false
   },
   "linterOptions": {
     "exclude": [

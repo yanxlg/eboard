@@ -5,7 +5,9 @@
  * @Last Modified time: 2019/3/30 17:03
  * @disc:frame
  */
+import {SHAPE_TYPE, TOOL_TYPE} from '../Config';
 import {FRAME_TYPE_ENUM} from "../enums/EBoardEnum";
+import {MessageTag} from '../static/MessageTag';
 
 
 export declare interface ITab{
@@ -51,3 +53,14 @@ export declare interface IPdfFrame extends IBaseFrame{
 
 export type IFrame = IEmptyFrame|IImageFrame|IImagesFrame|IPdfFrame;
 
+
+
+export declare interface IMessage {
+    tag:MessageTag;
+    wbNumber:string;
+    pageNum?:number;
+    shapeType?:SHAPE_TYPE|TOOL_TYPE;
+    attributes?:any;
+    objectId?:number;
+    objectIds?:number[];
+}

@@ -69,7 +69,7 @@ class CircleBrush extends BaseBrush<Circle> implements IBrush{
     
     @Bind
     @Debounce(40,{maxWait:40,trailing:true})
-    private dispatchMessage(objectId:string,center:Point){
+    protected dispatchMessage(objectId:string,center:Point){
         const {x,y,radius} = center;
         const message = {
             objectId,

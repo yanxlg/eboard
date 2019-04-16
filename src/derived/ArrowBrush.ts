@@ -27,11 +27,10 @@ class ArrowBrush extends LineBrush{
     private theta:number=30;
     private arrowType:ArrowType=ArrowType.Next;
     public strokeDashArray:number[]=undefined;// dot Line
-    public convertPointsToSVGPath(){
-        let p1 = this._startPointer,
-            p2 = this._endPointer||this._startPointer;
-        const headmen = Math.max(this.width * 2 +this.arrowOffset,this.arrowOffset);
-        const theta = this.theta;
+    public static convertPointsToSVGPath(arrowType:ArrowType,start:Point,end:Point,width:number,arrowOffset:number,theta:number){
+        let p1 = start,
+            p2 = end||start;
+        const headmen = Math.max(width * 2 +arrowOffset,arrowOffset);
         const {x:fromX,y:fromY} = p1;
         const {x:toX,y:toY} = p2;
         const angle = Math.atan2(fromY - toY, fromX - toX) * 180 / Math.PI,
@@ -42,7 +41,7 @@ class ArrowBrush extends LineBrush{
             botX = headmen * Math.cos(angle2),
             botY = headmen * Math.sin(angle2);
         let path:any= [];
-        if(this.arrowType === ArrowType.Prev||this.arrowType === ArrowType.All){
+        if(arrowType === ArrowType.Prev||arrowType === ArrowType.All){
             const point1={
                 x:fromX - topX,
                 y:fromY - topY
@@ -65,8 +64,8 @@ class ArrowBrush extends LineBrush{
             path.push(["L",point2.x,point2.y," "]);
             path.push(["L",point4.x,point4.y," "]);
             path.push(["Z"," "]);
-    
-    
+        
+        
             path.push(["M",point1.x ,point1.y," "]);
             path.push(["L",fromX,fromY," "]);
             path.push(["L",point2.x,point2.y," "]);
@@ -76,7 +75,7 @@ class ArrowBrush extends LineBrush{
         }else{
             path.push(["M",fromX,fromY," "]);
         }
-        if(this.arrowType === ArrowType.Next||this.arrowType === ArrowType.All){
+        if(arrowType === ArrowType.Next||arrowType === ArrowType.All){
             const point1={
                 x:toX + topX,
                 y:toY + topY
@@ -106,7 +105,7 @@ class ArrowBrush extends LineBrush{
         return path;
     }
     public createPath(pathData?:string):any {
-        const path = new Arrow(this.objectId,this.context,pathData, {
+        const path = new Arrow(this.objectId,this.context,this._startPointer,this._endPointer,pathData, {
             stroke: this.stroke,
             fill:this.stroke,
             strokeWidth: this.width,
@@ -124,7 +123,7 @@ class ArrowBrush extends LineBrush{
     protected _finalizeAndAddPath(){
         const ctx = this.canvas.contextTop;
         ctx.closePath();
-        const pathData = this.convertPointsToSVGPath().join('');
+        const pathData = ArrowBrush.convertPointsToSVGPath(this.arrowType,this._startPointer,this._endPointer,this.width,this.arrowOffset,this.theta).join('');
         if (pathData === 'M 0 0 Q 0 0 0 0 L 0 0') {
             this.canvas.requestRenderAll();
             return;
@@ -243,14 +242,18 @@ class ArrowBrush extends LineBrush{
         const message = {
             objectId,
             tag:MessageTag.Shape,
-            startPoint:start,
-            endPoint:end,
             type:SHAPE_TYPE.Arrow,
-            stroke: this.stroke,
-            strokeWidth: this.width,
-            arrowType:this.arrowType,
             wbNumber:this.wbNumber,
-            pageNum:this.pageNum
+            pageNum:this.pageNum,
+            attributes:{
+                startPoint:start,
+                endPoint:end,
+                stroke: this.stroke,
+                strokeWidth: this.width,
+                arrowType:this.arrowType,
+                arrowOffset:this.arrowOffset,
+                theta:this.theta
+            }
         };
         this.context.onMessageListener&&this.context.onMessageListener(message);
     }

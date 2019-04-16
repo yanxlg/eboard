@@ -16,6 +16,10 @@ import {RectBrush} from './derived/RectBrush';
 import {SelectBrush} from './derived/SelectBrush';
 import {StarBrush} from './derived/StarBrush';
 import {TextBoxBrush} from './derived/TextBoxBrush';
+import {ArrowDispatch} from './dispatch/ArrowDispatch';
+import {LineDispatch} from './dispatch/LineDispatch';
+import {PencilDispatch} from './dispatch/PencilDispatch';
+import {TextBoxDispatch} from './dispatch/TextBoxDispatch';
 import {EBoardContext, EventList, IEBoardContext} from './EBoardContext';
 import {FRAME_TYPE_ENUM} from './enums/EBoardEnum';
 import {IFrame, IImageFrame} from './interface/IFrame';
@@ -45,6 +49,17 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
     private imageHeight:number;
     private bgObject:fabric.Image;
     private brush:any;
+    
+    
+    
+    
+    
+    private pencilDispatch:PencilDispatch;
+    private textDispatch:TextBoxDispatch;
+    private lineDispatch:LineDispatch;
+    private arrowDispatch:ArrowDispatch;
+    
+    
     constructor(props:IEBoardCanvas,context:IEBoardContext) {
         super(props);
         const {property} = props;
@@ -52,11 +67,13 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
             this.image=new Image();
             this.image.src=(property as IImageFrame).image;
         }
+        
+        const currentPageNum = (property as any).pageNum;
         // clear 事件监听
         context.eventEmitter.on(EventList.Clear,(e:any)=>{
             const data = e.data;
             const {wbNumber,pageNum} = data;
-            if(wbNumber === property.wbNumber&&pageNum === (property as any).pageNum){
+            if(wbNumber === property.wbNumber&&pageNum === currentPageNum){
                 this.clear();
                 if(data.evented){
                     context.onMessageListener({
@@ -67,8 +84,37 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                 }
             }
         });
+        
+        context.eventEmitter.on(EventList.DrawPencil, (e:any)=>{
+            const data = e.data;
+            const {wbNumber,pageNum,objectId,attributes,timestamp} = data;
+            if(wbNumber===property.wbNumber&&pageNum===currentPageNum){
+                this.pencilDispatch.onDraw(objectId,timestamp,attributes);
+            }
+        });
+        
+        context.eventEmitter.on(EventList.DrawText, (e:any)=>{
+            const data = e.data;
+            const {wbNumber,pageNum,objectId,attributes,timestamp} = data;
+            if(wbNumber===property.wbNumber&&pageNum===currentPageNum){
+                this.textDispatch.onDraw(objectId,timestamp,attributes);
+            }
+        });
+        context.eventEmitter.on(EventList.DrawLine, (e:any)=>{
+            const data = e.data;
+            const {wbNumber,pageNum,objectId,attributes,timestamp} = data;
+            if(wbNumber===property.wbNumber&&pageNum===currentPageNum){
+                this.lineDispatch.onDraw(objectId,timestamp,attributes);
+            }
+        });
+        context.eventEmitter.on(EventList.DrawArrow, (e:any)=>{
+            const data = e.data;
+            const {wbNumber,pageNum,objectId,attributes,timestamp} = data;
+            if(wbNumber===property.wbNumber&&pageNum===currentPageNum){
+                this.arrowDispatch.onDraw(objectId,timestamp,attributes);
+            }
+        });
     }
-    
     @Bind
     private layout(props:IEBoardCanvas){
         let {width:canvasWidth,height:canvasHeight,property} = props;
@@ -287,6 +333,13 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
             this.fabricCanvas.backgroundImage=this.bgObject;
         }
     }
+    @Bind
+    private initDispatch(){
+        this.pencilDispatch=new PencilDispatch(this.fabricCanvas,this.context);
+        this.textDispatch=new TextBoxDispatch(this.fabricCanvas,this.context);
+        this.lineDispatch=new LineDispatch(this.fabricCanvas,this.context);
+        this.arrowDispatch=new ArrowDispatch(this.fabricCanvas,this.context);
+    }
     componentDidMount(): void {
         const container = this.containerRef.current;
         this.fabricCanvas=new Canvas(container,{
@@ -294,9 +347,8 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
             skipTargetFind:true
         });
         this.layout(this.props);
-        
         this.initBrush(this.context);
-        
+        this.initDispatch();
 /*
         this.fabricCanvas.isDrawingMode=true;
         const brush = new StarBrush(this.fabricCanvas,this.context.config,this.context.idGenerator);

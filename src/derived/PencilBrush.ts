@@ -23,19 +23,12 @@ class PencilBrush extends fabric.PencilBrush implements IBaseBrush{
     private _render:()=>void;
     // private strokeMiterLimit:number;
     public shadow:fabric.Shadow;
-    public objectMap=new Map<string,Pencil>();
     protected objectId?:string;
     public cursorType=Cursor.hand;
     private _points:Point[];
     private context:IEBoardContext;
     private wbNumber:string;
     private pageNum?:number;
-    public hasObjectId(objectId:string){
-        return this.objectMap.has(objectId);
-    }
-    public getObject(objectId:string){
-        return this.objectMap.get(objectId);
-    }
     constructor(canvas:Canvas,context:IEBoardContext,wbNumber:string,pageNum?:number){
         super();
         this.canvas=canvas;
@@ -44,7 +37,7 @@ class PencilBrush extends fabric.PencilBrush implements IBaseBrush{
         this.pageNum=pageNum;
     }
     public createPath(pathData:string) {
-        const path = new Pencil(this.objectId,this.context,pathData, {
+        const path = new Pencil(this.objectId,this._points,this.context,pathData, {
             fill:null,
             stroke: this.color,
             strokeWidth: this.width,

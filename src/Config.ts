@@ -84,4 +84,4 @@ if(_localConfig){
 }
 
 
-export {config as Config};
+export {config};

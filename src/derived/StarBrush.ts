@@ -19,6 +19,7 @@ import {Star} from './Star';
 class StarBrush extends BaseBrush<Star>{
     private _startPoint:Point;
     private _points:Point[]=[];
+    private _radius:number;
     private calcQuadrant(point:{x:number,y:number}){
         if(point.x>=this._startPoint.x){
             if(point.y>=this._startPoint.y){
@@ -104,12 +105,12 @@ class StarBrush extends BaseBrush<Star>{
     }
     protected onMouseMove(pointer:fabric.Point) {
         pointer=new Point(pointer);
-        const radius = Math.sqrt(Math.pow(this._startPoint.x-pointer.x,2)+Math.pow(this._startPoint.y-pointer.y,2));
+        this._radius = Math.sqrt(Math.pow(this._startPoint.x-pointer.x,2)+Math.pow(this._startPoint.y-pointer.y,2));
         const angle = this.calcAngle(pointer);
-        this._points = StarBrush.calcPointsByRadius(this._startPoint,radius,angle);
+        this._points = StarBrush.calcPointsByRadius(this._startPoint,this._radius,angle);
         this.canvas.clearContext(this.canvas.contextTop);
         this._render();
-        this.dispatchMessage(this.objectId,this._points);
+        this.dispatchMessage(this.objectId,this._startPoint,this._radius,angle);
     }
     protected onMouseUp() {
         this._finalizeAndAddPath();
@@ -147,7 +148,7 @@ class StarBrush extends BaseBrush<Star>{
     protected _finalizeAndAddPath(){
         const originalRenderOnAddRemove = this.canvas.renderOnAddRemove;
         this.canvas.renderOnAddRemove = false;
-        const square = new Star(this.objectId,this.context,this._points,{
+        const square = new Star(this.objectId,this.context,this._radius,this._points,{
             fill:this.fill,
             stroke:this.stroke,
             strokeWidth:this.width,
@@ -163,7 +164,7 @@ class StarBrush extends BaseBrush<Star>{
     }
     @Bind
     @Debounce(40,{maxWait:40,trailing:true})
-    protected dispatchMessage(objectId:string,points:Point[]){
+    protected dispatchMessage(objectId:string,center:Point,radius:number,angle:number){
         const message = {
             objectId,
             tag:MessageTag.Shape,
@@ -171,7 +172,10 @@ class StarBrush extends BaseBrush<Star>{
             wbNumber:this.wbNumber,
             pageNum:this.pageNum,
             attributes:{
-                points,
+                center,
+                radius,
+                angle,
+                fill:this.fill,
                 stroke: this.stroke,
                 strokeWidth: this.width
             }

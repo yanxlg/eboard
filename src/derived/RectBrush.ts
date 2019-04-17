@@ -71,6 +71,7 @@ class RectBrush extends SquareBrush{
             wbNumber:this.wbNumber,
             pageNum:this.pageNum,
             attributes:{
+                fill:this.fill,
                 stroke: this.stroke,
                 strokeWidth: this.width,
                 left:center.x,

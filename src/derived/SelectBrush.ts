@@ -28,8 +28,8 @@ class SelectBrush {
     private containsProperties=["borderColor","cornerColor","cornerStrokeColor","cornerStyle","transparentCorners","cornerSize","borderScaleFactor","selectable","id","sourceId"];
     private _cacheObjectsTransforms:any={};
     private idGenerator:IDGenerator;
-    private wbNumber:string;
-    private pageNum?:number;
+    private readonly wbNumber:string;
+    private readonly pageNum?:number;
     constructor(canvas:Canvas,context:IEBoardContext,wbNumber:string,pageNum?:number){
         this.canvas=canvas;
         this.wbNumber=wbNumber;
@@ -159,7 +159,7 @@ class SelectBrush {
                             top:object.top
                         };
                     });
-                },["id"]);
+                },["objectId"]);
             }else{
                 const object:IObject=target as any;
                 objectsTransform[object.objectId]={

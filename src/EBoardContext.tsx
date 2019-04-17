@@ -5,7 +5,7 @@
  */
 import {Bind} from 'lodash-decorators';
 import React from 'react';
-import {Config, IConfig, SHAPE_TYPE, TOOL_TYPE} from './Config';
+import {config, IConfig, SHAPE_TYPE, TOOL_TYPE} from './Config';
 import {IFrame, IMessage} from './interface/IFrame';
 import {MessageTag} from './static/MessageTag';
 import {EventEmitter} from './untils/EventMitter';
@@ -34,6 +34,10 @@ export enum EventList {
     DrawText="drawText",
     DrawLine="drawLine",
     DrawArrow="drawArrow",
+    DrawCircle="drawCircle",
+    DrawRect="drawRect",
+    DrawStar="drawStar",
+    Transform="transform"
 }
 
 declare interface IToolProps {
@@ -65,7 +69,7 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
         this.state={
             activeBoard:"444",
             boardMap,
-            config:Config,
+            config:config,
             lock:false,
             eventEmitter:this.eventEmitter,
             idGenerator:this.idGenerator,
@@ -102,10 +106,18 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
     }
     @Bind
     public dispatchMessage(message:IMessage,timestamp:number){
-        console.log("我将收到的消息纷发到不同的brush");
-        const {tag,wbNumber,pageNum,shapeType,objectId,attributes} = message;
+        const {tag,wbNumber,pageNum,shapeType,objectId,attributes,wbType,canRemove,wbName,wbIcon} = message;
         switch (tag) {
             case MessageTag.CreateFrame:
+                const {boardMap} = this.state;
+                boardMap.set(wbNumber,{
+                    wbNumber,
+                    wbType,
+                    canRemove,
+                    wbName,
+                    wbIcon
+                });
+                this.updateBoardMap(boardMap,wbNumber);// 默认切换到当前的
                 break;
             case MessageTag.Shape:
                 switch (shapeType) {
@@ -145,17 +157,59 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                             timestamp
                         });
                         break;
-                    case SHAPE_TYPE.Rect:
-                        break;
-                    case SHAPE_TYPE.HollowRect:
-                        break;
                     case SHAPE_TYPE.Circle:
+                        this.state.eventEmitter.trigger(EventList.DrawCircle,{
+                            wbNumber,
+                            pageNum,
+                            objectId,
+                            attributes,
+                            timestamp
+                        });
                         break;
                     case SHAPE_TYPE.HollowCircle:
+                        this.state.eventEmitter.trigger(EventList.DrawCircle,{
+                            wbNumber,
+                            pageNum,
+                            objectId,
+                            attributes,
+                            timestamp
+                        });
+                        break;
+                    case SHAPE_TYPE.Rect:
+                        this.state.eventEmitter.trigger(EventList.DrawRect,{
+                            wbNumber,
+                            pageNum,
+                            objectId,
+                            attributes,
+                            timestamp
+                        });
+                        break;
+                    case SHAPE_TYPE.HollowRect:
+                        this.state.eventEmitter.trigger(EventList.DrawRect,{
+                            wbNumber,
+                            pageNum,
+                            objectId,
+                            attributes,
+                            timestamp
+                        });
                         break;
                     case SHAPE_TYPE.Star:
+                        this.state.eventEmitter.trigger(EventList.DrawStar,{
+                            wbNumber,
+                            pageNum,
+                            objectId,
+                            attributes,
+                            timestamp
+                        });
                         break;
                     case SHAPE_TYPE.HollowStar:
+                        this.state.eventEmitter.trigger(EventList.DrawStar,{
+                            wbNumber,
+                            pageNum,
+                            objectId,
+                            attributes,
+                            timestamp
+                        });
                         break;
                     case SHAPE_TYPE.Triangle:
                         break;
@@ -167,6 +221,17 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                 this.state.eventEmitter.trigger(EventList.Clear,{
                     wbNumber,
                     pageNum,
+                });
+                break;
+            case MessageTag.SelectionMove:
+            case MessageTag.SelectionScale:
+            case MessageTag.SelectionRotate:
+                this.state.eventEmitter.trigger(EventList.Transform,{
+                    wbNumber,
+                    pageNum,
+                    objectId,
+                    attributes,
+                    timestamp
                 });
                 break;
         }

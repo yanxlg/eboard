@@ -12,9 +12,11 @@ import {Common} from '../untils/Common';
 
 class Star extends fabric.Polygon{
     public objectId:string;
-    constructor(objectId:string,context:IEBoardContext,points: Array<{ x: number; y: number }>, options?: IPolylineOptions) {
+    public radius:number;
+    constructor(objectId:string,context:IEBoardContext,radius:number,points: Array<{ x: number; y: number }>, options?: IPolylineOptions) {
         super(points, Common.filterParams(options,context));
         this.objectId = objectId;
+        this.radius=radius||0;
     }
 }
 

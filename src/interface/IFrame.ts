@@ -63,4 +63,8 @@ export declare interface IMessage {
     attributes?:any;
     objectId?:number;
     objectIds?:number[];
+    wbType?:FRAME_TYPE_ENUM;
+    canRemove?:boolean;
+    wbName?:string;
+    wbIcon?:string;
 }

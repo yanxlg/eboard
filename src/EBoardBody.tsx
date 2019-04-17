@@ -72,9 +72,9 @@ class EBoardBody extends React.PureComponent<{},IEboardBodyState>{
         this.resize();
     }
     render(){
-        const boardList = EBoardContext.getBoardList();
-        const {activeBoard} = this.context;
+        const {activeBoard,boardMap} = this.context;
         const {width,height,dimensions} = this.state;
+        const boardList = boardMap.toArray();
         return (
             <div className="layout-board-container cursor-default" ref={this.containerRef}>
                 {

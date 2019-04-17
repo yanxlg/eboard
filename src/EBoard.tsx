@@ -14,7 +14,11 @@ import {ResizeEmitter} from './ResizeEmitter';
 import "./style/layout.less";
 
 
-class EBoard extends React.PureComponent{
+declare interface IEBoardProps {
+    onMessageListener?:(message:object)=>void;
+}
+
+class EBoard extends React.PureComponent<IEBoardProps>{
     private contextRef:RefObject<EBoardContext> = React.createRef();
     componentDidMount(): void {
         document.addEventListener("contextmenu", (event)=>{
@@ -23,7 +27,7 @@ class EBoard extends React.PureComponent{
     }
     @Bind
     private onMessageListener(message:object){
-        console.log(JSON.stringify(message));
+        this.props.onMessageListener&&this.props.onMessageListener(message);
     }
     @Bind
     public dispatchMessage(message:IMessage,timestamp:number){

@@ -20,9 +20,10 @@ export declare interface IEBoardContext{
     eventEmitter:EventEmitter<EventList>;
     idGenerator:IDGenerator;
     brushOptions?:any;
-    updateBoardMap:(boards:EMap<string,IFrame>)=>void;
+    updateBoardMap:(boards:EMap<string,IFrame>,activeBoard?:string)=>void;
     setToolProps:(props:IToolProps)=>void;
     onMessageListener:(message:object)=>void;
+    updateActiveWbNumber:(wbNumber:string)=>void;
 }
 
 const Context=React.createContext(null);
@@ -58,9 +59,6 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
     public static Context=Context;
     public static Provider=Context.Provider;
     public static Consumer=Context.Consumer;
-    public static getBoardList:()=>IFrame[];
-    public static updateBoardMap:(boards:EMap<string,IFrame>,activeBoard:string)=>void;
-    public static updateActiveBoard:(wbNumber:string)=>void;
     public eventEmitter:EventEmitter<EventList>=new EventEmitter<EventList>();
     public idGenerator:IDGenerator = new IDGenerator(111,"ds");
     constructor(props:IEboardContextProps){
@@ -69,21 +67,15 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
         this.state={
             activeBoard:"444",
             boardMap,
-            config:config,
+            config,
             lock:false,
             eventEmitter:this.eventEmitter,
             idGenerator:this.idGenerator,
             updateBoardMap:this.updateBoardMap,
             setToolProps:this.setToolProps,
-            onMessageListener:props.onMessageListener
+            onMessageListener:props.onMessageListener,
+            updateActiveWbNumber:this.updateActiveWbNumber
         };
-        EBoardContext.getBoardList=this.getBoardList;
-        EBoardContext.updateBoardMap=this.updateBoardMap;
-        EBoardContext.updateActiveBoard=this.updateActiveBoard;
-    }
-    @Bind
-    private getBoardList(){
-        return this.state.boardMap.toArray();
     }
     @Bind
     private updateBoardMap(boards:EMap<string,IFrame>,activeBoard?:string){
@@ -93,7 +85,7 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
         })
     }
     @Bind
-    private updateActiveBoard(wbNumber:string){
+    private updateActiveWbNumber(wbNumber:string){
         this.setState({
             activeBoard:wbNumber
         })

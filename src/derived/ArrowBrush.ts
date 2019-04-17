@@ -242,7 +242,7 @@ class ArrowBrush extends LineBrush{
         const message = {
             objectId,
             tag:MessageTag.Shape,
-            type:SHAPE_TYPE.Arrow,
+            shapeType:SHAPE_TYPE.Arrow,
             wbNumber:this.wbNumber,
             pageNum:this.pageNum,
             attributes:{

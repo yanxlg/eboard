@@ -98,7 +98,7 @@ class PencilBrush extends fabric.PencilBrush implements IBaseBrush{
     private dispatchMessage(objectId:string,points:Point[]){
         const message = {
             tag:MessageTag.Shape,
-            type:TOOL_TYPE.Pencil,
+            shapeType:TOOL_TYPE.Pencil,
             objectId,
             wbNumber:this.wbNumber,
             pageNum:this.pageNum,

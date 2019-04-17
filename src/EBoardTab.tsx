@@ -137,7 +137,7 @@ class EBoardTab extends React.PureComponent<{}, ITabInterface>{
     @Bind
     private onItemClick(wbNumber:string,element:HTMLDivElement){
         this.scrollToView(element);
-        EBoardContext.updateActiveBoard(wbNumber);
+        this.context.updateActiveWbNumber(wbNumber);
         this.context.onMessageListener({
             tag:MessageTag.SwitchToFrame,
             wbNumber
@@ -155,7 +155,7 @@ class EBoardTab extends React.PureComponent<{}, ITabInterface>{
         this.add(frame);
         this.context.onMessageListener({
             tag:MessageTag.CreateFrame,
-            frame
+            ...frame
         });
     }
     @Bind
@@ -186,7 +186,7 @@ class EBoardTab extends React.PureComponent<{}, ITabInterface>{
         const {wbNumber} = tabItem;
         const {boardMap,activeBoard} = this.context;
         boardMap.set(wbNumber,tabItem);
-        EBoardContext.updateBoardMap(boardMap,active===false?activeBoard:wbNumber);
+        this.context.updateBoardMap(boardMap,active===false?activeBoard:wbNumber);
         this.scrollToLast(tabItem);
     };
     @Bind
@@ -196,7 +196,7 @@ class EBoardTab extends React.PureComponent<{}, ITabInterface>{
         const scroll = this.scrollRef.current;
         const item = scroll.querySelector(`[data-e-id="${wbNumber}"]`) as HTMLDivElement;
         const nextActiveId = activeBoard === wbNumber ? boardMap.size>0?boardMap.last().wbNumber:undefined: activeBoard;
-        EBoardContext.updateBoardMap(boardMap,nextActiveId);
+        this.context.updateBoardMap(boardMap,nextActiveId);
         if(nextActiveId){
             const activeItem = scroll.querySelector(`[data-e-id="${nextActiveId}"]`) as HTMLDivElement;
             this.scrollToView(activeItem,item)
@@ -215,7 +215,7 @@ class EBoardTab extends React.PureComponent<{}, ITabInterface>{
         const scroll = this.scrollRef.current;
         const item = scroll.querySelector(`[data-e-id="${wbNumber}"]`) as HTMLDivElement;
         this.scrollToView(item);
-        EBoardContext.updateActiveBoard(wbNumber);
+        this.context.updateActiveWbNumber(wbNumber);
     }
     @Bind
     public resize(){
@@ -228,8 +228,8 @@ class EBoardTab extends React.PureComponent<{}, ITabInterface>{
     }
     render(){
         const {showPager,scrollOffset,prevDisable,nextDisable} = this.state;
-        const boardList = EBoardContext.getBoardList();
-        const {activeBoard} = this.context;
+        const {activeBoard,boardMap} = this.context;
+        const boardList = boardMap.toArray();
         return (
             <div className="tab-container" ref={this.containerRef}>
                 <div className={`tab-scroll ${showPager?"tab-scroll-pager":""}`} ref={this.scrollRef}>

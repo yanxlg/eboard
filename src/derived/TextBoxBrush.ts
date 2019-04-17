@@ -65,7 +65,7 @@ class TextBoxBrush{
             console.log(this._cacheBeforeText);
             this.context.onMessageListener({
                 tag:MessageTag.Shape,
-                type:TOOL_TYPE.Text,
+                shapeType:TOOL_TYPE.Text,
                 wbNumber:this.wbNumber,
                 pageNum:this.pageNum,
                 objectId:this.objectId,

@@ -30,9 +30,9 @@ class PencilDispatch  extends fabric.PencilBrush{
     }
     @Bind
     public onDraw(objectId:string,timestamp:number,attributes:any){
-        let obj = this.getObject(objectId) as Pencil;
-        const {points,stroke,strokeWidth} = attributes;
         this._promise=this._promise.then(()=>{
+            let obj = this.getObject(objectId) as Pencil;
+            const {points,stroke,strokeWidth} = attributes;
            return new Promise((resolve,reject)=>{
                const start = Math.max(obj?obj.points.length:0,2);
                const end = points.length;
@@ -43,9 +43,8 @@ class PencilDispatch  extends fabric.PencilBrush{
                    startValue: start,
                    onChange:(value:number)=>{
                        const intValue = Math.floor(value);
-                       const size = obj.points.length;
+                       const size = obj?obj.points.length:0;
                        if(size!==intValue){
-                           // update object
                            this.canvas.renderOnAddRemove=false;
                            if(obj){
                                this.canvas.remove(obj);

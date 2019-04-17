@@ -30,26 +30,24 @@ class ArrowDispatch{
     }
     @Bind
     public onDraw(objectId:string,timestamp:number,attributes:any){
-        let obj = this.getObject(objectId) as Arrow;
-        const {startPoint,endPoint,stroke,strokeWidth,arrowType,arrowOffset,theta} = attributes;
         this._promise=this._promise.then(()=>{
+            let obj = this.getObject(objectId) as Arrow;
+            const {startPoint,endPoint,stroke,strokeWidth,arrowType,arrowOffset,theta} = attributes;
             return new Promise((resolve,reject)=>{
                 const prevEnd = obj?obj.endPoint:startPoint;
-                const start = prevEnd.x;// 按照哪个坐标进行animate ???
-                const end = endPoint.x;
                 fabric.util.animate({
-                    byValue:end-start,
+                    byValue:100,
                     duration: 350,
-                    endValue: end,
-                    startValue: start,
+                    endValue: 100,
+                    startValue: 0,
                     onChange:(value:number,valuePerc:number)=>{
-                        // update object
                         this.canvas.renderOnAddRemove=false;
                         if(obj){
                             this.canvas.remove(obj);
                         }
-                        const _endY = (endPoint.y-startPoint.y)*valuePerc+startPoint.y;
-                        const _end = new Point(value,_endY);
+                        const _endX = (endPoint.x-prevEnd.x)*value/100+prevEnd.x;
+                        const _endY = (endPoint.y-prevEnd.y)*value/100+prevEnd.y;
+                        const _end = new Point(_endX,_endY);
                         const path = ArrowBrush.convertPointsToSVGPath(arrowType,startPoint,_end,strokeWidth,arrowOffset,theta);
                         obj=new Arrow(objectId,this.context,startPoint,_end,path,{
                             stroke,

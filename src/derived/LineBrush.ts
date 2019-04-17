@@ -137,12 +137,12 @@ class LineBrush extends BaseBrush<Line>{
         const message = {
             objectId,
             tag:MessageTag.Shape,
-            type:SHAPE_TYPE.Line,
+            shapeType:SHAPE_TYPE.Line,
             wbNumber:this.wbNumber,
             pageNum:this.pageNum,
             attributes:{
                 startPoint:start,
-                endPoint:end,
+                endPoint:end||start,
                 stroke: this.stroke,
                 strokeWidth: this.width
             },

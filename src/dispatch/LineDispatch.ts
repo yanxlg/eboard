@@ -28,26 +28,24 @@ class LineDispatch{
     }
     @Bind
     public onDraw(objectId:string,timestamp:number,attributes:any){
-        let obj = this.getObject(objectId) as Line;
-        const {startPoint,endPoint,stroke,strokeWidth} = attributes;
         this._promise=this._promise.then(()=>{
+            let obj = this.getObject(objectId) as Line;
+            const {startPoint,endPoint,stroke,strokeWidth} = attributes;
             return new Promise((resolve,reject)=>{
                 const prevEnd = obj?obj.endPoint:startPoint;
-                const start = prevEnd.x;// 按照哪个坐标进行animate ???
-                const end = endPoint.x;
                 fabric.util.animate({
-                    byValue:end-start,
+                    byValue:100,
                     duration: 350,
-                    endValue: end,
-                    startValue: start,
+                    endValue: 100,
+                    startValue: 0,
                     onChange:(value:number,valuePerc:number)=>{
-                        // update object
                         this.canvas.renderOnAddRemove=false;
                         if(obj){
                             this.canvas.remove(obj);
                         }
-                        const _endY = (endPoint.y-startPoint.y)*valuePerc+startPoint.y;
-                        obj=new Line(objectId,this.context,[start.x,start.y,value,_endY],{
+                        const _endX = (endPoint.x-prevEnd.x)*value/100+prevEnd.x;
+                        const _endY = (endPoint.y-prevEnd.y)*value/100+prevEnd.y;
+                        obj=new Line(objectId,this.context,[startPoint.x,startPoint.y,_endX,_endY],{
                             stroke,
                             strokeWidth,
                             fill:null,

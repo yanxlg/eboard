@@ -26,9 +26,9 @@ class PencilBrush extends fabric.PencilBrush implements IBaseBrush{
     protected objectId?:string;
     public cursorType=Cursor.hand;
     private _points:Point[];
-    private context:IEBoardContext;
-    private wbNumber:string;
-    private pageNum?:number;
+    private readonly context:IEBoardContext;
+    private readonly wbNumber:string;
+    private readonly pageNum?:number;
     constructor(canvas:Canvas,context:IEBoardContext,wbNumber:string,pageNum?:number){
         super();
         this.canvas=canvas;
@@ -103,7 +103,7 @@ class PencilBrush extends fabric.PencilBrush implements IBaseBrush{
             wbNumber:this.wbNumber,
             pageNum:this.pageNum,
             attributes:{
-                points,
+                points:Object.assign([],points),// 取消引用传值
                 stroke: this.color,
                 strokeWidth: this.width
             },

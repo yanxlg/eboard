@@ -15,7 +15,7 @@ function onMessage(message:object){
         return new Promise((resolve)=>{
             const time = Math.random()*100*2;
            setTimeout(()=>{
-               console.log(message);
+               // console.log(JSON.stringify(message));
                eBoardRef.current.dispatchMessage(message as any,0);
                resolve();
            },time);

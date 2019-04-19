@@ -29,44 +29,47 @@ class PencilDispatch  extends fabric.PencilBrush{
         this.context=context;
     }
     @Bind
+    private renderPoint(objectId:string,obj:Pencil,points:any,stroke:string,strokeWidth:number,callback:()=>void){
+        let before = obj?obj.points.length:1;// 最小从2开始
+        const total = points.length;
+        if(before===total){
+            callback();
+            return;
+        }
+        const nextPoints = points.slice(0,++before).map((point:any)=>{
+            return new Point(point.x,point.y);
+        });
+        this.canvas.renderOnAddRemove=false;
+        if(obj){
+            this.canvas.remove(obj);
+        }
+        const pathData = this.convertPointsToSVGPath(nextPoints).join('');
+        obj=new Pencil(objectId,nextPoints,this.context,pathData,{
+            stroke,
+            strokeWidth,
+            fill:null,
+        });
+        this.canvas.add(obj);
+        this.canvas.renderAll();
+        this.canvas.renderOnAddRemove=true;
+        if(before===total){
+            callback();
+            return;
+        }
+        fabric.util.requestAnimFrame(()=>{
+            this.renderPoint(objectId,obj,points,stroke,strokeWidth,callback);
+        });
+    }
+    @Bind
     public onDraw(objectId:string,timestamp:number,attributes:any){
         this._promise=this._promise.then(()=>{
             let obj = this.getObject(objectId) as Pencil;
-            const {points,stroke,strokeWidth} = attributes;
+            const {points,stroke,strokeWidth} = Object.assign({},attributes);
            return new Promise((resolve,reject)=>{
-               const start = Math.max(obj?obj.points.length:0,2);
-               const end = points.length;
-               fabric.util.animate({
-                   byValue:end-start,
-                   duration: 350,
-                   endValue: end,
-                   startValue: start,
-                   onChange:(value:number)=>{
-                       const intValue = Math.floor(value);
-                       const size = obj?obj.points.length:0;
-                       if(size!==intValue){
-                           this.canvas.renderOnAddRemove=false;
-                           if(obj){
-                               this.canvas.remove(obj);
-                           }
-                           const nextPoints = points.slice(0,intValue).map((point:any)=>{
-                               return new Point(point.x,point.y);
-                           });
-                           const pathData = this.convertPointsToSVGPath(nextPoints).join('');
-                           obj=new Pencil(objectId,nextPoints,this.context,pathData,{
-                               stroke,
-                               strokeWidth,
-                               fill:null,
-                           });
-                           this.canvas.add(obj);
-                           this.canvas.requestRenderAll();
-                           this.canvas.renderOnAddRemove=true;
-                       }
-                   },
-                   onComplete:()=>{
-                       resolve();
-                   }
-               });
+               // 按照点进行绘制
+               this.renderPoint(objectId,obj,points,stroke,strokeWidth,()=>{
+                   resolve();
+               })
            })
         });
     }

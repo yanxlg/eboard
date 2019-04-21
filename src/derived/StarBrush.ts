@@ -20,6 +20,7 @@ class StarBrush extends BaseBrush<Star>{
     private _startPoint:Point;
     private _points:Point[]=[];
     private _radius:number;
+    private _angle:number;
     private calcQuadrant(point:{x:number,y:number}){
         if(point.x>=this._startPoint.x){
             if(point.y>=this._startPoint.y){
@@ -106,11 +107,11 @@ class StarBrush extends BaseBrush<Star>{
     protected onMouseMove(pointer:fabric.Point) {
         pointer=new Point(pointer);
         this._radius = Math.sqrt(Math.pow(this._startPoint.x-pointer.x,2)+Math.pow(this._startPoint.y-pointer.y,2));
-        const angle = this.calcAngle(pointer);
-        this._points = StarBrush.calcPointsByRadius(this._startPoint,this._radius,angle);
+        this._angle = this.calcAngle(pointer);
+        this._points = StarBrush.calcPointsByRadius(this._startPoint,this._radius,this._angle);
         this.canvas.clearContext(this.canvas.contextTop);
         this._render();
-        this.dispatchMessage(this.objectId,this._startPoint,this._radius,angle);
+        this.dispatchMessage(this.objectId,this._startPoint,this._radius,this._angle);
     }
     protected onMouseUp() {
         this._finalizeAndAddPath();
@@ -118,6 +119,8 @@ class StarBrush extends BaseBrush<Star>{
     
     private _reset() {
         this._points=[];
+        this._angle=0;
+        this._radius=0;
         this._setBrushStyles();
         const color = new fabric.Color(this.color);
         this.needsFullRender = (color.getAlpha() < 1);
@@ -148,7 +151,7 @@ class StarBrush extends BaseBrush<Star>{
     protected _finalizeAndAddPath(){
         const originalRenderOnAddRemove = this.canvas.renderOnAddRemove;
         this.canvas.renderOnAddRemove = false;
-        const square = new Star(this.objectId,this.context,this._radius,this._points,{
+        const square = new Star(this.objectId,this.context,this._radius,this._angle,this._points,{
             fill:this.fill,
             stroke:this.stroke,
             strokeWidth:this.width,
@@ -168,7 +171,7 @@ class StarBrush extends BaseBrush<Star>{
         const message = {
             objectId,
             tag:MessageTag.Shape,
-            type:SHAPE_TYPE.Star,
+            shapeType:SHAPE_TYPE.Star,
             wbNumber:this.wbNumber,
             pageNum:this.pageNum,
             attributes:{

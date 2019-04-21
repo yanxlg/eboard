@@ -9,16 +9,16 @@ let promise = new Promise((resolve)=>{setTimeout(()=>{resolve()},5000)});
 const eBoardRef:RefObject<EBoard> = React.createRef();
 
 
-function onMessage(message:object){
+function onMessage(message:string){
     // 延迟5s + random()[0-2]s 处理，通过promise来处理
     promise=promise.then(()=>{
         return new Promise((resolve)=>{
-            const time = Math.random()*100*2;
+            // const time = Math.random()*100*2;
            setTimeout(()=>{
                // console.log(JSON.stringify(message));
-               eBoardRef.current.dispatchMessage(message as any,0);
+               eBoardRef.current.dispatchMessage(JSON.parse(message) as any,0);
                resolve();
-           },time);
+           },0);
         });
     })
 }

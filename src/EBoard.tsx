@@ -15,7 +15,7 @@ import "./style/layout.less";
 
 
 declare interface IEBoardProps {
-    onMessageListener?:(message:object)=>void;
+    onMessageListener?:(message:string)=>void;
 }
 
 class EBoard extends React.PureComponent<IEBoardProps>{
@@ -27,7 +27,7 @@ class EBoard extends React.PureComponent<IEBoardProps>{
     }
     @Bind
     private onMessageListener(message:object){
-        this.props.onMessageListener&&this.props.onMessageListener(message);
+        this.props.onMessageListener&&this.props.onMessageListener(JSON.stringify(message));
     }
     @Bind
     public dispatchMessage(message:IMessage,timestamp:number){

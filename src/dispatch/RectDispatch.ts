@@ -27,23 +27,33 @@ class RectDispatch{
     }
     @Bind
     public onDraw(objectId:string,timestamp:number,attributes:any){
-        let obj = this.getObject(objectId) as Rect;
-        const {width,height,left,top,fill,stroke,strokeWidth} = attributes;
-        const start = obj?obj.width:0;
-        const _height = obj?obj.height:0;
         this._promise=this._promise.then(()=>{
+            let obj = this.getObject(objectId) as Rect;
+            const {width,height,left,top,fill,stroke,strokeWidth} = attributes;
+            const _width = obj?obj.width:0;
+            const _height = obj?obj.height:0;
+            const widthOffset = Math.abs(width-_width);
+            const heightOffset = Math.abs(height-_height);
+            const byWidth = widthOffset>heightOffset;
+            const offset = byWidth?widthOffset:heightOffset;
+            const duration = offset;
             return new Promise((resolve,reject)=>{
+                if(0 === offset){
+                    resolve();
+                    return;
+                }
                 fabric.util.animate({
-                    byValue:width-start,
-                    duration: 350,
-                    endValue: width,
-                    startValue: start,
+                    byValue:offset,
+                    duration,
+                    endValue: offset,
+                    startValue: byWidth?_width:_height,
                     onChange:(value:number,valuePerc:number)=>{
+                        const __width = byWidth?value:(width-_width)*valuePerc+_width;
+                        const __height = byWidth?(height-_height)*valuePerc+_height:value;
                         this.canvas.renderOnAddRemove=false;
                         if(obj){
                             this.canvas.remove(obj);
                         }
-                        const _endHeight = (height-_height)*valuePerc+_height;
                         obj=new Rect(objectId,this.context,{
                             left,
                             top,
@@ -52,8 +62,8 @@ class RectDispatch{
                             fill,
                             stroke,
                             strokeWidth,
-                            width:value,
-                            height:_endHeight,
+                            width:__width,
+                            height:__height,
                         });
                         this.canvas.add(obj);
                         this.canvas.requestRenderAll();

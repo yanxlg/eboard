@@ -27,39 +27,37 @@ class CircleDispatch{
     }
     @Bind
     public onDraw(objectId:string,timestamp:number,attributes:any){
-        let obj = this.getObject(objectId) as Circle;
-        const {radius,left,top,fill,stroke,strokeWidth} = attributes;
-        const start = obj?obj.radius:0;
-        const end = radius;
         this._promise=this._promise.then(()=>{
+            let obj = this.getObject(objectId) as Circle;
+            const {radius,left,top,fill,stroke,strokeWidth} = attributes;
+            const start = obj?obj.radius:0;
+            const end = radius;
+            const offset = end-start;
+            const duration = offset*3;
             return new Promise((resolve,reject)=>{
                 fabric.util.animate({
-                    byValue:end-start,
-                    duration: 350,
+                    byValue:offset,
+                    duration,
                     endValue: end,
                     startValue: start,
                     onChange:(value:number,valuePerc:number)=>{
-                        const intValue = Math.floor(value);
-                        const currentRadius = obj.radius;
-                        if(currentRadius!==intValue){
-                            this.canvas.renderOnAddRemove=false;
-                            if(obj){
-                                this.canvas.remove(obj);
-                            }
-                            obj=new Circle(objectId,this.context,{
-                                top,
-                                left,
-                                radius,
-                                stroke,
-                                fill,
-                                strokeWidth,
-                                originX: 'center',
-                                originY: 'center',
-                            });
-                            this.canvas.add(obj);
-                            this.canvas.requestRenderAll();
-                            this.canvas.renderOnAddRemove=true;
+                        this.canvas.renderOnAddRemove=false;
+                        if(obj){
+                            this.canvas.remove(obj);
                         }
+                        obj=new Circle(objectId,this.context,{
+                            top,
+                            left,
+                            radius:value,
+                            stroke,
+                            fill,
+                            strokeWidth,
+                            originX: 'center',
+                            originY: 'center',
+                        });
+                        this.canvas.add(obj);
+                        this.canvas.requestRenderAll();
+                        this.canvas.renderOnAddRemove=true;
                     },
                     onComplete:()=>{
                         resolve();

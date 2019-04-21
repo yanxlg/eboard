@@ -67,7 +67,7 @@ class RectBrush extends SquareBrush{
         const message = {
             objectId,
             tag:MessageTag.Shape,
-            type:SHAPE_TYPE.Rect,
+            shapeType:SHAPE_TYPE.Rect,
             wbNumber:this.wbNumber,
             pageNum:this.pageNum,
             attributes:{

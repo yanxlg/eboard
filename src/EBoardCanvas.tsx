@@ -16,6 +16,7 @@ import {RectBrush} from './derived/RectBrush';
 import {SelectBrush} from './derived/SelectBrush';
 import {StarBrush} from './derived/StarBrush';
 import {TextBoxBrush} from './derived/TextBoxBrush';
+import {TriangleBrush} from './derived/TriangleBrush';
 import {ArrowDispatch} from './dispatch/ArrowDispatch';
 import {CircleDispatch} from './dispatch/CircleDispatch';
 import {LineDispatch} from './dispatch/LineDispatch';
@@ -23,6 +24,7 @@ import {PencilDispatch} from './dispatch/PencilDispatch';
 import {RectDispatch} from './dispatch/RectDispatch';
 import {StarDispatch} from './dispatch/StarDispatch';
 import {TextBoxDispatch} from './dispatch/TextBoxDispatch';
+import {TriangleDispatch} from './dispatch/TriangleDispatch';
 import {EBoardContext, EventList, IEBoardContext} from './EBoardContext';
 import {FRAME_TYPE_ENUM} from './enums/EBoardEnum';
 import {IFrame, IImageFrame} from './interface/IFrame';
@@ -64,6 +66,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
     private circleDispatch:CircleDispatch;
     private rectDispatch:RectDispatch;
     private starDispatch:StarDispatch;
+    private triangleDispatch:TriangleDispatch;
     
     constructor(props:IEBoardCanvas,context:IEBoardContext) {
         super(props);
@@ -166,6 +169,13 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
             const {wbNumber,pageNum,objectId,attributes,timestamp} = data;
             if(wbNumber===property.wbNumber&&pageNum===currentPageNum){
                 this.starDispatch.onDraw(objectId,timestamp,attributes);
+            }
+        });
+        this.context.eventEmitter.on(EventList.DrawTriangle, (e:any)=>{
+            const data = e.data;
+            const {wbNumber,pageNum,objectId,attributes,timestamp} = data;
+            if(wbNumber===property.wbNumber&&pageNum===currentPageNum){
+                this.triangleDispatch.onDraw(objectId,timestamp,attributes);
             }
         });
     }
@@ -334,16 +344,18 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                         this.fabricCanvas.freeDrawingBrush = this.brush;
                         break;
                     case SHAPE_TYPE.Triangle:
-               /*         let triangleBrush = new StarBrush(this.fabricCanvas,this.context.config,this.context.idGenerator);
-                        this.fabricCanvas.freeDrawingCursor=starBrush.cursorType||Cursor.cross;
-                        starBrush.fill=shapeColor;
-                        this.fabricCanvas.freeDrawingBrush = starBrush;*/
+                        this.fabricCanvas.isDrawingMode=true;
+                        this.brush = new TriangleBrush(this.fabricCanvas,this.context,wbNumber,pageNum);
+                        this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
+                        this.brush.fill=shapeColor;
+                        this.fabricCanvas.freeDrawingBrush = this.brush;
                         break;
                     case SHAPE_TYPE.HollowTriangle:
-                   /*     let starBrush_1 = new StarBrush(this.fabricCanvas,this.context.config,this.context.idGenerator);
-                        this.fabricCanvas.freeDrawingCursor=starBrush_1.cursorType||Cursor.cross;
-                        starBrush_1.stroke=shapeColor;
-                        this.fabricCanvas.freeDrawingBrush = starBrush_1;*/
+                        this.fabricCanvas.isDrawingMode=true;
+                        this.brush = new TriangleBrush(this.fabricCanvas,this.context,wbNumber,pageNum);
+                        this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
+                        this.brush.stroke=shapeColor;
+                        this.fabricCanvas.freeDrawingBrush = this.brush;
                         break;
                     case SHAPE_TYPE.Rect:
                         this.fabricCanvas.isDrawingMode=true;
@@ -393,6 +405,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
         this.circleDispatch=new CircleDispatch(this.fabricCanvas,this.context);
         this.rectDispatch=new RectDispatch(this.fabricCanvas,this.context);
         this.starDispatch=new StarDispatch(this.fabricCanvas,this.context);
+        this.triangleDispatch=new TriangleDispatch(this.fabricCanvas,this.context);
     }
     render(){
         return (

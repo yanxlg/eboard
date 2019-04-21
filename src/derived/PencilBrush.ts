@@ -103,7 +103,7 @@ class PencilBrush extends fabric.PencilBrush implements IBaseBrush{
             wbNumber:this.wbNumber,
             pageNum:this.pageNum,
             attributes:{
-                points:Object.assign([],points),// 取消引用传值
+                points,// 取消引用传值
                 stroke: this.color,
                 strokeWidth: this.width
             },

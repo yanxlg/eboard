@@ -33,9 +33,11 @@ class LineDispatch{
             const {startPoint,endPoint,stroke,strokeWidth} = attributes;
             return new Promise((resolve,reject)=>{
                 const prevEnd = obj?obj.endPoint:startPoint;
+                // 根据变化点位置计算duration
+                const changeLength = Math.sqrt(Math.pow(endPoint.x-prevEnd.x,2)+Math.pow(endPoint.y-prevEnd.y,2));
                 fabric.util.animate({
                     byValue:100,
-                    duration: 350,
+                    duration: changeLength,
                     endValue: 100,
                     startValue: 0,
                     onChange:(value:number,valuePerc:number)=>{
@@ -43,8 +45,8 @@ class LineDispatch{
                         if(obj){
                             this.canvas.remove(obj);
                         }
-                        const _endX = (endPoint.x-prevEnd.x)*value/100+prevEnd.x;
-                        const _endY = (endPoint.y-prevEnd.y)*value/100+prevEnd.y;
+                        const _endX = (endPoint.x-prevEnd.x)*valuePerc+prevEnd.x;
+                        const _endY = (endPoint.y-prevEnd.y)*valuePerc+prevEnd.y;
                         obj=new Line(objectId,this.context,[startPoint.x,startPoint.y,_endX,_endY],{
                             stroke,
                             strokeWidth,

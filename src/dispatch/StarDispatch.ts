@@ -5,14 +5,14 @@
  * @Last Modified time: 2019/4/17 9:14
  * @disc:StarDispatch
  */
+import {fabric} from 'fabric';
 import {Bind} from 'lodash-decorators';
 import {Canvas} from '../derived/Canvas';
-import {fabric} from "fabric";
+import {Point} from '../derived/Point';
 import {Star} from '../derived/Star';
 import {StarBrush} from '../derived/StarBrush';
 import {IEBoardContext} from '../EBoardContext';
 import {IObject} from '../interface/IBrush';
-
 
 class StarDispatch{
     private canvas:Canvas;
@@ -28,24 +28,34 @@ class StarDispatch{
     }
     @Bind
     public onDraw(objectId:string,timestamp:number,attributes:any){
-        let obj = this.getObject(objectId) as Star;
-        const {center,radius,angle,fill,stroke,strokeWidth} = attributes;
-        const start = obj?obj.radius:0;
-        // TODO angle 可能也存在动画
         this._promise=this._promise.then(()=>{
+            let obj = this.getObject(objectId) as Star;
+            const {center,radius,angle,fill,stroke,strokeWidth} = attributes;
+            const start = obj?obj.radius:0;
+            const _angle = obj?obj.calcAngle:0;
+            const offset = radius-start;
+            const duration = Math.max(offset,angle-_angle);
+            // finalPoints
+            const beforePoints = obj?obj.points:new Array(10).fill(center);
+            const finalPoints = StarBrush.calcPointsByRadius(center,radius,angle);
             return new Promise((resolve,reject)=>{
                 fabric.util.animate({
-                    byValue:radius-start,
-                    duration: 350,
-                    endValue: radius,
-                    startValue: start,
+                    byValue:100,
+                    duration,
+                    endValue: 100,
+                    startValue: 0,
                     onChange:(value:number,valuePerc:number)=>{
+                        const points = finalPoints.map((point,index)=>{
+                            const _before = beforePoints[index];
+                            const {x,y} = _before;
+                            return new Point((point.x-x)*valuePerc+x,(point.y-y)*valuePerc+y);
+                        });
                         this.canvas.renderOnAddRemove=false;
                         if(obj){
                             this.canvas.remove(obj);
                         }
-                        const points = StarBrush.calcPointsByRadius(center,value,angle);
-                        obj=new Star(objectId,this.context,value,points,{
+                        // const points = StarBrush.calcPointsByRadius(center,value,angle);
+                        obj=new Star(objectId,this.context,value,angle,points,{
                             fill,
                             stroke,
                             strokeWidth,

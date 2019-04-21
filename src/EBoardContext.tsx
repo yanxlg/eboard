@@ -38,7 +38,8 @@ export enum EventList {
     DrawCircle="drawCircle",
     DrawRect="drawRect",
     DrawStar="drawStar",
-    Transform="transform"
+    DrawTriangle="drawTriangle",
+    Transform="transform",
 }
 
 declare interface IToolProps {
@@ -204,8 +205,22 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                         });
                         break;
                     case SHAPE_TYPE.Triangle:
+                        this.state.eventEmitter.trigger(EventList.DrawTriangle,{
+                            wbNumber,
+                            pageNum,
+                            objectId,
+                            attributes,
+                            timestamp
+                        });
                         break;
                     case SHAPE_TYPE.HollowTriangle:
+                        this.state.eventEmitter.trigger(EventList.DrawTriangle,{
+                            wbNumber,
+                            pageNum,
+                            objectId,
+                            attributes,
+                            timestamp
+                        });
                         break;
                 }
                 break;

@@ -5,7 +5,7 @@
  * @Last Modified time: 2019/4/15 9:12
  * @disc:教鞭Brush
  */
-import {Bind, Debounce} from 'lodash-decorators';
+import {Bind} from 'lodash-decorators';
 import {IEBoardContext} from '../EBoardContext';
 import {MessageTag} from '../static/MessageTag';
 import {Cursor} from '../untils/Cursor';
@@ -27,13 +27,17 @@ class FeruleBrush{
         canvas.on("mouse:move",this.onMouseMove);
     }
     @Bind
+    public update(wbNumber:string,pageNum?:number){
+        this.wbNumber=wbNumber;
+        this.pageNum=pageNum;
+    }
+    @Bind
     private onMouseMove(e:IEvent){
         const _p = this.canvas.getPointer(e.e);
         const pointer = new Point(_p.x,_p.y);
         this.dispatchMessage(pointer);
     }
     @Bind
-    @Debounce(40,{maxWait:40,trailing:true})
     private dispatchMessage(pointer:Point){
         this.context.onMessageListener({
             tag:MessageTag.Cursor,

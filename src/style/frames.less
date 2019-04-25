@@ -6,13 +6,10 @@
  */
 
 .board-frame{
-    position: absolute!important;
-    width: 100%;
-    height: 100%;
-    top: 0;
     z-index: 1;
     opacity: 0;
     overflow: hidden;
+    position: relative;
     transition: width 300ms cubic-bezier(.645, .045, .355, 1),
                 height 300ms cubic-bezier(.645, .045, .355, 1),
                 opacity 300ms cubic-bezier(.645, .045, .355, 1);
@@ -20,30 +17,8 @@
         z-index: 2!important;
         opacity: 1!important;
     }
-    &s{
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        z-index: 1;
-        opacity: 0;
-        &.board-frames-left{
-            & .board-frame{
-                animation: boardFrameHideFromLeft 240ms ease;
-            }
-            & .board-frame-active{
-                animation: boardFrameShowLeft 240ms ease!important;
-            }
-        }
-        &.board-frames-right{
-            & .board-frame{
-                animation: boardFrameHideFromRight 240ms ease;
-            }
-            & .board-frame-active{
-                animation: boardFrameShowFromRight 240ms ease!important;
-            }
-        }
-    }
 }
+
 @keyframes  boardFrameHideFromRight{
     from{
         opacity: 1;

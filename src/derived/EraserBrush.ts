@@ -30,6 +30,11 @@ class EraserBrush{
         canvas.on("mouse:down",this.onClick);
     }
     @Bind
+    public update(wbNumber:string,pageNum?:number){
+        this.wbNumber=wbNumber;
+        this.pageNum=pageNum;
+    }
+    @Bind
     private onSelected(e:IEvent){
         const target = e.target;
         if(void 0 !== target && null !== target){
@@ -56,7 +61,7 @@ class EraserBrush{
             this.canvas.requestRenderAll();
             this.context.onMessageListener({
                 tag:MessageTag.Delete,
-                objectId:target.objectId,
+                objectIds:[target.objectId],
                 wbNumber:this.wbNumber,
                 pageNum:this.pageNum
             });

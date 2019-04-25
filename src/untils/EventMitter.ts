@@ -18,7 +18,7 @@ class EventEmitter<T extends string> {
         this.el.dispatchEvent(event);
     };
     public off(type:T,eventListener:(ev:any)=>void){
-        this.el.addEventListener(type,eventListener);
+        this.el.removeEventListener(type,eventListener);
     }
 }
 

@@ -4,7 +4,7 @@ import {EBoardTabItem} from './components/tabItem';
 import {EBoardContext, EventList, IEBoardContext} from './EBoardContext';
 import {FRAME_TYPE_ENUM} from './enums/EBoardEnum';
 import './font/iconfont.css';
-import {IEmptyFrame, IFrame} from './interface/IFrame';
+import {IBaseFrame} from './interface/IFrame';
 import './style/tab.less';
 import {MessageTag} from './static/MessageTag';
 
@@ -108,7 +108,7 @@ class EBoardTab extends React.PureComponent<{}, ITabInterface>{
         }
     }
     @Bind
-    private scrollToLast(addFrame?:IFrame){
+    private scrollToLast(addFrame?:IBaseFrame){
         const scroll = this.scrollRef.current;
         const container = this.containerRef.current;
         const addBtn = this.addRef.current;
@@ -146,7 +146,7 @@ class EBoardTab extends React.PureComponent<{}, ITabInterface>{
     @Bind
     private onAddClick(){
         const {config} = this.context;
-        const frame:IEmptyFrame = {
+        const frame:IBaseFrame = {
             wbType:FRAME_TYPE_ENUM.EMPTY,
             wbNumber:Date.now().toString(),
             canRemove:true,
@@ -182,21 +182,38 @@ class EBoardTab extends React.PureComponent<{}, ITabInterface>{
         })
     }
     @Bind
-    public add(tabItem:IFrame,active?:boolean){
-        const {wbNumber} = tabItem;
-        const {boardMap,activeBoard} = this.context;
-        boardMap.set(wbNumber,tabItem);
-        this.context.updateBoardMap(boardMap,active===false?activeBoard:wbNumber);
+    public add(tabItem:IBaseFrame,active?:boolean){
+        const {wbNumber,pageNum} = tabItem;
+        const {activeWbNumber} = this.context;
+        this.context.addBoard(tabItem,wbNumber,pageNum);
+        this.context.updateActiveWbNumber(active===false&&activeWbNumber?activeWbNumber:wbNumber);
         this.scrollToLast(tabItem);
     };
     @Bind
     public remove(wbNumber:string){
-        const {boardMap,activeBoard} = this.context;
-        boardMap.delete(wbNumber);
+        // 如果是文档则删除所有关联的board
+        const {boardMap,activeWbNumber} = this.context;
         const scroll = this.scrollRef.current;
         const item = scroll.querySelector(`[data-e-id="${wbNumber}"]`) as HTMLDivElement;
-        const nextActiveId = activeBoard === wbNumber ? boardMap.size>0?boardMap.last().wbNumber:undefined: activeBoard;
-        this.context.updateBoardMap(boardMap,nextActiveId);
+        const boardList = boardMap.toArray().filter((board)=>board.missTab!==true);
+        let nextActiveId:string="";
+        if(activeWbNumber&&activeWbNumber === wbNumber){
+            if(boardList.length>0){
+                const board = boardList.reverse().find((board)=>{
+                    return board.wbNumber!==activeWbNumber;
+                });
+                nextActiveId=board?board.wbNumber:undefined;
+            }
+        }else{
+            nextActiveId=activeWbNumber;
+        }
+        this.context.removeBoard(wbNumber);
+        this.context.updateActiveWbNumber(nextActiveId);
+        // 确保切换到同一个页面
+        this.context.onMessageListener({
+            tag:MessageTag.SwitchToFrame,
+            wbNumber:nextActiveId
+        });
         if(nextActiveId){
             const activeItem = scroll.querySelector(`[data-e-id="${nextActiveId}"]`) as HTMLDivElement;
             this.scrollToView(activeItem,item)
@@ -215,12 +232,12 @@ class EBoardTab extends React.PureComponent<{}, ITabInterface>{
         const scroll = this.scrollRef.current;
         const item = scroll.querySelector(`[data-e-id="${wbNumber}"]`) as HTMLDivElement;
         this.scrollToView(item);
-        this.context.updateActiveWbNumber(wbNumber);
+        this.context.updateActiveWbNumber(wbNumber);// 如果是文档则需要记录每个文档当前的pageNum
     }
     @Bind
     public resize(){
         const scroll = this.scrollRef.current;
-        const activeId = this.context.activeBoard;
+        const activeId = this.context.activeWbNumber;
         if(activeId){
             const item = scroll.querySelector(`[data-e-id="${activeId}"]`) as HTMLDivElement;
             this.scrollToView(item,undefined,true);
@@ -228,15 +245,15 @@ class EBoardTab extends React.PureComponent<{}, ITabInterface>{
     }
     render(){
         const {showPager,scrollOffset,prevDisable,nextDisable} = this.state;
-        const {activeBoard,boardMap} = this.context;
-        const boardList = boardMap.toArray();
+        const {activeWbNumber,boardMap} = this.context;
+        const boardList = boardMap.toArray().filter((board)=>board.missTab!==true);
         return (
             <div className="tab-container" ref={this.containerRef}>
                 <div className={`tab-scroll ${showPager?"tab-scroll-pager":""}`} ref={this.scrollRef}>
                     <div className="tab-scroll-bar" style={{transform:`translateX(-${scrollOffset}px)`}}>
                         {
                             boardList.map((frame,index)=>(
-                                <EBoardTabItem wbName={frame.wbName} canRemove={frame.canRemove} wbIcon={frame.wbIcon} wbNumber={frame.wbNumber} key={frame.wbNumber} activeNumber={activeBoard} onClick={this.onItemClick} onRemove={this.onItemRemove}/>
+                                <EBoardTabItem wbName={frame.wbName} canRemove={frame.canRemove} wbIcon={frame.wbIcon} wbNumber={frame.wbNumber} key={frame.wbNumber} activeNumber={activeWbNumber} onClick={this.onItemClick} onRemove={this.onItemRemove}/>
                             ))
                         }
                     </div>

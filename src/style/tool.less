@@ -75,9 +75,11 @@
         border-radius: 8px;
         overflow: hidden;
         opacity: 0;
+        visibility: hidden;
         transition: opacity 240ms cubic-bezier(.645, .045, .355, 1),left 240ms ease,top 240ms ease;
         &-show{
             opacity: 1!important;
+            visibility: visible;
         }
         &-header{
             border-bottom: 1px solid #555555;

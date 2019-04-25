@@ -7,12 +7,7 @@
 import {Bind} from 'lodash-decorators';
 import React, {RefObject} from 'react';
 import {EBoardContext, EventList, IEBoardContext} from './EBoardContext';
-import {FRAME_TYPE_ENUM} from './enums/EBoardEnum';
-import {EmptyFrame} from './frames/EmptyFrame';
-import {ImageFrame} from './frames/ImageFrame';
-import {ImagesFrame} from './frames/ImagesFrame';
-import {PdfFrame} from './frames/PdfFrame';
-import {IImageFrame, IImagesFrame, IPdfFrame} from './interface/IFrame';
+import {MixFrame} from './frames/MixFrame';
 import './style/cursor.less';
 
 // 延迟初始化加载
@@ -26,7 +21,7 @@ declare interface IEboardBodyState {
     }
 }
 
-class EBoardBody extends React.PureComponent<{},IEboardBodyState>{
+class EBoardBody extends React.Component<{},IEboardBodyState>{
     public static contextType = EBoardContext.Context;
     public context:IEBoardContext;
     private containerRef:RefObject<HTMLDivElement>=React.createRef();
@@ -71,13 +66,30 @@ class EBoardBody extends React.PureComponent<{},IEboardBodyState>{
     componentDidMount(): void {
         this.resize();
     }
+    
+  /*  shouldComponentUpdate(
+        nextProps: Readonly<{}>, nextState: Readonly<IEboardBodyState>,
+        nextContext: IEBoardContext): boolean {
+        // 仅当active resize发生改变才会重新render
+   /!*     const {activeBoard} = this.context;
+        console.log(activeBoard!==nextContext.activeBoard);
+        if(activeBoard!==nextContext.activeBoard||nextState.width!==this.state.width||nextState.height!==this.state.height){
+            return true;
+        }*!/
+        return false;
+    }*/
     render(){
-        const {activeBoard,boardMap} = this.context;
         const {width,height,dimensions} = this.state;
-        const boardList = boardMap.toArray();
+        const board = this.context.getActiveBoard();
+        // TODO 会重复render 需要解决
+        // 最多显示3个
         return (
             <div className="layout-board-container cursor-default" ref={this.containerRef}>
                 {
+                    board&&dimensions?<MixFrame {...board} render={true} width={width} height={height} dimensions={dimensions} active={true}/>:null
+                }
+            
+      {/*          {
                     width&&height&&boardList.map((board)=>{
                         const {wbType} = board;
                         return wbType===FRAME_TYPE_ENUM.EMPTY?
@@ -86,7 +98,7 @@ class EBoardBody extends React.PureComponent<{},IEboardBodyState>{
                                 wbType===FRAME_TYPE_ENUM.IMAGES?<ImagesFrame active={activeBoard===board.wbNumber} wbType={FRAME_TYPE_ENUM.IMAGES} key={board.wbNumber} {...board as IImagesFrame} dimensions={dimensions} width={width} height={height}/>:
                                     wbType===FRAME_TYPE_ENUM.PDF?<PdfFrame key={board.wbNumber} active={activeBoard===board.wbNumber} width={width} height={height} dimensions={dimensions} wbType={FRAME_TYPE_ENUM.PDF} {...board as IPdfFrame}/>:null;
                     })
-                }
+                }*/}
             </div>
         )
     }

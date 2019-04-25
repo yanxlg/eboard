@@ -28,8 +28,8 @@ class SelectBrush {
     private containsProperties=["borderColor","cornerColor","cornerStrokeColor","cornerStyle","transparentCorners","cornerSize","borderScaleFactor","selectable","id","sourceId"];
     private _cacheObjectsTransforms:any={};
     private idGenerator:IDGenerator;
-    private readonly wbNumber:string;
-    private readonly pageNum?:number;
+    private wbNumber:string;
+    private pageNum?:number;
     constructor(canvas:Canvas,context:IEBoardContext,wbNumber:string,pageNum?:number){
         this.canvas=canvas;
         this.wbNumber=wbNumber;
@@ -43,6 +43,11 @@ class SelectBrush {
         window.addEventListener("keydown",this.onKeyDown);
         this.canvas.on('mouse:move', this.onMouseMove);
         this.canvas.on('mouse:out', this.onMouseOut);
+    }
+    @Bind
+    public update(wbNumber:string,pageNum?:number){
+        this.wbNumber=wbNumber;
+        this.pageNum=pageNum;
     }
     @Bind
     private onTransform(e:IEvent){

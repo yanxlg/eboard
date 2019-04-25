@@ -7,15 +7,7 @@ import {Bind} from 'lodash-decorators';
 import React, {MouseEvent} from 'react';
 import {SHAPE_TYPE, TOOL_TYPE} from './Config';
 import {EBoardContext, EventList, IEBoardContext} from './EBoardContext';
-import {FRAME_TYPE_ENUM} from './enums/EBoardEnum';
 import './font/iconfont.css';
-
-import {
-    IImageFrame,
-    IImagesFrame,
-    IPdfFrame,
-    IPdfItemFrame,
-} from './interface/IFrame';
 import './style/tool.less';
 
 declare interface IEBoardToolState {
@@ -144,14 +136,16 @@ class EBoardTool extends React.Component<{},IEBoardToolState>{
                 });
                 break;
             case "清空":
-                const {boardMap,activeBoard,eventEmitter} = this.context;
-                const frame = boardMap.get(activeBoard);
-                const {pageNo} = frame as any;
-                eventEmitter.trigger(EventList.Clear,{
-                    wbNumber:activeBoard,
-                    pageNo,
-                    evented:true
-                });
+                const {eventEmitter} = this.context;
+                const frame = this.context.getActiveBoard();
+                if(frame){
+                    const {wbNumber,pageNum} = frame;
+                    eventEmitter.trigger(EventList.Clear,{
+                        wbNumber,
+                        pageNum,
+                        evented:true
+                    });
+                }
                 break;
             case "教鞭":
                 this.context.setToolProps({
@@ -165,60 +159,6 @@ class EBoardTool extends React.Component<{},IEBoardToolState>{
                 // this.context.setToolType(TOOL_TYPE.Ferule);
                 break;
         }
-    }
-    @Bind
-    private addImagesGroup(){
-        const images:string[]=[require("./frames/1.jpg"),
-            require("./frames/2.jpg"),
-            require("./frames/3.jpg"),
-            require("./frames/4.jpg"),
-            require("./frames/5.jpg")];
-        const {boardMap} = this.context;
-        const wbNumber = Date.now().toString();
-        const frames = new Map<number,IImageFrame>();
-        images.map((image,index)=>{
-            const _index = index+1;
-            frames.set(_index,{
-                wbType:FRAME_TYPE_ENUM.IMAGE,
-                wbNumber,
-                image,
-                layoutMode:"top_auto",
-                render:_index===1
-            });
-        });
-        const frame:IImagesFrame={
-            wbType:FRAME_TYPE_ENUM.IMAGES,
-            wbNumber,
-            wbName:"图片组",
-            frames,
-            pageNum:1
-        };
-        boardMap.set(wbNumber,frame);
-        this.context.updateBoardMap(boardMap);
-    }
-    @Bind
-    private addPdfGroup(){
-        const {boardMap} = this.context;
-        const wbNumber = Date.now().toString();
-        const frames = new Map<number,IPdfItemFrame>();
-        frames.set(1,{
-            wbType:FRAME_TYPE_ENUM.PDFTASK,
-            pageNum:1,
-            render:true,
-            layoutMode:"top_auto",
-            wbNumber,
-        });
-        // pdf loading
-        const frame:IPdfFrame={
-            wbType:FRAME_TYPE_ENUM.PDF,
-            wbNumber,
-            wbName:"Pdf",
-            frames,
-            pageNum:1,
-            filePath:"https://res2dev.9itest.com/resource2/1000/document/20190404/d6e7818316644e7c82191d298a0c5345.pdf"
-        };
-        boardMap.set(wbNumber,frame);
-        this.context.updateBoardMap(boardMap);
     }
     @Bind
     private showPanel(e:MouseEvent<HTMLButtonElement>){
@@ -310,8 +250,6 @@ class EBoardTool extends React.Component<{},IEBoardToolState>{
                     <button className={`board-tool-item eboard-icon eboard-icon-jiaobian ${toolType===TOOL_TYPE.Ferule?" active":""}`} onClick={this.onClick} title="教鞭" onMouseEnter={this.showPanel}/>
                     <button className="board-tool-item eboard-icon eboard-icon-revoke" onClick={this.onClick} title="撤销" onMouseEnter={this.showPanel}/>
                     <button className="board-tool-item eboard-icon eboard-icon-redo" onClick={this.onClick} title="反撤销" onMouseEnter={this.showPanel}/>
-                    <button className="board-tool-item" onClick={this.addPdfGroup}>pdf</button>
-                    <button className="board-tool-item" onClick={this.addImagesGroup}>png</button>
                     <div className={`board-tool-panel ${showPanel?"board-tool-panel-show":""}`} style={{left,top}}>
                         {
                             type==="pencil"?(

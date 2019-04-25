@@ -14,11 +14,10 @@ import "antd/lib/input/style";
 declare interface IPaginationProps{
     onChange:(pageNo:number)=>void;
     total:number;
-    defaultCurrent?:number;
+    current:number;
 }
 
 declare interface IPaginationState {
-    current:number;
     control:boolean;
     inputVal:string;
 }
@@ -27,7 +26,6 @@ class Pagination extends React.PureComponent<IPaginationProps,IPaginationState>{
     constructor(props:IPaginationProps){
         super(props);
         this.state={
-            current:props.defaultCurrent||0,
             control:true,
             inputVal:""
         }
@@ -44,20 +42,14 @@ class Pagination extends React.PureComponent<IPaginationProps,IPaginationState>{
     }
     @Bind
     private onPrev(){
-        const {current} = this.state;
+        const {current=0} = this.props;
         const prev = current-1;
-        this.setState({
-            current:prev
-        });
         this.props.onChange(prev);
     }
     @Bind
     private onNext(){
-        const {current} = this.state;
+        const {current=0} = this.props;
         const next = current+1;
-        this.setState({
-            current:next
-        });
         this.props.onChange(next);
     }
     @Bind
@@ -66,17 +58,14 @@ class Pagination extends React.PureComponent<IPaginationProps,IPaginationState>{
         if(/^\d+$/.test(inputVal)){
             const next = Number(inputVal);
             this.props.onChange(next);
-            this.setState({
-                current:next
-            })
         }
         this.setState({
             inputVal:""
         })
     }
     render(){
-        const {current,control,inputVal} = this.state;
-        const {total} = this.props;
+        const {control,inputVal} = this.state;
+        const {total,current=0} = this.props;
         return (
             <div className={`board-pagination ${control?"board-pagination-control":""}`}>
                 {

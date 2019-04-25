@@ -25,14 +25,19 @@ class TextBoxBrush{
     private _cacheBeforeText:string;
     private objectId:string;
     public static fontFamily:string='Microsoft YaHei,"Times New Roman"';
-    private readonly wbNumber:string;
-    private readonly pageNum?:number;
+    private wbNumber:string;
+    private pageNum?:number;
     constructor(canvas:Canvas,context:IEBoardContext,wbNumber:string,pageNum?:number){
         this.canvas=canvas;
         this.context=context;
         this.wbNumber=wbNumber;
         this.pageNum=pageNum;
         canvas.on("mouse:down",this.onMouseDown);
+    }
+    @Bind
+    public update(wbNumber:string,pageNum?:number){
+        this.wbNumber=wbNumber;
+        this.pageNum=pageNum;
     }
     @Bind
     private onMouseDown(e:IEvent){

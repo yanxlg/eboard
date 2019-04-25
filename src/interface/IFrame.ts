@@ -19,39 +19,16 @@ export declare interface ITab{
 export declare interface IBaseFrame extends ITab{
     wbType:FRAME_TYPE_ENUM;
     wbNumber:string;
-}
-
-export declare interface IEmptyFrame extends IBaseFrame{
-
-}
-
-export declare interface IImageFrame extends IBaseFrame{
-    image:string;
+    imageArray?:string[];
     layoutMode?:"center_contain"|"top_auto";
-    render:boolean;// 是否渲染
+    render?:boolean;// 是否渲染
     pageNum?:number;
+    total?:number;
+    cacheJSON?:string;
+    missTab?:boolean;
+    vScrollOffset?:number;
 }
 
-
-export declare interface IImagesFrame extends IBaseFrame{
-    frames:Map<number,IImageFrame>;
-    pageNum:number;
-}
-
-
-export declare interface IPdfItemFrame extends IBaseFrame{
-    pageNum:number;
-    layoutMode?:"center_contain"|"top_auto";
-    render:boolean;// 是否渲染
-}
-
-export declare interface IPdfFrame extends IBaseFrame{
-    frames:Map<number,IPdfItemFrame>;
-    pageNum:number;
-    filePath:string;
-}
-
-export type IFrame = IEmptyFrame|IImageFrame|IImagesFrame|IPdfFrame;
 
 
 
@@ -67,4 +44,7 @@ export declare interface IMessage {
     canRemove?:boolean;
     wbName?:string;
     wbIcon?:string;
+    vScrollOffset?:number;
+    imageArray?:string[];
+    layoutMode?:"center_contain"|"top_auto";
 }

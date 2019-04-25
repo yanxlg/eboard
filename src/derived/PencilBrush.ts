@@ -27,12 +27,17 @@ class PencilBrush extends fabric.PencilBrush implements IBaseBrush{
     public cursorType=Cursor.hand;
     private _points:Point[];
     private readonly context:IEBoardContext;
-    private readonly wbNumber:string;
-    private readonly pageNum?:number;
+    private wbNumber:string;
+    private pageNum?:number;
     constructor(canvas:Canvas,context:IEBoardContext,wbNumber:string,pageNum?:number){
         super();
         this.canvas=canvas;
         this.context=context;
+        this.wbNumber=wbNumber;
+        this.pageNum=pageNum;
+    }
+    @Bind
+    public update(wbNumber:string,pageNum?:number){
         this.wbNumber=wbNumber;
         this.pageNum=pageNum;
     }

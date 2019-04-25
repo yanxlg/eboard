@@ -5,47 +5,25 @@
  * @Last Modified time: 2019/4/14 9:06
  * @disc:Frame 管理
  */
-import {EmptyFrame} from '../frames/EmptyFrame';
-import {ImageFrame} from '../frames/ImageFrame';
-import {ImagesFrame} from '../frames/ImagesFrame';
-import {PdfFrame} from '../frames/PdfFrame';
-import {PdfItemFrame} from '../frames/PdfItemFrame';
-
-declare interface IFrameComponent{
-    frame:ImagesFrame|PdfFrame|EmptyFrame|ImageFrame|PdfItemFrame;
-    childFrames?:Map<number,EmptyFrame|ImageFrame|PdfItemFrame>
-}
+import {MixFrame} from '../frames/MixFrame';
 
 
 class FrameMap {
-    public static frameMap:Map<string,IFrameComponent>=new Map<string, IFrameComponent>();
-    private static setParent(wbNumber:string,frame:ImagesFrame|PdfFrame|EmptyFrame|ImageFrame|PdfItemFrame){
-        this.frameMap.set(wbNumber,{
-            frame,
+    private static frameMap:Map<string,MixFrame>=new Map<string, MixFrame>();
+    private static getKey(wbNumber:string,pageNum?:number){
+        return JSON.stringify({
+            wbNumber,
+            pageNum,
         });
     }
-    private static setChildren(wbNumber:string,pageNo:number,frame:EmptyFrame|ImageFrame|PdfItemFrame){
-        const parent = this.frameMap.get(wbNumber);
-        const childFrames = parent.childFrames||new Map<number, EmptyFrame|ImageFrame|PdfItemFrame>();
-        childFrames.set(pageNo,frame);
-        parent.childFrames=childFrames;
+    public static add(frame:MixFrame,wbNumber:string,pageNum?:number){
+        this.frameMap.set(this.getKey(wbNumber,pageNum),frame);
     }
-    public static setChild(wbNumber:string,pageNo:number|undefined,frame:ImagesFrame|PdfFrame|EmptyFrame|ImageFrame|PdfItemFrame){
-        if(void 0 === pageNo){
-            this.setParent(wbNumber,frame);
-        }else{
-            this.setChildren(wbNumber,pageNo,frame as any);
-        }
+    public static get(wbNumber:string,pageNum?:number){
+        this.frameMap.get(this.getKey(wbNumber,pageNum));
     }
-    public static removeChild(wbNumber:string,pageNo?:number){
-        if(void 0 === pageNo){
-            this.frameMap.delete(wbNumber);
-        }else{
-            const parent = this.frameMap.get(wbNumber);
-            if(void 0 !== parent){
-                parent.childFrames.delete(pageNo);
-            }
-        }
+    public static remove(wbNumber:string,pageNum?:number){
+        this.frameMap.delete(this.getKey(wbNumber,pageNum));
     }
 }
 

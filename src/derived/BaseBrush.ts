@@ -6,6 +6,7 @@
  * @disc:BaseBrush
  */
 import {fabric} from "fabric";
+import {Bind} from 'lodash-decorators';
 import {IEBoardContext} from '../EBoardContext';
 import {Canvas} from './Canvas';
 
@@ -33,6 +34,11 @@ class BaseBrush<InstanceType extends fabric.Object> extends fabric.BaseBrush imp
         super();
         this.canvas=canvas;
         this.context=context;
+        this.wbNumber=wbNumber;
+        this.pageNum=pageNum;
+    }
+    @Bind
+    public update(wbNumber:string,pageNum?:number){
         this.wbNumber=wbNumber;
         this.pageNum=pageNum;
     }

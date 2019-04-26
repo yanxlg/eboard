@@ -15,9 +15,7 @@ export enum MessageTag{
     Scroll=6,
     Delete=7,
     Cursor=8,
-    SelectionMove=9,
-    SelectionScale=10,
-    SelectionRotate=11,
+    Transform=9,
     RemoveFrame=12,
     Shape=13,
     TurnPage=14,// 翻页

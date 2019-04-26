@@ -120,9 +120,7 @@ class EBoard extends React.PureComponent<IEBoardProps>{
                     }
                     break;
                 case MessageTag.Shape:
-                case MessageTag.SelectionMove:
-                case MessageTag.SelectionScale:
-                case MessageTag.SelectionRotate:
+                case MessageTag.Transform:
                 case MessageTag.Delete:
                     // TODO 形状，需要记录在board实例中
                     const board1 = boardMap.get(EBoardContext.getKey(wbNumber,pageNum));

@@ -500,9 +500,7 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                     pageNum,
                 });
                 break;
-            case MessageTag.SelectionMove:
-            case MessageTag.SelectionScale:
-            case MessageTag.SelectionRotate:
+            case MessageTag.Transform:
                 this.state.eventEmitter.trigger(EventList.Transform,{
                     wbNumber,
                     pageNum,

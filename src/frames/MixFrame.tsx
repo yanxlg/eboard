@@ -152,7 +152,7 @@ class MixFrame extends React.PureComponent<IFrameProps>{
                 <PerfectScrollbar key="content" ref={this.scrollRef} className={`board-frame ${active?"board-frame-active":""}`} style={{width,height}} disabled={allowDocControl?false:disabled}>
                     <EBoardCanvas ref={this.eBoardCanvasRef} property={this.props} dimensions={dimensions} height={height} width={width}/>
                 </PerfectScrollbar>,
-                wbType===FRAME_TYPE_ENUM.IMAGES||wbType===FRAME_TYPE_ENUM.PDF?<Pagination key="pagination" current={pageNum} total={images.length} onChange={this.onPageChange}/>:null
+                (wbType===FRAME_TYPE_ENUM.IMAGES||wbType===FRAME_TYPE_ENUM.PDF)&&images.length>1?<Pagination key="pagination" current={pageNum} total={images.length} onChange={this.onPageChange}/>:null
             ]
         }
     }

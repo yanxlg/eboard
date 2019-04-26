@@ -388,7 +388,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                    this.imageHeight=size.height;
                     const {layoutMode} = property;
                     const {width,height} = dimensions;
-                    if(layoutMode==="top_auto"){
+                    if(layoutMode==="top_auto"||void 0 === layoutMode){
                         // scroll enable
                         const imageRatio = this.imageHeight/this.imageWidth;
                         if(height/width<imageRatio){

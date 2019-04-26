@@ -27,49 +27,67 @@ class StarDispatch{
         this.context=context;
     }
     @Bind
-    public onDraw(objectId:string,timestamp:number,attributes:any){
-        this._promise=this._promise.then(()=>{
+    public onDraw(objectId:string,timestamp:number,attributes:any,animation:boolean){
+        if(animation){
+            this._promise=this._promise.then(()=>{
+                let obj = this.getObject(objectId) as Star;
+                const {center,radius,angle,fill,stroke,strokeWidth} = attributes;
+                const start = obj?obj.radius:0;
+                const _angle = obj?obj.calcAngle:0;
+                const offset = radius-start;
+                const duration = Math.max(offset,angle-_angle);
+                // finalPoints
+                const beforePoints = obj?obj.points:new Array(10).fill(center);
+                const finalPoints = StarBrush.calcPointsByRadius(center,radius,angle);
+                return new Promise((resolve,reject)=>{
+                    fabric.util.animate({
+                        byValue:100,
+                        duration,
+                        endValue: 100,
+                        startValue: 0,
+                        onChange:(value:number,valuePerc:number)=>{
+                            const points = finalPoints.map((point,index)=>{
+                                const _before = beforePoints[index];
+                                const {x,y} = _before;
+                                return new Point((point.x-x)*valuePerc+x,(point.y-y)*valuePerc+y);
+                            });
+                            this.canvas.renderOnAddRemove=false;
+                            if(obj){
+                                this.canvas.remove(obj);
+                            }
+                            // const points = StarBrush.calcPointsByRadius(center,value,angle);
+                            obj=new Star(objectId,this.context,value,angle,points,{
+                                fill,
+                                stroke,
+                                strokeWidth,
+                            });
+                            this.canvas.add(obj);
+                            this.canvas.requestRenderAll();
+                            this.canvas.renderOnAddRemove=true;
+                        },
+                        onComplete:()=>{
+                            resolve();
+                        }
+                    });
+                })
+            });
+        }else{
             let obj = this.getObject(objectId) as Star;
             const {center,radius,angle,fill,stroke,strokeWidth} = attributes;
-            const start = obj?obj.radius:0;
-            const _angle = obj?obj.calcAngle:0;
-            const offset = radius-start;
-            const duration = Math.max(offset,angle-_angle);
-            // finalPoints
-            const beforePoints = obj?obj.points:new Array(10).fill(center);
             const finalPoints = StarBrush.calcPointsByRadius(center,radius,angle);
-            return new Promise((resolve,reject)=>{
-                fabric.util.animate({
-                    byValue:100,
-                    duration,
-                    endValue: 100,
-                    startValue: 0,
-                    onChange:(value:number,valuePerc:number)=>{
-                        const points = finalPoints.map((point,index)=>{
-                            const _before = beforePoints[index];
-                            const {x,y} = _before;
-                            return new Point((point.x-x)*valuePerc+x,(point.y-y)*valuePerc+y);
-                        });
-                        this.canvas.renderOnAddRemove=false;
-                        if(obj){
-                            this.canvas.remove(obj);
-                        }
-                        // const points = StarBrush.calcPointsByRadius(center,value,angle);
-                        obj=new Star(objectId,this.context,value,angle,points,{
-                            fill,
-                            stroke,
-                            strokeWidth,
-                        });
-                        this.canvas.add(obj);
-                        this.canvas.requestRenderAll();
-                        this.canvas.renderOnAddRemove=true;
-                    },
-                    onComplete:()=>{
-                        resolve();
-                    }
-                });
-            })
-        });
+            this.canvas.renderOnAddRemove=false;
+            if(obj){
+                this.canvas.remove(obj);
+            }
+            obj=new Star(objectId,this.context,radius,angle,finalPoints,{
+                fill,
+                stroke,
+                strokeWidth,
+            });
+            this.canvas.add(obj);
+            this.canvas.requestRenderAll();
+            this.canvas.renderOnAddRemove=true;
+        }
     }
 }
 

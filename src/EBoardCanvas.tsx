@@ -24,9 +24,11 @@ import {FeruleDispatch} from './dispatch/FeruleDispatch';
 import {LineDispatch} from './dispatch/LineDispatch';
 import {PencilDispatch} from './dispatch/PencilDispatch';
 import {RectDispatch} from './dispatch/RectDispatch';
+import {SelectDispatch} from './dispatch/SelectDispatch';
 import {StarDispatch} from './dispatch/StarDispatch';
 import {TextBoxDispatch} from './dispatch/TextBoxDispatch';
 import {TriangleDispatch} from './dispatch/TriangleDispatch';
+import {UndoRedoDispatch} from './dispatch/UndoRedoDispatch';
 import {EBoardContext, EventList, IEBoardContext} from './EBoardContext';
 import {FRAME_TYPE_ENUM} from './enums/EBoardEnum';
 import {IBaseFrame} from './interface/IFrame';
@@ -85,7 +87,9 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
     private starDispatch:StarDispatch;
     private triangleDispatch:TriangleDispatch;
     private eraserDispatch:EraserDispatch;
+    private transformDispatch:SelectDispatch;
     private feruleDispatch:FeruleDispatch;
+    private undoRedoDispatch:UndoRedoDispatch;
     constructor(props:IEBoardCanvas,context:IEBoardContext) {
         super(props);
         this.initImage(props);
@@ -99,7 +103,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
         if(property.wbType===FRAME_TYPE_ENUM.IMAGES){
             this.image=null;
             this.image=new Image();
-            this.image.src=property.imageArray[property.pageNum-1];
+            this.image.src=property.images[property.pageNum-1];
         }
     }
     @Bind
@@ -108,9 +112,17 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
         this.fabricCanvas.clear();
         this.initImage(this.props);
         this.layout(this.props);
-        const {cacheJSON} = this.props.property;
+        const {cacheJSON,cacheMessage} = this.props.property;
         if(cacheJSON){
             this.fabricCanvas.loadFromJSON(JSON.parse(cacheJSON),()=>this.fabricCanvas.renderAll());
+        }
+        if(cacheMessage){
+            // 根据消息进行恢复
+            cacheMessage.map((message:any)=>{
+                this.context.dispatchMessage(message,0,false);
+                // 不使用animation
+                
+            })
         }
         // update brush
         this.brush&&this.brush.update(this.props.property.wbNumber,this.props.property.pageNum);
@@ -147,7 +159,6 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
             this.init();
         }
     }
-    
     componentWillUnmount(): void {
         // 数据cache
         this.destroy();
@@ -165,7 +176,9 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
         this.starDispatch=null;
         this.triangleDispatch=null;
         this.eraserDispatch=null;
+        this.transformDispatch=null;
         this.feruleDispatch=null;
+        this.undoRedoDispatch=null;
         this.unDispatchListener();
     }
     @Bind
@@ -188,91 +201,101 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
     @Bind
     private pencilListener(e:any){
         const data = e.data;
-        const {wbNumber,pageNum,objectId,attributes,timestamp} = data;
+        const {wbNumber,pageNum,objectId,attributes,timestamp,animation} = data;
         const {property} = this.props;
         const {pageNum:currentPageNum} = property;
         if(wbNumber===property.wbNumber&&pageNum===currentPageNum){
-            this.pencilDispatch.onDraw(objectId,timestamp,attributes);
+            this.pencilDispatch.onDraw(objectId,timestamp,attributes,animation);
         }
     }
     @Bind
     private textListener(e:any){
         const data = e.data;
-        const {wbNumber,pageNum,objectId,attributes,timestamp} = data;
+        const {wbNumber,pageNum,objectId,attributes,timestamp,animation} = data;
         const {property} = this.props;
         const {pageNum:currentPageNum} = property;
         if(wbNumber===property.wbNumber&&pageNum===currentPageNum){
-            this.textDispatch.onDraw(objectId,timestamp,attributes);
+            this.textDispatch.onDraw(objectId,timestamp,attributes,animation);
         }
     }
     @Bind
     private lineListener(e:any){
         const data = e.data;
-        const {wbNumber,pageNum,objectId,attributes,timestamp} = data;
+        const {wbNumber,pageNum,objectId,attributes,timestamp,animation} = data;
         const {property} = this.props;
         const {pageNum:currentPageNum} = property;
         if(wbNumber===property.wbNumber&&pageNum===currentPageNum){
-            this.lineDispatch.onDraw(objectId,timestamp,attributes);
+            this.lineDispatch.onDraw(objectId,timestamp,attributes,animation);
         }
     }
     @Bind
     private arrowListener(e:any){
         const data = e.data;
-        const {wbNumber,pageNum,objectId,attributes,timestamp} = data;
+        const {wbNumber,pageNum,objectId,attributes,timestamp,animation} = data;
         const {property} = this.props;
         const {pageNum:currentPageNum} = property;
         if(wbNumber===property.wbNumber&&pageNum===currentPageNum){
-            this.arrowDispatch.onDraw(objectId,timestamp,attributes);
+            this.arrowDispatch.onDraw(objectId,timestamp,attributes,animation);
         }
     }
     @Bind
     private circleListener(e:any){
         const data = e.data;
-        const {wbNumber,pageNum,objectId,attributes,timestamp} = data;
+        const {wbNumber,pageNum,objectId,attributes,timestamp,animation} = data;
         const {property} = this.props;
         const {pageNum:currentPageNum} = property;
         if(wbNumber===property.wbNumber&&pageNum===currentPageNum){
-            this.circleDispatch.onDraw(objectId,timestamp,attributes);
+            this.circleDispatch.onDraw(objectId,timestamp,attributes,animation);
         }
     }
     @Bind
     private rectListener(e:any){
         const data = e.data;
-        const {wbNumber,pageNum,objectId,attributes,timestamp} = data;
+        const {wbNumber,pageNum,objectId,attributes,timestamp,animation} = data;
         const {property} = this.props;
         const {pageNum:currentPageNum} = property;
         if(wbNumber===property.wbNumber&&pageNum===currentPageNum){
-            this.rectDispatch.onDraw(objectId,timestamp,attributes);
+            this.rectDispatch.onDraw(objectId,timestamp,attributes,animation);
         }
     }
     @Bind
     private starListener(e:any){
         const data = e.data;
-        const {wbNumber,pageNum,objectId,attributes,timestamp} = data;
+        const {wbNumber,pageNum,objectId,attributes,timestamp,animation} = data;
         const {property} = this.props;
         const {pageNum:currentPageNum} = property;
         if(wbNumber===property.wbNumber&&pageNum===currentPageNum){
-            this.starDispatch.onDraw(objectId,timestamp,attributes);
+            this.starDispatch.onDraw(objectId,timestamp,attributes,animation);
         }
     }
     @Bind
     private triangleListener(e:any){
         const data = e.data;
-        const {wbNumber,pageNum,objectId,attributes,timestamp} = data;
+        const {wbNumber,pageNum,objectId,attributes,timestamp,animation} = data;
         const {property} = this.props;
         const {pageNum:currentPageNum} = property;
         if(wbNumber===property.wbNumber&&pageNum===currentPageNum){
-            this.triangleDispatch.onDraw(objectId,timestamp,attributes);
+            this.triangleDispatch.onDraw(objectId,timestamp,attributes,animation);
         }
     }
     @Bind
     private deleteListener(e:any){
         const data = e.data;
-        const {wbNumber,pageNum,objectIds} = data;
+        const {wbNumber,pageNum,objectIds,animation} = data;
         const {property} = this.props;
         const {pageNum:currentPageNum} = property;
         if(wbNumber===property.wbNumber&&pageNum===currentPageNum){
-            this.eraserDispatch.onDraw(objectIds);
+            this.eraserDispatch.onDraw(objectIds,animation);
+        }
+    }
+    @Bind
+    private transformListener(e:any){
+        const data = e.data;
+        const {wbNumber,pageNum,attributes,animation} = data;
+        const {property} = this.props;
+        const {pageNum:currentPageNum} = property;
+        if(wbNumber===property.wbNumber&&pageNum===currentPageNum){
+            this.transformDispatch.onDraw(attributes,animation);
         }
     }
     @Bind
@@ -283,6 +306,26 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
         const {pageNum:currentPageNum} = property;
         if(wbNumber===property.wbNumber&&pageNum===currentPageNum){
             this.feruleDispatch.onDraw(attributes,dimensions.width/width);
+        }
+    }
+    @Bind
+    private undoListener(e:any){
+        const data = e.data;
+        const {wbNumber,pageNum} = data;
+        const {property} = this.props;
+        const {pageNum:currentPageNum} = property;
+        if(wbNumber===property.wbNumber&&pageNum===currentPageNum){
+            this.undoRedoDispatch.undoAction(data);
+        }
+    }
+    @Bind
+    private redoListener(e:any){
+        const data = e.data;
+        const {wbNumber,pageNum} = data;
+        const {property} = this.props;
+        const {pageNum:currentPageNum} = property;
+        if(wbNumber===property.wbNumber&&pageNum===currentPageNum){
+            this.undoRedoDispatch.redoAction(data);
         }
     }
     @Bind
@@ -297,7 +340,11 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
         this.context.eventEmitter.on(EventList.DrawStar, this.starListener);
         this.context.eventEmitter.on(EventList.DrawTriangle, this.triangleListener);
         this.context.eventEmitter.on(EventList.Delete, this.deleteListener);
+        this.context.eventEmitter.on(EventList.Transform, this.transformListener);
         this.context.eventEmitter.on(EventList.Ferule,this.feruleListener);
+        
+        this.context.eventEmitter.on(EventList.Undo,this.undoListener);
+        this.context.eventEmitter.on(EventList.Redo,this.redoListener);
     }
     @Bind
     private unDispatchListener(){
@@ -311,7 +358,10 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
         this.context.eventEmitter.off(EventList.DrawStar, this.starListener);
         this.context.eventEmitter.off(EventList.DrawTriangle, this.triangleListener);
         this.context.eventEmitter.off(EventList.Delete, this.deleteListener);
+        this.context.eventEmitter.off(EventList.Transform, this.transformListener);
         this.context.eventEmitter.off(EventList.Ferule,this.feruleListener);
+        this.context.eventEmitter.off(EventList.Undo,this.undoListener);
+        this.context.eventEmitter.off(EventList.Redo,this.redoListener);
     }
     @Bind
     private layout(props:IEBoardCanvas){
@@ -554,7 +604,9 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
         this.starDispatch=new StarDispatch(this.fabricCanvas,this.context);
         this.triangleDispatch=new TriangleDispatch(this.fabricCanvas,this.context);
         this.eraserDispatch=new EraserDispatch(this.fabricCanvas,this.context);
+        this.transformDispatch=new SelectDispatch(this.fabricCanvas,this.context);
         this.feruleDispatch=new FeruleDispatch(this.fabricCanvas,this.context);
+        this.undoRedoDispatch=new UndoRedoDispatch(this.fabricCanvas,this.context);
     }
     render(){
         return (

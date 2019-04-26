@@ -1,6 +1,7 @@
 import {fabric} from "fabric"
 import {Bind, Debounce} from 'lodash-decorators';
 import {SHAPE_TYPE} from '../Config';
+import {EventList} from '../EBoardContext';
 import {MessageTag} from '../static/MessageTag';
 import {Common} from '../untils/Common';
 import {BaseBrush} from './BaseBrush';
@@ -64,6 +65,21 @@ class CircleBrush extends BaseBrush<Circle> implements IBrush{
             this.canvas.clearContext(this.canvas.contextTop);
             this._resetShadow();
             this.canvas.renderOnAddRemove = originalRenderOnAddRemove;
+        });
+        this.context.eventEmitter.trigger(EventList.ObjectAdd,{
+            objectId:this.objectId,
+            tag:MessageTag.Shape,
+            shapeType:SHAPE_TYPE.Circle,
+            wbNumber:this.wbNumber,
+            pageNum:this.pageNum,
+            attributes:{
+                radius,
+                left: x,
+                top: y,
+                fill:this.fill,
+                stroke:this.stroke,
+                strokeWidth:this.width,
+            }
         });
     };
     

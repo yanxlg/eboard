@@ -19,12 +19,12 @@ export declare interface ITab{
 export declare interface IBaseFrame extends ITab{
     wbType:FRAME_TYPE_ENUM;
     wbNumber:string;
-    imageArray?:string[];
+    images?:string[];
     layoutMode?:"center_contain"|"top_auto";
-    render?:boolean;// 是否渲染
     pageNum?:number;
     total?:number;
     cacheJSON?:string;
+    cacheMessage?:string[];
     missTab?:boolean;
     vScrollOffset?:number;
 }
@@ -45,6 +45,7 @@ export declare interface IMessage {
     wbName?:string;
     wbIcon?:string;
     vScrollOffset?:number;
-    imageArray?:string[];
+    images?:string[];
     layoutMode?:"center_contain"|"top_auto";
+    action?:"undo"|"redo";
 }

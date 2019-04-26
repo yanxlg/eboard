@@ -25,7 +25,7 @@ class EraserDispatch{
         this.context=context;
     }
     @Bind
-    public onDraw(objectIds:string[]){
+    public onDraw(objectIds:string[],animation:boolean){
         this._promise=this._promise.then(()=>{
             return new Promise((resolve,reject)=>{
                 objectIds.map((objectId:string)=>{

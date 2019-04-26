@@ -8,7 +8,7 @@
 import {IEvent} from 'fabric/fabric-impl';
 import {Bind} from 'lodash-decorators';
 import {TOOL_TYPE} from '../Config';
-import {IEBoardContext} from '../EBoardContext';
+import {EventList, IEBoardContext} from '../EBoardContext';
 import {MessageTag} from '../static/MessageTag';
 import {Cursor} from '../untils/Cursor';
 import {Canvas} from './Canvas';
@@ -67,7 +67,6 @@ class TextBoxBrush{
         });
         this._cacheBeforeText="";
         this.instance.on("changed",()=>{
-            console.log(this._cacheBeforeText);
             this.context.onMessageListener({
                 tag:MessageTag.Shape,
                 shapeType:TOOL_TYPE.Text,
@@ -81,13 +80,23 @@ class TextBoxBrush{
                     fill:this.fontColor,
                     fontSize:this.fontSize
                 }
-            })
-           /* const data = this.throw();
-            if(data){
-                // save state
-                // this.eBoardCanvas.eventBus.trigger("object:added",{...data,beforeText:this._cacheBeforeText});
-                this._cacheBeforeText=data.text||"";
-            }*/
+            });
+            this.context.eventEmitter.trigger(EventList.ObjectAdd,{
+                tag:MessageTag.Shape,
+                shapeType:TOOL_TYPE.Text,
+                wbNumber:this.wbNumber,
+                pageNum:this.pageNum,
+                objectId:this.objectId,
+                attributes:{
+                    left:pointer.x,
+                    top:pointer.y,
+                    text:this.instance.text,
+                    fill:this.fontColor,
+                    fontSize:this.fontSize,
+                    beforeText:this._cacheBeforeText
+                },
+            });
+            this._cacheBeforeText=this.instance.text||"";
         });
         this.canvas.add(this.instance);
         this.instance.enterEditing();// 进入编辑模式

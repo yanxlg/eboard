@@ -81,12 +81,11 @@ class EBoardBody extends React.Component<{},IEboardBodyState>{
     render(){
         const {width,height,dimensions} = this.state;
         const board = this.context.getActiveBoard();
-        // TODO 会重复render 需要解决
         // 最多显示3个
         return (
             <div className="layout-board-container cursor-default" ref={this.containerRef}>
                 {
-                    board&&dimensions?<MixFrame {...board} render={true} width={width} height={height} dimensions={dimensions} active={true}/>:null
+                    board&&dimensions?<MixFrame {...board} width={width} height={height} dimensions={dimensions} active={true}/>:null
                 }
             
       {/*          {

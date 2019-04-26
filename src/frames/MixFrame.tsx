@@ -20,9 +20,8 @@ declare interface IFrameProps{
     wbType:FRAME_TYPE_ENUM;
     wbNumber:string;
     image?:string;
-    imageArray?:string[];
+    images?:string[];
     layoutMode?:"center_contain"|"top_auto";
-    render:boolean;// 是否渲染
     pageNum?:number;
     width:number;
     height:number;
@@ -119,7 +118,7 @@ class MixFrame extends React.PureComponent<IFrameProps>{
     }
     @Bind
     private onPageChange(pageNum:number){
-        const {wbNumber,imageArray} = this.props;
+        const {wbNumber,images} = this.props;
         if(this.context.hasBoard(wbNumber,pageNum)){
             this.context.updateActiveWbNumber(wbNumber,pageNum);
         }else{
@@ -128,7 +127,7 @@ class MixFrame extends React.PureComponent<IFrameProps>{
                 wbNumber,
                 layoutMode:"top_auto",
                 pageNum,
-                imageArray,
+                images,
                 missTab:true,
             },wbNumber,pageNum);
             this.context.updateActiveWbNumber(wbNumber,pageNum);
@@ -140,7 +139,8 @@ class MixFrame extends React.PureComponent<IFrameProps>{
         })
     }
     render(){
-        const {active,width,height,dimensions,wbType,pageNum,imageArray} = this.props;
+        const {active,width,height,dimensions,wbType,pageNum,images} = this.props;
+        const {disabled,allowDocControl} = this.context;
         if(wbType===FRAME_TYPE_ENUM.EMPTY){
             return [
                 <div key="content" className={`board-frame ${active?"board-frame-active":""}`} style={{width,height}}>
@@ -149,10 +149,10 @@ class MixFrame extends React.PureComponent<IFrameProps>{
             ]
         }else{
             return [
-                <PerfectScrollbar key="content" ref={this.scrollRef} className={`board-frame ${active?"board-frame-active":""}`} style={{width,height}}>
+                <PerfectScrollbar key="content" ref={this.scrollRef} className={`board-frame ${active?"board-frame-active":""}`} style={{width,height}} disabled={allowDocControl?false:disabled}>
                     <EBoardCanvas ref={this.eBoardCanvasRef} property={this.props} dimensions={dimensions} height={height} width={width}/>
                 </PerfectScrollbar>,
-                wbType===FRAME_TYPE_ENUM.IMAGES||wbType===FRAME_TYPE_ENUM.PDF?<Pagination key="pagination" current={pageNum} total={imageArray.length} onChange={this.onPageChange}/>:null
+                wbType===FRAME_TYPE_ENUM.IMAGES||wbType===FRAME_TYPE_ENUM.PDF?<Pagination key="pagination" current={pageNum} total={images.length} onChange={this.onPageChange}/>:null
             ]
         }
     }

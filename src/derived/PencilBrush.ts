@@ -10,7 +10,7 @@
 import {fabric} from "fabric";
 import {Bind, Debounce} from 'lodash-decorators';
 import {TOOL_TYPE} from '../Config';
-import {IEBoardContext} from '../EBoardContext';
+import {EventList, IEBoardContext} from '../EBoardContext';
 import {MessageTag} from '../static/MessageTag';
 import {Cursor} from '../untils/Cursor';
 import {IBaseBrush} from './BaseBrush';
@@ -86,6 +86,18 @@ class PencilBrush extends fabric.PencilBrush implements IBaseBrush{
         this.dispatchMessage(this.objectId,this._points);
     };
     protected onMouseUp(){
+        this.context.eventEmitter.trigger(EventList.ObjectAdd,{
+            tag:MessageTag.Shape,
+            shapeType:TOOL_TYPE.Pencil,
+            objectId:this.objectId,
+            wbNumber:this.wbNumber,
+            pageNum:this.pageNum,
+            attributes:{
+                points:this._points,
+                stroke: this.color,
+                strokeWidth: this.width
+            },
+        });
         // @ts-ignore
         super.onMouseUp();
         this.objectId=undefined;

@@ -29,42 +29,60 @@ class ArrowDispatch{
         this.context=context;
     }
     @Bind
-    public onDraw(objectId:string,timestamp:number,attributes:any){
-        this._promise=this._promise.then(()=>{
-            let obj = this.getObject(objectId) as Arrow;
-            const {startPoint,endPoint,stroke,strokeWidth,arrowType,arrowOffset,theta} = attributes;
-            return new Promise((resolve,reject)=>{
-                const prevEnd = obj?obj.endPoint:startPoint;
-                const changeLength = Math.sqrt(Math.pow(endPoint.x-prevEnd.x,2)+Math.pow(endPoint.y-prevEnd.y,2));
-                fabric.util.animate({
-                    byValue:100,
-                    duration: changeLength,
-                    endValue: 100,
-                    startValue: 0,
-                    onChange:(value:number,valuePerc:number)=>{
-                        this.canvas.renderOnAddRemove=false;
-                        if(obj){
-                            this.canvas.remove(obj);
+    public onDraw(objectId:string,timestamp:number,attributes:any,animation:boolean){
+        if(animation){
+            this._promise=this._promise.then(()=>{
+                let obj = this.getObject(objectId) as Arrow;
+                const {startPoint,endPoint,stroke,strokeWidth,arrowType,arrowOffset,theta} = attributes;
+                return new Promise((resolve,reject)=>{
+                    const prevEnd = obj?obj.endPoint:startPoint;
+                    const changeLength = Math.sqrt(Math.pow(endPoint.x-prevEnd.x,2)+Math.pow(endPoint.y-prevEnd.y,2));
+                    fabric.util.animate({
+                        byValue:100,
+                        duration: changeLength,
+                        endValue: 100,
+                        startValue: 0,
+                        onChange:(value:number,valuePerc:number)=>{
+                            this.canvas.renderOnAddRemove=false;
+                            if(obj){
+                                this.canvas.remove(obj);
+                            }
+                            const _endX = (endPoint.x-prevEnd.x)*valuePerc+prevEnd.x;
+                            const _endY = (endPoint.y-prevEnd.y)*valuePerc+prevEnd.y;
+                            const _end = new Point(_endX,_endY);
+                            const path = ArrowBrush.convertPointsToSVGPath(arrowType,startPoint,_end,strokeWidth,arrowOffset,theta);
+                            obj=new Arrow(objectId,this.context,startPoint,_end,path,{
+                                stroke,
+                                fill:stroke,
+                                strokeWidth,
+                            });
+                            this.canvas.add(obj);
+                            this.canvas.requestRenderAll();
+                            this.canvas.renderOnAddRemove=true;
+                        },
+                        onComplete:()=>{
+                            resolve();
                         }
-                        const _endX = (endPoint.x-prevEnd.x)*valuePerc+prevEnd.x;
-                        const _endY = (endPoint.y-prevEnd.y)*valuePerc+prevEnd.y;
-                        const _end = new Point(_endX,_endY);
-                        const path = ArrowBrush.convertPointsToSVGPath(arrowType,startPoint,_end,strokeWidth,arrowOffset,theta);
-                        obj=new Arrow(objectId,this.context,startPoint,_end,path,{
-                            stroke,
-                            fill:stroke,
-                            strokeWidth,
-                        });
-                        this.canvas.add(obj);
-                        this.canvas.requestRenderAll();
-                        this.canvas.renderOnAddRemove=true;
-                    },
-                    onComplete:()=>{
-                        resolve();
-                    }
-                });
-            })
-        });
+                    });
+                })
+            });
+        }else{
+            let obj = this.getObject(objectId) as Arrow;
+            this.canvas.renderOnAddRemove=false;
+            if(obj){
+                this.canvas.remove(obj);
+            }
+            const {arrowType,startPoint,endPoint,strokeWidth,arrowOffset,theta,stroke} = attributes;
+            const path = ArrowBrush.convertPointsToSVGPath(arrowType,startPoint,endPoint,strokeWidth,arrowOffset,theta);
+            obj=new Arrow(objectId,this.context,startPoint,endPoint,path,{
+                stroke,
+                fill:stroke,
+                strokeWidth,
+            });
+            this.canvas.add(obj);
+            this.canvas.requestRenderAll();
+            this.canvas.renderOnAddRemove=true;
+        }
     }
 }
 

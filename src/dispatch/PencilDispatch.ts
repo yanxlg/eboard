@@ -91,17 +91,37 @@ class PencilDispatch{
         });
     }
     @Bind
-    public onDraw(objectId:string,timestamp:number,attributes:any){
-        this._promise=this._promise.then(()=>{
+    public onDraw(objectId:string,timestamp:number,attributes:any,animation:boolean){
+        if(animation){
+            this._promise=this._promise.then(()=>{
+                let obj = this.getObject(objectId) as Pencil;
+                const {points,stroke,strokeWidth} = Object.assign({},attributes);
+                return new Promise((resolve,reject)=>{
+                    // 按照点进行绘制
+                    this.renderPoint(objectId,obj,points,stroke,strokeWidth,()=>{
+                        resolve();
+                    })
+                })
+            });
+        }else{
             let obj = this.getObject(objectId) as Pencil;
-            const {points,stroke,strokeWidth} = Object.assign({},attributes);
-           return new Promise((resolve,reject)=>{
-               // 按照点进行绘制
-               this.renderPoint(objectId,obj,points,stroke,strokeWidth,()=>{
-                   resolve();
-               })
-           })
-        });
+            this.canvas.renderOnAddRemove=false;
+            if(obj){
+                this.canvas.remove(obj);
+            }
+            const points = attributes.points.map((point:any)=>{
+                return new Point(point.x,point.y);
+            });
+            const pathData = this.convertPointsToSVGPath(points,attributes.strokeWidth).join('');
+            obj=new Pencil(objectId,points,this.context,pathData,{
+                stroke:attributes.stroke,
+                strokeWidth:attributes.strokeWidth,
+                fill:null,
+            });
+            this.canvas.add(obj);
+            this.canvas.requestRenderAll();
+            this.canvas.renderOnAddRemove=true;
+        }
     }
 }
 

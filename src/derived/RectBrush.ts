@@ -8,6 +8,7 @@
 import {fabric} from 'fabric';
 import {Bind, Debounce} from 'lodash-decorators';
 import {SHAPE_TYPE} from '../Config';
+import {EventList} from '../EBoardContext';
 import {MessageTag} from '../static/MessageTag';
 import {Point} from './Point';
 import {Rect} from './Rect';
@@ -59,6 +60,22 @@ class RectBrush extends SquareBrush{
             this.canvas.clearContext(this.canvas.contextTop);
             this._resetShadow();
             this.canvas.renderOnAddRemove = originalRenderOnAddRemove;
+        });
+        this.context.eventEmitter.trigger(EventList.ObjectAdd,{
+            objectId:this.objectId,
+            tag:MessageTag.Shape,
+            shapeType:SHAPE_TYPE.Rect,
+            wbNumber:this.wbNumber,
+            pageNum:this.pageNum,
+            attributes:{
+                fill:this.fill,
+                stroke: this.stroke,
+                strokeWidth: this.width,
+                left:this.centerPoint.x,
+                top:this.centerPoint.y,
+                width,
+                height
+            }
         });
     }
     @Bind

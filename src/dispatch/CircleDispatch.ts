@@ -26,45 +26,67 @@ class CircleDispatch{
         this.context=context;
     }
     @Bind
-    public onDraw(objectId:string,timestamp:number,attributes:any){
-        this._promise=this._promise.then(()=>{
-            let obj = this.getObject(objectId) as Circle;
-            const {radius,left,top,fill,stroke,strokeWidth} = attributes;
-            const start = obj?obj.radius:0;
-            const end = radius;
-            const offset = end-start;
-            const duration = offset*3;
-            return new Promise((resolve,reject)=>{
-                fabric.util.animate({
-                    byValue:offset,
-                    duration,
-                    endValue: end,
-                    startValue: start,
-                    onChange:(value:number,valuePerc:number)=>{
-                        this.canvas.renderOnAddRemove=false;
-                        if(obj){
-                            this.canvas.remove(obj);
+    public onDraw(objectId:string,timestamp:number,attributes:any,animation:boolean){
+        if(animation){
+            this._promise=this._promise.then(()=>{
+                let obj = this.getObject(objectId) as Circle;
+                const {radius,left,top,fill,stroke,strokeWidth} = attributes;
+                const start = obj?obj.radius:0;
+                const end = radius;
+                const offset = end-start;
+                const duration = offset*3;
+                return new Promise((resolve,reject)=>{
+                    fabric.util.animate({
+                        byValue:offset,
+                        duration,
+                        endValue: end,
+                        startValue: start,
+                        onChange:(value:number,valuePerc:number)=>{
+                            this.canvas.renderOnAddRemove=false;
+                            if(obj){
+                                this.canvas.remove(obj);
+                            }
+                            obj=new Circle(objectId,this.context,{
+                                top,
+                                left,
+                                radius:value,
+                                stroke,
+                                fill,
+                                strokeWidth,
+                                originX: 'center',
+                                originY: 'center',
+                            });
+                            this.canvas.add(obj);
+                            this.canvas.requestRenderAll();
+                            this.canvas.renderOnAddRemove=true;
+                        },
+                        onComplete:()=>{
+                            resolve();
                         }
-                        obj=new Circle(objectId,this.context,{
-                            top,
-                            left,
-                            radius:value,
-                            stroke,
-                            fill,
-                            strokeWidth,
-                            originX: 'center',
-                            originY: 'center',
-                        });
-                        this.canvas.add(obj);
-                        this.canvas.requestRenderAll();
-                        this.canvas.renderOnAddRemove=true;
-                    },
-                    onComplete:()=>{
-                        resolve();
-                    }
-                });
-            })
-        });
+                    });
+                })
+            });
+        }else{
+            let obj = this.getObject(objectId) as Circle;
+            this.canvas.renderOnAddRemove=false;
+            if(obj){
+                this.canvas.remove(obj);
+            }
+            const {radius,left,top,fill,stroke,strokeWidth} = attributes;
+            obj=new Circle(objectId,this.context,{
+                top,
+                left,
+                radius,
+                stroke,
+                fill,
+                strokeWidth,
+                originX: 'center',
+                originY: 'center',
+            });
+            this.canvas.add(obj);
+            this.canvas.requestRenderAll();
+            this.canvas.renderOnAddRemove=true;
+        }
     }
 }
 

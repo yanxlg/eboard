@@ -8,6 +8,7 @@
 import {fabric} from 'fabric';
 import {Bind, Debounce} from 'lodash-decorators';
 import {SHAPE_TYPE} from '../Config';
+import {EventList} from '../EBoardContext';
 import {MessageTag} from '../static/MessageTag';
 import {Common} from '../untils/Common';
 import {CircleBrush} from './CircleBrush';
@@ -62,10 +63,27 @@ class EllipseBrush extends CircleBrush{
             this._resetShadow();
             this.canvas.renderOnAddRemove = originalRenderOnAddRemove;
         });
-    };  @Bind
+        this.context.eventEmitter.trigger(EventList.ObjectAdd,{
+            objectId:this.objectId,
+            tag:MessageTag.Shape,
+            shapeType:SHAPE_TYPE.Ellipse,
+            wbNumber:this.wbNumber,
+            pageNum:this.pageNum,
+            attributes:{
+                left: x,
+                top: y,
+                fill:this.fill,
+                stroke:this.stroke,
+                strokeWidth:this.width,
+                rx,
+                ry
+            }
+        });
+    };
+    @Bind
     @Debounce(40,{maxWait:40,trailing:true})
     protected dispatchMessage(objectId:string,center:Point){
-        const {x,y,radius} = center;
+        const {x,y} = center;
         const message = {
             objectId,
             tag:MessageTag.Shape,
@@ -73,7 +91,6 @@ class EllipseBrush extends CircleBrush{
             wbNumber:this.wbNumber,
             pageNum:this.pageNum,
             attributes:{
-                radius,
                 left: x,
                 top: y,
                 fill:this.fill,

@@ -6,6 +6,7 @@
  * @disc:工具栏
  */
 @import "cursor";
+@import "tab";
 
 @padToolbarBgColor:#eeeeee;
 @padToolbarHeight:30px;
@@ -26,7 +27,7 @@
     width: 100%;
     height: @padToolbarHeight;
     background-color: @padToolbarBgColor;
-    top: 50px;
+    top: @tabHeight;
     z-index: 2;
     &-wrap{
         display: inline-block;
@@ -65,6 +66,11 @@
             right: (@padToolbarHeight - @padToolbarIconSize)/2;
             bottom: (@padToolbarHeight - @padToolbarIconSize)/2;
             border-radius: @dotSize;
+        }
+        &.disabled{
+            opacity: 0.5;
+            &:extend(.cursor-not-allowed);
+            pointer-events: none;
         }
     }
     &-panel{

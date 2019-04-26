@@ -1,6 +1,6 @@
 {
   "name": "rc-eboard",
-  "version": "0.1.0",
+  "version": "0.1.5",
   "dependencies": {
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
@@ -17,6 +17,14 @@
     "compile": "set NODE_ENV=production&&rc-tools run compile --babel-runtime",
     "pub": "set NODE_ENV=production&&rc-tools run pub --babel-runtime"
   },
+  "files": [
+    "lib",
+    "es",
+    "dist"
+  ],
+  "main": "lib/EBoard.js",
+  "module": "es/EBoard.js",
+  "typings": "lib/EBoard.d.ts",
   "devDependencies": {
     "@types/fabric": "^2.6.6",
     "@types/jest": "^24.0.11",

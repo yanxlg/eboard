@@ -9,6 +9,7 @@
 import {fabric} from 'fabric';
 import {Bind, Debounce} from 'lodash-decorators';
 import {SHAPE_TYPE} from '../Config';
+import {EventList} from '../EBoardContext';
 import {MessageTag} from '../static/MessageTag';
 import {Arrow} from './Arrow';
 import {LineBrush} from './LineBrush';
@@ -135,6 +136,23 @@ class ArrowBrush extends LineBrush{
         path.setCoords();
         this._resetShadow();
         this.canvas.fire('path:created', { path});
+        //undoRedo
+        this.context.eventEmitter.trigger(EventList.ObjectAdd,{
+            objectId:this.objectId,
+            tag:MessageTag.Shape,
+            shapeType:SHAPE_TYPE.Arrow,
+            wbNumber:this.wbNumber,
+            pageNum:this.pageNum,
+            attributes:{
+                stroke: this.stroke,
+                strokeWidth: this.width,
+                arrowType:this.arrowType,
+                arrowOffset:this.arrowOffset,
+                theta:this.theta,
+                startPoint:this._startPointer,
+                endPoint:this._endPointer||this._startPointer,
+            },
+        });
     }
     private drawArrowPoints(start:fabric.Point,end:fabric.Point){
         const headmen = Math.max(this.width * 2 +this.arrowOffset,this.arrowOffset);

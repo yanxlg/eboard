@@ -8,6 +8,7 @@
 import {fabric} from 'fabric';
 import {Bind, Debounce} from 'lodash-decorators';
 import {SHAPE_TYPE} from '../Config';
+import {EventList} from '../EBoardContext';
 import {MessageTag} from '../static/MessageTag';
 import {BaseBrush} from './BaseBrush';
 import {Point} from './Point';
@@ -36,6 +37,20 @@ class TriangleBrush extends BaseBrush<Triangle>{
     
     protected onMouseUp() {
         this._finalizeAndAddPath();
+        this.context.eventEmitter.trigger(EventList.ObjectAdd,{
+            objectId:this.objectId,
+            tag:MessageTag.Shape,
+            shapeType:SHAPE_TYPE.Triangle,
+            wbNumber:this.wbNumber,
+            pageNum:this.pageNum,
+            attributes:{
+                fill:this.fill,
+                stroke: this.stroke,
+                strokeWidth: this.width,
+                startPoint:this._startPointer,
+                endPoint:this._endPointer||this._startPointer,
+            }
+        });
     }
     
     private _prepareForDrawing(pointer:Point) {

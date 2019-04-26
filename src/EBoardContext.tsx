@@ -17,7 +17,10 @@ import {IDGenerator} from './untils/IDGenerator';
 import {EMap} from './untils/Map';
 
 export declare interface IEBoardContext{
-    lock:boolean;
+    disabled:boolean;
+    allowDocControl:boolean;
+    
+    
     config:IConfig;
     activeWbNumber?:string;
     docPageNumMap:EMap<string,number>;
@@ -25,6 +28,9 @@ export declare interface IEBoardContext{
     eventEmitter:EventEmitter<EventList>;
     idGenerator:IDGenerator;
     brushOptions?:any;
+    
+    undoStack:EMap<string,any[]>;
+    redoStack:EMap<string,any[]>;
     addBoard:(frame:IBaseFrame,wbNumber:string,pageNum?:number)=>void;
     removeBoard:(wbNumber:string,pageNum?:number)=>void;
     setToolProps:(props:IToolProps)=>void;
@@ -34,6 +40,12 @@ export declare interface IEBoardContext{
     getActiveBoard:()=>IBaseFrame|undefined;
     hasBoard:(wbNumber:string,pageNum?:number)=>boolean;
     updateVScrollOffset:(vScrollOffset:number,webNumber:string,pageNum?:number)=>void;
+    pushUndoStack:(action:any,wbNumber:string,pageNum?:number)=>void;
+    getUndoStack:(wbNumber:string,pageNum?:number)=>any[];
+    getRedoStack:(wbNumber:string,pageNum?:number)=>any[];
+    undo:()=>void;
+    redo:()=>void;
+    dispatchMessage:(message:IMessage,timestamp:number,animation?:boolean)=>void;
 }
 
 const Context=React.createContext(null);
@@ -52,7 +64,11 @@ export enum EventList {
     Transform="transform",
     Scroll="scroll",
     Delete="delete",
-    Ferule="ferule"
+    Ferule="ferule",
+    ObjectAdd="object:added",
+    ObjectModify="object:modified",
+    Undo="undo",
+    Redo="redo",
 }
 
 declare interface IToolProps {
@@ -67,6 +83,8 @@ declare interface IToolProps {
 
 declare interface IEboardContextProps {
     onMessageListener:(message:object)=>void;
+    disabled?:boolean;
+    allowDocControl?:boolean;
 }
 
 class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardContext>{
@@ -80,12 +98,16 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
         super(props);
         const boardMap = new EMap<string,IBaseFrame>();
         this.state={
+            disabled:props.disabled||false,
+            allowDocControl:props.allowDocControl||false,
+         
             boardMap,
             docPageNumMap:new EMap<string, number>(),
             config,
-            lock:false,
             eventEmitter:this.eventEmitter,
             idGenerator:this.idGenerator,
+            undoStack:new EMap<string, string[]>(),
+            redoStack:new EMap<string, string[]>(),
             addBoard:this.addBoard,
             removeBoard:this.removeBoard,
             setToolProps:this.setToolProps,
@@ -94,8 +116,111 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
             setCacheData:this.setCacheData,
             getActiveBoard:this.getActiveBoard,
             hasBoard:this.hasBoard,
-            updateVScrollOffset:this.updateVScrollOffset
+            updateVScrollOffset:this.updateVScrollOffset,
+            pushUndoStack:this.pushUndoStack,
+            getUndoStack:this.getUndoStack,
+            getRedoStack:this.getRedoStack,
+            undo:this.undo,
+            redo:this.redo,
+            dispatchMessage:this.dispatchMessage
         };
+    }
+    @Bind
+    public addEmptyFrame(){
+        const wbNumber = Date.now().toString();
+        const frame = {
+            wbType:FRAME_TYPE_ENUM.EMPTY,
+            wbNumber,
+            canRemove:true,
+            wbName:config.defaultName,
+        };
+        this.addBoard(frame,wbNumber);
+        this.updateActiveWbNumber(wbNumber);
+        this.state.onMessageListener({
+            tag:MessageTag.CreateFrame,
+            ...frame
+        });
+    }
+    @Bind
+    public recover(boardMap:EMap<string,IBaseFrame>,docPageNumMap:EMap<string,number>,imageListMap:Map<string,string[]>,activeWbNumber:string){
+        this.imageListMap=imageListMap;
+        this.setState({
+            boardMap,
+            docPageNumMap,
+            activeWbNumber
+        })
+    }
+    @Bind
+    private redo(){
+        const {activeWbNumber,docPageNumMap,undoStack,redoStack} = this.state;
+        const nextUndoStack = undoStack.clone();
+        const nextRedoStack = redoStack.clone();
+        const pageNum = docPageNumMap.get(activeWbNumber);
+        const key = EBoardContext.getKey(activeWbNumber,pageNum);
+        const actions = nextRedoStack.get(key);
+        if(actions&&actions.length>0){
+            const undoActions = nextUndoStack.get(key);
+            const action = actions.shift();
+            if(undoActions){
+                undoActions.push(action);
+            }else{
+                nextUndoStack.set(key,[action]);
+            }
+            this.eventEmitter.trigger(EventList.Redo,action);
+            this.setState({
+                undoStack:nextUndoStack,
+                redoStack:nextRedoStack
+            });
+        }
+    }
+    @Bind
+    private undo(){
+        const {activeWbNumber,docPageNumMap,undoStack,redoStack} = this.state;
+        const nextUndoStack = undoStack.clone();
+        const nextRedoStack = redoStack.clone();
+        const pageNum = docPageNumMap.get(activeWbNumber);
+        const key = EBoardContext.getKey(activeWbNumber,pageNum);
+        const actions = nextUndoStack.get(key);
+        if(actions&&actions.length>0){
+            const redoActions = nextRedoStack.get(key);
+            const action = actions.pop();
+            if(redoActions){
+                redoActions.unshift(action);
+            }else{
+                nextRedoStack.set(key,[action]);
+            }
+            this.eventEmitter.trigger(EventList.Undo,action);
+            this.setState({
+                undoStack:nextUndoStack,
+                redoStack:nextRedoStack
+            });
+        }
+    }
+    @Bind
+    private getUndoStack(wbNumber:string,pageNum?:number){
+        return this.state.undoStack.get(EBoardContext.getKey(wbNumber,pageNum));
+    }
+    @Bind
+    private getRedoStack(wbNumber:string,pageNum?:number){
+        return this.state.redoStack.get(EBoardContext.getKey(wbNumber,pageNum));
+    }
+    @Bind
+    private pushUndoStack(action:any,wbNumber:string,pageNum?:number){
+        const {undoStack,redoStack} = this.state;
+        const nextUndoStack = undoStack.clone();
+        const nextRedoStack = redoStack.clone();
+        const key = EBoardContext.getKey(wbNumber,pageNum);
+        nextRedoStack.set(key,[]);
+        let undoStackInstance = nextUndoStack.get(key);
+        if(undoStackInstance){
+            undoStackInstance.push(action);
+        }else{
+            nextUndoStack.set(key,[action]);
+        }
+        this.setState({
+            undoStack:nextUndoStack,
+            redoStack:nextRedoStack
+        })
     }
     @Bind
     private updateVScrollOffset(vScrollOffset:number,wbNumber:string,pageNum?:number){
@@ -104,14 +229,14 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
     }
     @Bind
     private hasBoard(wbNumber:string,pageNum?:number){
-        const key = this.getKey(wbNumber,pageNum);
+        const key = EBoardContext.getKey(wbNumber,pageNum);
         const {boardMap} = this.state;
         return boardMap.has(key);
     }
     @Bind
     private getBoard(wbNumber:string,pageNum?:number){
         const {boardMap} = this.state;
-        return boardMap.get(this.getKey(wbNumber,pageNum));
+        return boardMap.get(EBoardContext.getKey(wbNumber,pageNum));
     }
     @Bind
     private getActiveBoard(){
@@ -120,13 +245,13 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
             return undefined;
         }
         if(docPageNumMap.has(activeWbNumber)){
-            return boardMap.get(this.getKey(activeWbNumber,docPageNumMap.get(activeWbNumber)));
+            return boardMap.get(EBoardContext.getKey(activeWbNumber,docPageNumMap.get(activeWbNumber)));
         }else{
-            return boardMap.get(this.getKey(activeWbNumber));
+            return boardMap.get(EBoardContext.getKey(activeWbNumber));
         }
     }
     @Bind
-    private getKey(wbNumber:string,pageNum?:number){
+    public static getKey(wbNumber:string,pageNum?:number){
         return JSON.stringify({
             wbNumber,
             pageNum
@@ -135,20 +260,19 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
     @Bind
     private setCacheData(json:any,wbNumber:string,pageNum?:number){
         const {boardMap} = this.state;
-        const board = boardMap.get(this.getKey(wbNumber,pageNum));
-        board&&(board.cacheJSON=json);
+        const board = boardMap.get(EBoardContext.getKey(wbNumber,pageNum));
+        board&&(board.cacheJSON=json,board.cacheMessage=undefined);
     }
     @Bind
     public addBoard(frame:IBaseFrame,wbNumber:string,pageNum?:number){
         const {boardMap} = this.state;
         const nextBoardMap = boardMap.clone();
-        nextBoardMap.set(this.getKey(wbNumber,pageNum),frame);
+        nextBoardMap.set(EBoardContext.getKey(wbNumber,pageNum),frame);
         this.setState({
             boardMap:nextBoardMap
         });
-        if(frame.imageArray){
-            console.log(frame.imageArray);
-            this.imageListMap.set(wbNumber,frame.imageArray);
+        if(frame.images){
+            this.imageListMap.set(wbNumber,frame.images);
         }
     }
     @Bind
@@ -162,7 +286,7 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                 }
             });
         }else{
-            nextBoardMap.delete(this.getKey(wbNumber,pageNum));
+            nextBoardMap.delete(EBoardContext.getKey(wbNumber,pageNum));
         }
         this.setState({
             boardMap:nextBoardMap
@@ -194,8 +318,15 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
         })
     }
     @Bind
-    public dispatchMessage(message:IMessage,timestamp:number){
-        const {tag,wbNumber,pageNum,shapeType,objectId,attributes,wbType,canRemove,wbName,wbIcon,vScrollOffset,objectIds,imageArray,layoutMode} = message;
+    public dispatchMessage(message:IMessage,timestamp:number,animation?:boolean){
+        const {tag,wbNumber,pageNum,shapeType,objectId,attributes,wbType,canRemove,wbName,wbIcon,vScrollOffset,objectIds,images,layoutMode,action} = message;
+        if(action==="undo"||action==="redo"){
+            this.state.eventEmitter.trigger(action==="undo"?EventList.Undo:EventList.Redo,{
+                ...message,
+                evented:true
+            });
+            return;
+        }
         switch (tag) {
             case MessageTag.CreateFrame:
                 this.addBoard({
@@ -211,7 +342,7 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                 this.addBoard({
                     wbType,
                     wbNumber,
-                    imageArray,
+                    images,
                     layoutMode,
                     wbName,
                     pageNum
@@ -233,7 +364,7 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                         wbNumber,
                         layoutMode:"top_auto",
                         pageNum,
-                        imageArray:this.imageListMap.get(wbNumber)||[],
+                        images:this.imageListMap.get(wbNumber)||[],
                         missTab:true,
                     },wbNumber,pageNum);
                     this.updateActiveWbNumber(wbNumber,pageNum);
@@ -247,7 +378,8 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                             pageNum,
                             objectId,
                             attributes,
-                            timestamp
+                            timestamp,
+                            animation
                         });
                         break;
                     case TOOL_TYPE.Text:
@@ -256,7 +388,8 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                             pageNum,
                             objectId,
                             attributes,
-                            timestamp
+                            timestamp,
+                            animation
                         });
                         break;
                     case SHAPE_TYPE.Line:
@@ -265,7 +398,8 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                             pageNum,
                             objectId,
                             attributes,
-                            timestamp
+                            timestamp,
+                            animation
                         });
                         break;
                     case SHAPE_TYPE.Arrow:
@@ -274,7 +408,8 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                             pageNum,
                             objectId,
                             attributes,
-                            timestamp
+                            timestamp,
+                            animation
                         });
                         break;
                     case SHAPE_TYPE.Circle:
@@ -283,7 +418,8 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                             pageNum,
                             objectId,
                             attributes,
-                            timestamp
+                            timestamp,
+                            animation
                         });
                         break;
                     case SHAPE_TYPE.HollowCircle:
@@ -292,7 +428,8 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                             pageNum,
                             objectId,
                             attributes,
-                            timestamp
+                            timestamp,
+                            animation
                         });
                         break;
                     case SHAPE_TYPE.Rect:
@@ -301,7 +438,8 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                             pageNum,
                             objectId,
                             attributes,
-                            timestamp
+                            timestamp,
+                            animation
                         });
                         break;
                     case SHAPE_TYPE.HollowRect:
@@ -310,7 +448,8 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                             pageNum,
                             objectId,
                             attributes,
-                            timestamp
+                            timestamp,
+                            animation
                         });
                         break;
                     case SHAPE_TYPE.Star:
@@ -319,7 +458,8 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                             pageNum,
                             objectId,
                             attributes,
-                            timestamp
+                            timestamp,
+                            animation
                         });
                         break;
                     case SHAPE_TYPE.HollowStar:
@@ -328,7 +468,8 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                             pageNum,
                             objectId,
                             attributes,
-                            timestamp
+                            timestamp,
+                            animation
                         });
                         break;
                     case SHAPE_TYPE.Triangle:
@@ -337,7 +478,8 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                             pageNum,
                             objectId,
                             attributes,
-                            timestamp
+                            timestamp,
+                            animation
                         });
                         break;
                     case SHAPE_TYPE.HollowTriangle:
@@ -346,7 +488,8 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                             pageNum,
                             objectId,
                             attributes,
-                            timestamp
+                            timestamp,
+                            animation
                         });
                         break;
                 }
@@ -365,7 +508,8 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                     pageNum,
                     objectId,
                     attributes,
-                    timestamp
+                    timestamp,
+                    animation
                 });
                 break;
             case MessageTag.Scroll:
@@ -373,7 +517,8 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                     wbNumber,
                     pageNum,
                     timestamp,
-                    vScrollOffset
+                    vScrollOffset,
+                    animation
                 });
                 break;
             case MessageTag.Delete:
@@ -381,7 +526,8 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                     wbNumber,
                     pageNum,
                     timestamp,
-                    objectIds
+                    objectIds,
+                    animation
                 });
                 break;
             case MessageTag.Cursor:
@@ -389,13 +535,22 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                     wbNumber,
                     pageNum,
                     timestamp,
-                    attributes
+                    attributes,
+                    animation
                 });
                 break;
             case MessageTag.RemoveFrame:
                 this.removeBoard(wbNumber);
                 break;
         }
+    }
+    componentWillReceiveProps(
+        nextProps: Readonly<IEboardContextProps>, nextContext: any): void {
+        const {disabled=false,allowDocControl=false} = nextProps;
+        this.setState({
+            disabled,
+            allowDocControl
+        })
     }
     render(){
         return (

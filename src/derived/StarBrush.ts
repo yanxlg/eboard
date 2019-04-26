@@ -9,6 +9,7 @@
 import {fabric} from 'fabric';
 import {Bind, Debounce} from 'lodash-decorators';
 import {SHAPE_TYPE} from '../Config';
+import {EventList} from '../EBoardContext';
 import {MessageTag} from '../static/MessageTag';
 import {Common} from '../untils/Common';
 import {BaseBrush} from './BaseBrush';
@@ -115,6 +116,21 @@ class StarBrush extends BaseBrush<Star>{
     }
     protected onMouseUp() {
         this._finalizeAndAddPath();
+        this.context.eventEmitter.trigger(EventList.ObjectAdd,{
+            objectId:this.objectId,
+            tag:MessageTag.Shape,
+            shapeType:SHAPE_TYPE.Star,
+            wbNumber:this.wbNumber,
+            pageNum:this.pageNum,
+            attributes:{
+                center:this._startPoint,
+                radius:this._radius,
+                angle:this._angle,
+                fill:this.fill,
+                stroke: this.stroke,
+                strokeWidth: this.width
+            }
+        });
     }
     
     private _reset() {

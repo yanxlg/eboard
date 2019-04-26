@@ -153,10 +153,10 @@ class EBoardTool extends React.Component<{},IEBoardToolState>{
                 });
                 break;
             case "撤销":
-                // this.context.setToolType(TOOL_TYPE.Ferule);
+                this.context.undo();
                 break;
             case "反撤销":
-                // this.context.setToolType(TOOL_TYPE.Ferule);
+                this.context.redo();
                 break;
         }
     }
@@ -234,6 +234,10 @@ class EBoardTool extends React.Component<{},IEBoardToolState>{
         const {config} = this.context;
         const {fontColor,fontSize,shapeColor,toolType,pencilWidth,pencilColor,shapeType} = config;
         const activeColor = type==="pencil"?pencilColor:type==="text"?fontColor:shapeColor;
+        const {activeWbNumber,docPageNumMap} = this.context;
+        const pageNum = docPageNumMap.get(activeWbNumber);
+        const undoStack = this.context.getUndoStack(activeWbNumber,pageNum);
+        const redoStack = this.context.getRedoStack(activeWbNumber,pageNum);
         return (
             <div className="board-tool">
                 <div className="board-tool-wrap" onMouseLeave={this.hidePanel}>
@@ -248,8 +252,8 @@ class EBoardTool extends React.Component<{},IEBoardToolState>{
                     <button className={`board-tool-item eboard-icon eboard-icon-rubber ${toolType===TOOL_TYPE.Eraser?" active":""}`} onClick={this.onClick} title="橡皮擦" onMouseEnter={this.showPanel}/>
                     <button className="board-tool-item eboard-icon eboard-icon-qingkong" onClick={this.onClick} title="清空" onMouseEnter={this.showPanel}/>
                     <button className={`board-tool-item eboard-icon eboard-icon-jiaobian ${toolType===TOOL_TYPE.Ferule?" active":""}`} onClick={this.onClick} title="教鞭" onMouseEnter={this.showPanel}/>
-                    <button className="board-tool-item eboard-icon eboard-icon-revoke" onClick={this.onClick} title="撤销" onMouseEnter={this.showPanel}/>
-                    <button className="board-tool-item eboard-icon eboard-icon-redo" onClick={this.onClick} title="反撤销" onMouseEnter={this.showPanel}/>
+                    <button className={`board-tool-item eboard-icon eboard-icon-revoke ${undoStack&&undoStack.length>0?"":"disabled"}`} onClick={this.onClick} title="撤销" onMouseEnter={this.showPanel}/>
+                    <button className={`board-tool-item eboard-icon eboard-icon-redo ${redoStack&&redoStack.length>0?"":"disabled"}`} onClick={this.onClick} title="反撤销" onMouseEnter={this.showPanel}/>
                     <div className={`board-tool-panel ${showPanel?"board-tool-panel-show":""}`} style={{left,top}}>
                         {
                             type==="pencil"?(

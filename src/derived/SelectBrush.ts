@@ -76,7 +76,6 @@ class SelectBrush {
                     console.log({prevState:this._cacheObjectsTransforms});
                     this.context.onMessageListener({
                         tag:MessageTag.SelectionMove,
-                        objectIds:ids,
                         attributes:objectsTransform,
                         wbNumber:this.wbNumber,
                         pageNum:this.pageNum,
@@ -88,7 +87,6 @@ class SelectBrush {
                     console.log({prevState:this._cacheObjectsTransforms});
                     this.context.onMessageListener({
                         tag:MessageTag.SelectionRotate,
-                        objectIds:ids,
                         attributes:objectsTransform,
                         wbNumber:this.wbNumber,
                         pageNum:this.pageNum,
@@ -101,7 +99,6 @@ class SelectBrush {
                 case "scaleY":
                     this.context.onMessageListener({
                         tag:MessageTag.SelectionScale,
-                        objectIds:ids,
                         attributes:objectsTransform,
                         wbNumber:this.wbNumber,
                         pageNum:this.pageNum

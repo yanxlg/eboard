@@ -27,11 +27,11 @@ class TextBoxDispatch{
         this.context=context;
     }
     @Bind
-    public onDraw(objectId:string,timestamp:number,attributes:any){
-        let obj = this.getObject(objectId) as TextBox;
-        const {text,fontSize,left,top,fill} = attributes;
+    public onDraw(objectId:string,timestamp:number,attributes:any,animation:boolean){
         this._promise=this._promise.then(()=>{
             return new Promise((resolve,reject)=>{
+                let obj = this.getObject(objectId) as TextBox;
+                const {text,fontSize,left,top,fill} = attributes;
                 this.canvas.renderOnAddRemove=false;
                 if(obj){
                     this.canvas.remove(obj);

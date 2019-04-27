@@ -59,9 +59,7 @@ class UndoRedoDispatch {
                     }
                 }
                 break;
-            case MessageTag.SelectionRotate:
-            case MessageTag.SelectionScale:
-            case MessageTag.SelectionMove:
+            case MessageTag.Transform:
                 const {prevState,ids} = data;
                 this.canvas.getObjects().filter((obj:any)=>{
                     const index = ids.indexOf(obj.objectId);
@@ -120,9 +118,7 @@ class UndoRedoDispatch {
                     }
                 }
                 break;
-            case MessageTag.SelectionRotate:
-            case MessageTag.SelectionScale:
-            case MessageTag.SelectionMove:
+            case MessageTag.Transform:
                 const {transform,ids} = data;
                 this.canvas.getObjects().filter((obj:any)=>{
                     const index = ids.indexOf(obj.objectId);

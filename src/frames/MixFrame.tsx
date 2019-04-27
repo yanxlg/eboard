@@ -82,6 +82,7 @@ class MixFrame extends React.PureComponent<IFrameProps>{
     private attachListener(){
         // this.scrollRef.current.
         if(this.scrollRef.current){
+            this.destroy();
             // @ts-ignore
             const container = this.scrollRef.current.container as HTMLDivElement;
             container.addEventListener("ps-scroll-end",this.scrollEndListener);
@@ -91,26 +92,11 @@ class MixFrame extends React.PureComponent<IFrameProps>{
     componentDidMount(): void {
         this.attachListener();
     }
-    componentWillUpdate(
-        nextProps: Readonly<IFrameProps>, nextState: Readonly<{}>,
-        nextContext: any): void {
-        // remove old listener
-        this.destroy();
-    }
     componentDidUpdate(
         prevProps: Readonly<IFrameProps>, prevState: Readonly<{}>,
         snapshot?: any): void {
         if(this.props.wbNumber!==prevProps.wbNumber||this.props.pageNum!==prevProps.pageNum){
             this.attachListener();
-            // update scroll
-            if(this.scrollRef.current){
-                const {vScrollOffset=0} = this.props;
-                // @ts-ignore
-                const container = this.scrollRef.current.container as HTMLDivElement;
-                const top = vScrollOffset*container.scrollHeight;
-                console.log(top);
-                this.scrollRef.current.scrollTop(top,false);
-            }
         }
     }
     componentWillUnmount(): void {
@@ -138,19 +124,31 @@ class MixFrame extends React.PureComponent<IFrameProps>{
             pageNum
         })
     }
+    @Bind
+    private onContainerSizeChange(){
+        const {vScrollOffset=0} = this.props;
+        console.log(vScrollOffset);
+        if(this.scrollRef.current){
+            // @ts-ignore
+            const container = this.scrollRef.current.container as HTMLDivElement;
+            const top = vScrollOffset*container.scrollHeight;
+            this.scrollRef.current.scrollTop(top,false);
+        }
+    }
     render(){
         const {active,width,height,dimensions,wbType,pageNum,images} = this.props;
         const {disabled,allowDocControl} = this.context;
+        const scrollDisabled=allowDocControl?false:disabled;
         if(wbType===FRAME_TYPE_ENUM.EMPTY){
             return [
                 <div key="content" className={`board-frame ${active?"board-frame-active":""}`} style={{width,height}}>
-                    <EBoardCanvas ref={this.eBoardCanvasRef} property={this.props} width={width} height={height} dimensions={dimensions}/>
+                    <EBoardCanvas ref={this.eBoardCanvasRef} onContainerSizeChange={this.onContainerSizeChange} property={this.props} width={width} height={height} dimensions={dimensions}/>
                 </div>,
             ]
         }else{
             return [
-                <PerfectScrollbar key="content" ref={this.scrollRef} className={`board-frame ${active?"board-frame-active":""}`} style={{width,height}} disabled={allowDocControl?false:disabled}>
-                    <EBoardCanvas ref={this.eBoardCanvasRef} property={this.props} dimensions={dimensions} height={height} width={width}/>
+                <PerfectScrollbar handlers={scrollDisabled?[]:['click-rail', 'drag-thumb', 'keyboard', 'wheel', 'touch']} key="content" ref={this.scrollRef} className={`board-frame ${active?"board-frame-active":""}`} style={{width,height}} disabled={scrollDisabled}>
+                    <EBoardCanvas ref={this.eBoardCanvasRef} onContainerSizeChange={this.onContainerSizeChange} property={this.props} dimensions={dimensions} height={height} width={width}/>
                 </PerfectScrollbar>,
                 (wbType===FRAME_TYPE_ENUM.IMAGES||wbType===FRAME_TYPE_ENUM.PDF)&&images.length>1?<Pagination key="pagination" current={pageNum} total={images.length} onChange={this.onPageChange}/>:null
             ]

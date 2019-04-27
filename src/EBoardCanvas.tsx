@@ -64,6 +64,7 @@ declare interface IEBoardCanvas{
         width:number;
         height:number;
     }
+    onContainerSizeChange:()=>void;
 }
 
 class EBoardCanvas extends React.Component<IEBoardCanvas>{
@@ -100,10 +101,15 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
     @Bind
     private initImage(props:IEBoardCanvas){
         const {property} = props;
-        if(property.wbType===FRAME_TYPE_ENUM.IMAGES){
+        const {wbType,images,pageNum} = property;
+        if(wbType===FRAME_TYPE_ENUM.IMAGES){
             this.image=null;
             this.image=new Image();
-            this.image.src=property.images[property.pageNum-1];
+            this.image.src=images[pageNum-1];
+        }else if(wbType===FRAME_TYPE_ENUM.IMAGE){
+            this.image=null;
+            this.image=new Image();
+            this.image.src=images[0];
         }
     }
     @Bind
@@ -156,7 +162,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
         prevProps: Readonly<IEBoardCanvas>, prevState: Readonly<{}>,
         snapshot?: any): void {
         if(this.props.property.wbNumber!==prevProps.property.wbNumber||this.props.property.pageNum!==prevProps.property.pageNum){
-            this.init();
+            this.init();// 需要执行完成才可以触发scroll
         }
     }
     componentWillUnmount(): void {
@@ -373,9 +379,11 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
             case FRAME_TYPE_ENUM.EMPTY:
                 this.fabricCanvas.setDimensions({width:canvasWidth,height:canvasHeight});// 设置样式大小
                 this.fabricCanvas.setDimensions(dimensions,{backstoreOnly:true});// 设置canvas 画布大小
+                this.props.onContainerSizeChange();
                 break;
             case FRAME_TYPE_ENUM.IMAGES:
             case FRAME_TYPE_ENUM.PDF:
+            case FRAME_TYPE_ENUM.IMAGE:
                 // 先铺满默认区域
                 this.fabricCanvas.setDimensions({width:canvasWidth,height:canvasHeight});// 设置样式大小
                 this.fabricCanvas.setDimensions(dimensions,{backstoreOnly:true});// 设置canvas 画布大小
@@ -395,6 +403,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                             dimensions.height=dimensions.width*imageRatio;
                             this.fabricCanvas.setDimensions({width:canvasWidth,height:canvasWidth*imageRatio});// 设置样式大小
                             this.fabricCanvas.setDimensions(dimensions,{backstoreOnly:true});// 设置canvas 画布大小
+                            this.props.onContainerSizeChange();
                             Common.imgeLoaded(this.image,()=>{
                                 this.bgObject = new fabric.Image(this.image, {
                                     height: size.height,
@@ -413,7 +422,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                     // without scroll
                     this.fabricCanvas.setDimensions({width:canvasWidth,height:canvasHeight});// 设置样式大小
                     this.fabricCanvas.setDimensions(dimensions,{backstoreOnly:true});// 设置canvas 画布大小
-
+                    this.props.onContainerSizeChange();
                     // calc 图片大小
                     let imageW=0,imageH=0;
                     const xRatio = width / this.imageWidth;

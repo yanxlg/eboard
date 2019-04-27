@@ -334,7 +334,8 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                     wbType,
                     canRemove,
                     wbName,
-                    wbIcon
+                    wbIcon,
+                    images
                 },wbNumber,pageNum);
                 this.updateActiveWbNumber(wbNumber,pageNum);
                 break;

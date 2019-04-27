@@ -34,7 +34,7 @@ function addImages(){
            require("./frames/3.jpg"),
            require("./frames/4.jpg"),
            require("./frames/5.jpg")];
-    eBoardRef1.current.addImages(images);
+    eBoardRef1.current.addImage(images[0],"图片");
 }
 
 
@@ -152,7 +152,7 @@ setTimeout(()=>{
 ,
         {"tag":14,"wbNumber":"1556246232493","pageNum":2}
 ,
-        {"tag":6,"wbNumber":"1556246232493","pageNum":2,"vScrollOffset":0.13143254520166897}
+        {"tag":6,"wbNumber":"1556246232493","pageNum":2,"vScrollOffset":0.5}
     ];
     eBoardRef.current.recovery(messages);
 },4000);

@@ -62,6 +62,7 @@ class EBoard extends React.PureComponent<IEBoardProps>{
                 pageNum:1
             }
         });
+        return wbNumber;
     }
     @Bind
     public recovery(messageList:any[]){
@@ -164,6 +165,30 @@ class EBoard extends React.PureComponent<IEBoardProps>{
     @Bind
     public addEmptyFrame(){
         this.contextRef.current.addEmptyFrame();
+    }
+    @Bind
+    public addImage(image:string,wbName?:string){
+        const wbNumber = Date.now().toString();
+        wbName=wbName||"图片";
+        this.contextRef.current.addBoard({
+            wbType:FRAME_TYPE_ENUM.IMAGE,
+            wbNumber,
+            images:[image],
+            layoutMode:"top_auto",
+            wbName,
+        },wbNumber);
+        this.contextRef.current.updateActiveWbNumber(wbNumber);
+        this.onMessageListener({
+            tag:MessageTag.CreateFrame,
+            ...{
+                wbType:FRAME_TYPE_ENUM.IMAGE,
+                wbNumber,
+                images:[image],
+                layoutMode:"top_auto",
+                wbName,
+            }
+        });
+        return wbNumber;
     }
     public render(){
         const {disabled,allowDocControl} = this.props;

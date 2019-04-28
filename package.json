@@ -1,6 +1,6 @@
 {
   "name": "rc-eboard",
-  "version": "0.1.9",
+  "version": "0.2.0",
   "dependencies": {
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
@@ -8,7 +8,7 @@
     "fabric": "^2.7.0",
     "antd": "^3.16.1",
     "pdfjs-dist": "^2.1.266",
-    "kxt-web": "^1.5.2"
+    "kxt-web": "^1.5.7"
   },
   "scripts": {
     "start": "node scripts/start.js",

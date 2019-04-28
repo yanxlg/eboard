@@ -164,7 +164,7 @@ ReactDOM.render(
 );
 
 ReactDOM.render(
-    <EBoard ref={eBoardRef} disabled={true}/>,
+    <EBoard ref={eBoardRef} disabled={false}/>,
     document.getElementById('child') as HTMLElement
 );
 

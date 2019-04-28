@@ -147,7 +147,7 @@ class MixFrame extends React.PureComponent<IFrameProps>{
             ]
         }else{
             return [
-                <PerfectScrollbar handlers={scrollDisabled?[]:['click-rail', 'drag-thumb', 'keyboard', 'wheel', 'touch']} key="content" ref={this.scrollRef} className={`board-frame ${active?"board-frame-active":""}`} style={{width,height}} disabled={scrollDisabled}>
+                <PerfectScrollbar key="content" ref={this.scrollRef} className={`board-frame ${active?"board-frame-active":""}`} style={{width,height}} disabled={scrollDisabled}>
                     <EBoardCanvas ref={this.eBoardCanvasRef} onContainerSizeChange={this.onContainerSizeChange} property={this.props} dimensions={dimensions} height={height} width={width}/>
                 </PerfectScrollbar>,
                 (wbType===FRAME_TYPE_ENUM.IMAGES||wbType===FRAME_TYPE_ENUM.PDF)&&images.length>1?<Pagination key="pagination" current={pageNum} total={images.length} onChange={this.onPageChange}/>:null

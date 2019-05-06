@@ -43,6 +43,7 @@ export declare interface IEBoardContext{
     pushUndoStack:(action:any,wbNumber:string,pageNum?:number)=>void;
     getUndoStack:(wbNumber:string,pageNum?:number)=>any[];
     getRedoStack:(wbNumber:string,pageNum?:number)=>any[];
+    clearUndoRedo:()=>void;
     undo:()=>void;
     redo:()=>void;
     dispatchMessage:(message:IMessage,timestamp:number,animation?:boolean)=>void;
@@ -120,6 +121,7 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
             pushUndoStack:this.pushUndoStack,
             getUndoStack:this.getUndoStack,
             getRedoStack:this.getRedoStack,
+            clearUndoRedo:this.clearUndoRedo,
             undo:this.undo,
             redo:this.redo,
             dispatchMessage:this.dispatchMessage
@@ -203,6 +205,13 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
     @Bind
     private getRedoStack(wbNumber:string,pageNum?:number){
         return this.state.redoStack.get(EBoardContext.getKey(wbNumber,pageNum));
+    }
+    @Bind
+    private clearUndoRedo(){
+        this.setState({
+            undoStack:new EMap<string, string[]>(),
+            redoStack:new EMap<string, string[]>()
+        })
     }
     @Bind
     private pushUndoStack(action:any,wbNumber:string,pageNum?:number){

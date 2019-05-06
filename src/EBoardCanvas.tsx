@@ -597,6 +597,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
     }
     private clear(){
         this.fabricCanvas.clear();
+        this.context.clearUndoRedo();// 清空同时清空undoRedo列表
         // 背景图需要保留
         if(this.bgObject){
             this.fabricCanvas.backgroundImage=this.bgObject;

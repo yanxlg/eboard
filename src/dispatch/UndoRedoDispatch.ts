@@ -28,12 +28,14 @@ class UndoRedoDispatch {
     private onObjectAdd(ev:any){
         const data = ev.data;
         const {wbNumber,pageNum} = data;
+        console.log(data);
         this.context.pushUndoStack({...data},wbNumber,pageNum);
     }
     @Bind
     private onObjectModified(ev:any){
         const data = ev.data;
         const {wbNumber,pageNum} = data;
+        console.log(data);
         this.context.pushUndoStack({...data},wbNumber,pageNum);
     }
     

@@ -14,7 +14,6 @@ const eBoardRef1:RefObject<EBoard> = React.createRef();
 function onMessage(message:string){
     // 延迟5s + random()[0-2]s 处理，通过promise来处理
     
-    console.log(message);
     eBoardRef.current.dispatchMessage(JSON.parse(message) as any,0,true);
 /*    promise=promise.then(()=>{
         return new Promise((resolve)=>{

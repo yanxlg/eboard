@@ -127,7 +127,6 @@ class MixFrame extends React.PureComponent<IFrameProps>{
     @Bind
     private onContainerSizeChange(){
         const {vScrollOffset=0} = this.props;
-        console.log(vScrollOffset);
         if(this.scrollRef.current){
             // @ts-ignore
             const container = this.scrollRef.current.container as HTMLDivElement;

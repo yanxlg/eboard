@@ -6,7 +6,7 @@
  * @disc:Eraser 橡皮擦
  */
 import {Bind} from 'lodash-decorators';
-import {IEBoardContext} from '../EBoardContext';
+import {EventList, IEBoardContext} from '../EBoardContext';
 import {IObject} from '../interface/IBrush';
 import {MessageTag} from '../static/MessageTag';
 import {Cursor} from '../untils/Cursor';
@@ -14,7 +14,7 @@ import {Canvas} from './Canvas';
 import {IEvent} from 'fabric/fabric-impl';
 
 class EraserBrush{
-    public cursorType=Cursor.cross;
+    public cursorType=Cursor.erase;
     public canvas:Canvas;
     private context:IEBoardContext;
     private wbNumber:string;
@@ -64,6 +64,13 @@ class EraserBrush{
                 objectIds:[target.objectId],
                 wbNumber:this.wbNumber,
                 pageNum:this.pageNum
+            });
+            // undoRedo 需要添加
+            this.context.eventEmitter.trigger(EventList.ObjectModify,{
+                objectIds:[target.objectId],
+                tag:MessageTag.Delete,
+                wbNumber:this.wbNumber,
+                pageNum:this.pageNum,
             });
         }
     }

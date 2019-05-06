@@ -16,6 +16,7 @@ const nwseResizeCur = require("../cursor/nwse-resize.cur");
 const pointerCur = require("../cursor/pointer.cur");
 const textCur = require("../cursor/text.cur");
 const feruleCur = require("../cursor/ferule.cur");
+const eraseCur = require("../cursor/erase.cur");
 class Cursor {
     public static hand=`url("${handCur}") 0 20,default`;
     public static move=`url("${moveCur}") 11 11,move`;
@@ -28,6 +29,7 @@ class Cursor {
     public static pointer=`url("${pointerCur}") 11 11,pointer`;
     public static text=`url("${textCur}") 2 12,text`;
     public static ferule=`url("${feruleCur}") 12 12,default`;
+    public static erase=`url("${eraseCur}") 0 0,default`;
 }
 
 export {Cursor}

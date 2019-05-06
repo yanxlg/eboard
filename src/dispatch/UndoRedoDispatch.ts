@@ -81,7 +81,7 @@ class UndoRedoDispatch {
                 break;
             case MessageTag.Clear:
             case MessageTag.Delete:
-                const {ids:idList} = data;
+                const {objectIds:idList} = data;
                 this.canvas.getObjects().map((object:any)=>{
                     if(idList.indexOf(object.objectId)>-1){
                         object.visible=true
@@ -121,9 +121,9 @@ class UndoRedoDispatch {
                 }
                 break;
             case MessageTag.Transform:
-                const {transform,ids} = data;
+                const {transform,objectIds} = data;
                 this.canvas.getObjects().filter((obj:any)=>{
-                    const index = ids.indexOf(obj.objectId);
+                    const index = objectIds.indexOf(obj.objectId);
                     if(index>-1){
                         if(transform){
                             const _transform=transform[obj.objectId];
@@ -140,9 +140,9 @@ class UndoRedoDispatch {
                 break;
             case MessageTag.Clear:
             case MessageTag.Delete:
-                const {ids:idList} = data;
+                const {objectIds:idList} = data;
                 this.canvas.getObjects().map((object:any)=>{
-                    if(idList.indexOf(object.id)>-1){
+                    if(idList.indexOf(object.objectId)>-1){
                         object.visible=false;
                     }
                 });

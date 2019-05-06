@@ -27,7 +27,11 @@ class FeruleDispatch{
         this.context=context;
     }
     @Bind
-    public onDraw(pointer:Point,ratio:number){
+    public onDraw(pointer:Point|undefined,ratio:number){
+        if(void 0 === pointer){
+            this.canvas.contextTop.clearRect(0,0,this.canvas.contextTop.canvas.width,this.canvas.contextTop.canvas.height);
+            return;
+        }
         const size = 24*ratio;
         if(this.object){
             this.object.left=pointer.x;

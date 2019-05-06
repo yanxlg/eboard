@@ -55,10 +55,8 @@ class SelectBrush {
         const target:fabric.Object|ActiveSelection = e.target as fabric.Object|ActiveSelection;
         if(void 0 !== target){
             const objects = target.type==="activeSelection"?(target as ActiveSelection).getObjects():[target];
-            // 可能只有一个对象
-            let ids:string[]=[],objectsTransform:any={};
+            let objectsTransform:any={};
             objects.map((object:IObject)=>{
-                ids.push(object.objectId);
                 objectsTransform[object.objectId]={
                     flipX:object.flipX,
                     flipY:object.flipY,

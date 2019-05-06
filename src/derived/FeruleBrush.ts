@@ -25,11 +25,16 @@ class FeruleBrush{
         this.wbNumber=wbNumber;
         this.pageNum=pageNum;
         canvas.on("mouse:move",this.onMouseMove);
+        canvas.on("mouse:out",this.onMouseMoveOut);
     }
     @Bind
     public update(wbNumber:string,pageNum?:number){
         this.wbNumber=wbNumber;
         this.pageNum=pageNum;
+    }
+    @Bind
+    private onMouseMoveOut(){
+        this.dispatchMessage();
     }
     @Bind
     private onMouseMove(e:IEvent){
@@ -38,7 +43,7 @@ class FeruleBrush{
         this.dispatchMessage(pointer);
     }
     @Bind
-    private dispatchMessage(pointer:Point){
+    private dispatchMessage(pointer?:Point){
         this.context.onMessageListener({
             tag:MessageTag.Cursor,
             attributes:pointer,

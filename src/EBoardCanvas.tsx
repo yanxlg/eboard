@@ -461,11 +461,15 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
         if(this.brush&&this.brush.destroy){
             this.brush.destroy();
         }
+        
+        this.fabricCanvas.freeDrawingBrush=null;
+        this.fabricCanvas.freeDrawingCursor=null;
+        this.fabricCanvas.hoverCursor=null;
+        this.fabricCanvas.defaultCursor=Cursor.default;
+        
         switch (toolType) {
             case TOOL_TYPE.Select:
                 this.fabricCanvas.isDrawingMode=false;
-                this.fabricCanvas.freeDrawingBrush=null;
-                this.fabricCanvas.freeDrawingCursor=null;
                 this.fabricCanvas.setCursor(Cursor.default);
                 this.fabricCanvas.defaultCursor=Cursor.default;
                 this.brush = new SelectBrush(this.fabricCanvas,this.context,wbNumber,pageNum);
@@ -481,8 +485,6 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                 break;
             case TOOL_TYPE.Text:
                 this.fabricCanvas.isDrawingMode=false;
-                this.fabricCanvas.freeDrawingBrush=null;
-                this.fabricCanvas.freeDrawingCursor=null;
                 this.brush = new TextBoxBrush(this.fabricCanvas,this.context,wbNumber,pageNum);
                 this.fabricCanvas.defaultCursor=this.brush.cursorType;
                 this.fabricCanvas.setCursor(this.brush.cursorType);
@@ -581,14 +583,12 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
             case TOOL_TYPE.Eraser:
                 this.fabricCanvas.isDrawingMode=false;
                 this.brush = new EraserBrush(this.fabricCanvas,this.context,wbNumber,pageNum);
-                this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
-                this.fabricCanvas.setCursor(this.brush.cursorType||Cursor.cross);
-                this.fabricCanvas.freeDrawingBrush=null;
+                this.fabricCanvas.defaultCursor=this.brush.cursorType;
+                this.fabricCanvas.hoverCursor=this.brush.cursorType;
+                this.fabricCanvas.setCursor(this.brush.cursorType);
                 break;
             case TOOL_TYPE.Ferule:
                 this.fabricCanvas.isDrawingMode=false;
-                this.fabricCanvas.freeDrawingBrush=null;
-                this.fabricCanvas.freeDrawingCursor=null;
                 this.brush = new FeruleBrush(this.fabricCanvas,this.context,wbNumber,pageNum);
                 this.fabricCanvas.defaultCursor=this.brush.cursorType;
                 this.fabricCanvas.setCursor(this.brush.cursorType);

@@ -5,7 +5,7 @@
  */
 import {Bind} from 'lodash-decorators';
 import React from 'react';
-import {config, IConfig, SHAPE_TYPE, TOOL_TYPE} from './Config';
+import {config, IConfig, SHAPE_TYPE, TOOL_TYPE, updateConfig} from './Config';
 import {FRAME_TYPE_ENUM} from './enums/EBoardEnum';
 import {
     IBaseFrame,
@@ -324,7 +324,8 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
     private setToolProps(props:IToolProps){
         this.setState({
             config:Object.assign({},this.state.config,props)
-        })
+        });
+        updateConfig(props);
     }
     @Bind
     public dispatchMessage(message:IMessage,timestamp:number,animation?:boolean){

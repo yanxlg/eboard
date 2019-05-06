@@ -84,4 +84,17 @@ if(_localConfig){
 }
 
 
-export {config};
+function updateConfig(config:any){
+    let _config = localStorage.getItem("_eboard_config");
+    if(_config){
+        const __config = JSON.parse(_config);
+        localStorage.setItem("_eboard_config",JSON.stringify( Object.assign({},config,__config)));
+    }else{
+        localStorage.setItem("_eboard_config",JSON.stringify(config));
+    }
+}
+
+
+
+
+export {config,updateConfig};

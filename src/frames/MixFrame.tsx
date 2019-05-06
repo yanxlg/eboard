@@ -138,6 +138,7 @@ class MixFrame extends React.PureComponent<IFrameProps>{
         const {active,width,height,dimensions,wbType,pageNum,images} = this.props;
         const {disabled,allowDocControl} = this.context;
         const scrollDisabled=allowDocControl?false:disabled;
+        
         if(wbType===FRAME_TYPE_ENUM.EMPTY){
             return [
                 <div key="content" className={`board-frame ${active?"board-frame-active":""}`} style={{width,height}}>
@@ -145,11 +146,13 @@ class MixFrame extends React.PureComponent<IFrameProps>{
                 </div>,
             ]
         }else{
+            // disabled 表示是主讲还是非主讲，主讲可操作，需要显示touch不可用，非主讲不可操作，支持touch
+            const handlers:any = disabled?['click-rail','drag-thumb','keyboard','wheel','touch']:['click-rail','drag-thumb','keyboard','wheel'];
             return [
-                <PerfectScrollbar key="content" ref={this.scrollRef} className={`board-frame ${active?"board-frame-active":""}`} style={{width,height}} disabled={scrollDisabled}>
+                <PerfectScrollbar handlers={handlers} key="content" ref={this.scrollRef} className={`board-frame ${active?"board-frame-active":""}`} style={{width,height}} disabled={scrollDisabled}>
                     <EBoardCanvas ref={this.eBoardCanvasRef} onContainerSizeChange={this.onContainerSizeChange} property={this.props} dimensions={dimensions} height={height} width={width}/>
                 </PerfectScrollbar>,
-                (wbType===FRAME_TYPE_ENUM.IMAGES||wbType===FRAME_TYPE_ENUM.PDF)&&images.length>1?<Pagination key="pagination" current={pageNum} total={images.length} onChange={this.onPageChange}/>:null
+                (wbType===FRAME_TYPE_ENUM.IMAGES||wbType===FRAME_TYPE_ENUM.PDF)&&images.length>1?<Pagination key="pagination" disabled={scrollDisabled} current={pageNum} total={images.length} onChange={this.onPageChange}/>:null
             ]
         }
     }

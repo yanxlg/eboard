@@ -15,10 +15,10 @@ declare interface IPaginationProps{
     onChange:(pageNo:number)=>void;
     total:number;
     current:number;
+    disabled:boolean;
 }
 
 declare interface IPaginationState {
-    control:boolean;
     inputVal:string;
 }
 
@@ -26,7 +26,6 @@ class Pagination extends React.PureComponent<IPaginationProps,IPaginationState>{
     constructor(props:IPaginationProps){
         super(props);
         this.state={
-            control:true,
             inputVal:""
         }
     }
@@ -64,8 +63,9 @@ class Pagination extends React.PureComponent<IPaginationProps,IPaginationState>{
         })
     }
     render(){
-        const {control,inputVal} = this.state;
-        const {total,current=0} = this.props;
+        const {inputVal} = this.state;
+        const {total,current=0,disabled} = this.props;
+        const control = !disabled;
         return (
             <div className={`board-pagination ${control?"board-pagination-control":""}`}>
                 {

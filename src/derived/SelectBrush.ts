@@ -8,7 +8,7 @@
 
 import {ActiveSelection, Group, IEvent} from 'fabric/fabric-impl';
 import {Bind} from 'lodash-decorators';
-import {IEBoardContext} from '../EBoardContext';
+import {EventList, IEBoardContext} from '../EBoardContext';
 import {IObject} from '../interface/IBrush';
 import {MessageTag} from '../static/MessageTag';
 import {Cursor} from '../untils/Cursor';
@@ -43,6 +43,7 @@ class SelectBrush {
         window.addEventListener("keydown",this.onKeyDown);
         this.canvas.on('mouse:move', this.onMouseMove);
         this.canvas.on('mouse:out', this.onMouseOut);
+        
     }
     @Bind
     public update(wbNumber:string,pageNum?:number){
@@ -179,7 +180,17 @@ class SelectBrush {
     @Bind
     private onKeyDown(e:KeyboardEvent){
         const {ctrlKey,keyCode} = e;
-        if(!ctrlKey) {return}
+        if(!ctrlKey) {
+            switch (keyCode){
+                case 46:
+                    // delete selectron
+                    this.deleteSelection();
+                    break;
+                default:
+                    break;
+            }
+            return;
+        }
         switch (keyCode){
             case 67:
                 this.onCopy();
@@ -192,6 +203,35 @@ class SelectBrush {
                 break;
             default:
                 break;
+        }
+    }
+    @Bind
+    private deleteSelection(){
+        const objects = this.canvas.getActiveObjects();
+        if(objects.length>0){
+            this.canvas.renderOnAddRemove=false;
+            let ids:string[]=[];
+            objects.forEach((object:any)=>{
+                object.visible=false;
+                ids.push(object.objectId);
+            });
+            this.canvas.discardActiveObject();
+            this.canvas.requestRenderAll();
+            this.canvas.renderOnAddRemove=true;
+    
+            this.context.onMessageListener({
+                tag:MessageTag.Delete,
+                objectIds:ids,
+                wbNumber:this.wbNumber,
+                pageNum:this.pageNum
+            });
+            // undoRedo 需要添加
+            this.context.eventEmitter.trigger(EventList.ObjectModify,{
+                objectIds:ids,
+                tag:MessageTag.Delete,
+                wbNumber:this.wbNumber,
+                pageNum:this.pageNum,
+            });
         }
     }
     @Bind

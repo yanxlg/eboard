@@ -38,7 +38,7 @@ class EBoardTool extends React.Component<{},IEBoardToolState>{
         "#8b6dc5",
         "#ff7c81"
     ];
-    private pencilDotSize:number[]=[4,8,12,16];
+    private pencilDotSize:number[]=[2,4,8,12];
     private fontSize:number[]=[14,18,24,26];
     constructor(props:{}){
         super(props);

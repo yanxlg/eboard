@@ -24,7 +24,7 @@
     "ctrlKey":true,
     "defaultName": "白板",
     "shapeColor": "#f66c00",
-    "pencilWidth": 4,
+    "pencilWidth": 2,
     "pencilColor": "#f66c00",
     "toolType": "none",
     "shapeType": "line"

@@ -51,7 +51,9 @@ fabric.Object.prototype.toObject=function(){
         transparentCorners:this.transparentCorners,
         strokeLineCap:this.strokeLineCap,
         cornerSize:this.cornerSize,
-        borderScaleFactor:this.borderScaleFactor
+        borderScaleFactor:this.borderScaleFactor,
+        text:this["text"],
+        fontSize:this["fontSize"]
     });
 };
 

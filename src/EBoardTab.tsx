@@ -128,11 +128,11 @@ class EBoardTab extends React.PureComponent<{}, ITabInterface>{
     
     @Bind
     private onItemRemove(wbNumber:string){
-        this.remove(wbNumber);
         this.context.onMessageListener({
             tag:MessageTag.RemoveFrame,
             wbNumber
         });
+        this.remove(wbNumber);
     }
     @Bind
     private onItemClick(wbNumber:string,element:HTMLDivElement){

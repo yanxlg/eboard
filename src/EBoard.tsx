@@ -24,6 +24,7 @@ declare interface IEBoardProps {
 }
 
 class EBoard extends React.PureComponent<IEBoardProps>{
+    public static version:string = require("../package.json").version;
     private contextRef:RefObject<EBoardContext> = React.createRef();
     componentDidMount(): void {
         document.addEventListener("contextmenu", (event)=>{

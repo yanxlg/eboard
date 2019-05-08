@@ -453,18 +453,23 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
     }
     @Bind
     private initBrush(context:IEBoardContext){
-        const {config} = context;
+        const {config,disabled} = context;
         const {toolType,shapeType,shapeColor,pencilColor,pencilWidth,strokeWidth,fontSize,fontColor} = config;
         const {property} = this.props;
         const {wbNumber,pageNum} = property as any;
         if(this.brush&&this.brush.destroy){
             this.brush.destroy();
+            this.brush=null;
         }
-        
+      
         this.fabricCanvas.freeDrawingBrush=null;
         this.fabricCanvas.freeDrawingCursor=null;
         this.fabricCanvas.hoverCursor=null;
         this.fabricCanvas.defaultCursor=Cursor.default;
+    
+        if(disabled){
+            return;
+        }
         
         switch (toolType) {
             case TOOL_TYPE.Select:

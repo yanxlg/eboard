@@ -126,8 +126,6 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
             // 根据消息进行恢复
             cacheMessage.map((message:any)=>{
                 this.context.dispatchMessage(message,0,false);
-                // 不使用animation
-                
             })
         }
         // update brush
@@ -143,6 +141,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
         this.fabricCanvas=new Canvas(container,{
             selection:false,
             skipTargetFind:true,
+            enableRetinaScaling:false
         });
         this.initBrush(this.context);
         this.initDispatch();

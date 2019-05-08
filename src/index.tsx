@@ -28,12 +28,15 @@ function onMessage(message:string){
 }
 
 function addImages(){
-      const images:string[]=[require("./frames/1.jpg"),
+/*      const images:string[]=[require("./frames/1.jpg"),
            require("./frames/2.jpg"),
            require("./frames/3.jpg"),
            require("./frames/4.jpg"),
            require("./frames/5.jpg")];
     eBoardRef1.current.addImage(images[0],"图片");
+    
+    */
+    alert(document.getElementById('child').innerHTML);
 }
 
 

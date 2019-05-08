@@ -32,14 +32,14 @@ class ArrowDispatch{
     public onDraw(objectId:string,timestamp:number,attributes:any,animation:boolean){
         if(animation){
             this._promise=this._promise.then(()=>{
-                let obj = this.getObject(objectId) as Arrow;
-                const {startPoint,endPoint,stroke,strokeWidth,arrowType,arrowOffset,theta} = attributes;
                 return new Promise((resolve,reject)=>{
+                    let obj = this.getObject(objectId) as Arrow;
+                    const {startPoint,endPoint,stroke,strokeWidth,arrowType,arrowOffset,theta} = attributes;
                     const prevEnd = obj?obj.endPoint:startPoint;
                     const changeLength = Math.sqrt(Math.pow(endPoint.x-prevEnd.x,2)+Math.pow(endPoint.y-prevEnd.y,2));
                     fabric.util.animate({
                         byValue:100,
-                        duration: changeLength,
+                        duration: changeLength/5,
                         endValue: 100,
                         startValue: 0,
                         onChange:(value:number,valuePerc:number)=>{

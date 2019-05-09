@@ -242,7 +242,9 @@ class EBoardTool extends React.Component<{},IEBoardToolState>{
             <div className="board-tool">
                 <div className="board-tool-wrap" onMouseLeave={this.hidePanel}>
                     <button className={`board-tool-item eboard-icon eboard-icon-xuanze ${toolType===TOOL_TYPE.Select?"active":""}`} onClick={this.onClick} title={"选择"} onMouseEnter={this.showPanel}/>
-                    <button className={`board-tool-item eboard-icon eboard-icon-huabi ${toolType===TOOL_TYPE.Pencil?"active":""}`} onClick={this.onClick} title="画笔" onMouseEnter={this.showPanel} />
+                    <button className={`board-tool-item eboard-icon eboard-icon-huabi ${toolType===TOOL_TYPE.Pencil?"active":""}`} onClick={this.onClick} title="画笔" onMouseEnter={this.showPanel} >
+                        <i className="board-tool-item-pencil" style={{backgroundColor:pencilColor}}/>
+                    </button>
                     <button className={`board-tool-item eboard-icon eboard-icon-wenzi ${toolType===TOOL_TYPE.Text?"active":""}`} onClick={this.onClick} title="文字" onMouseEnter={this.showPanel}>
                         <i className="board-tool-item-text" style={{backgroundColor:fontColor}}/>
                     </button>

@@ -51,6 +51,14 @@
         &:hover,&.active{
             background-color: #4c84ff;
         }
+        &-pencil{
+            width: @dotSize;
+            height: @dotSize;
+            position: absolute;
+            right: (@padToolbarHeight - @padToolbarIconSize)/2;
+            bottom: (@padToolbarHeight - @padToolbarIconSize)/2;
+            border-radius: @dotSize;
+        }
         &-text{
             position: absolute;
             width: 60%;
@@ -62,7 +70,6 @@
             width: @dotSize;
             height: @dotSize;
             position: absolute;
-            background-color: red;
             right: (@padToolbarHeight - @padToolbarIconSize)/2;
             bottom: (@padToolbarHeight - @padToolbarIconSize)/2;
             border-radius: @dotSize;

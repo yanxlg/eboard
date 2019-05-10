@@ -10,19 +10,18 @@ import {Bind} from 'lodash-decorators';
 import {Canvas} from '../derived/Canvas';
 import {Line} from '../derived/Line';
 import {fabric} from "fabric";
-import {IEBoardContext} from '../EBoardContext';
-import {IObject} from '../interface/IBrush';
+import {IBrushContext, IObject} from '../interface/IBrush';
 
 
 class LineDispatch{
     private canvas:Canvas;
-    private readonly context:IEBoardContext;
+    private readonly context:IBrushContext;
     private _promise:Promise<any>=new Promise<any>((resolve)=>resolve());
     @Bind
     public getObject(objectId:string){
         return this.canvas.getObjects().find((obj:IObject)=>obj.objectId===objectId);
     }
-    constructor(canvas:Canvas,context:IEBoardContext){
+    constructor(canvas:Canvas,context:IBrushContext){
         this.canvas=canvas;
         this.context=context;
     }

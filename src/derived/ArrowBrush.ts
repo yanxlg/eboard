@@ -10,7 +10,7 @@ import {fabric} from 'fabric';
 import {Bind, Debounce} from 'lodash-decorators';
 import {SHAPE_TYPE} from '../Config';
 import {EventList} from '../EBoardContext';
-import {MessageTag} from '../static/MessageTag';
+import {MessageTag} from '../enums/MessageTag';
 import {Arrow} from './Arrow';
 import {LineBrush} from './LineBrush';
 import {Point} from './Point';

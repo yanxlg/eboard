@@ -9,19 +9,18 @@ import {Bind} from 'lodash-decorators';
 import {Canvas} from '../derived/Canvas';
 import {fabric} from "fabric";
 import {Rect} from '../derived/Rect';
-import {IEBoardContext} from '../EBoardContext';
-import {IObject} from '../interface/IBrush';
+import {IBrushContext, IObject} from '../interface/IBrush';
 
 
 class RectDispatch{
     private canvas:Canvas;
-    private readonly context:IEBoardContext;
+    private readonly context:IBrushContext;
     private _promise:Promise<any>=new Promise<any>((resolve)=>resolve());
     @Bind
     public getObject(objectId:string){
         return this.canvas.getObjects().find((obj:IObject)=>obj.objectId===objectId);
     }
-    constructor(canvas:Canvas,context:IEBoardContext){
+    constructor(canvas:Canvas,context:IBrushContext){
         this.canvas=canvas;
         this.context=context;
     }

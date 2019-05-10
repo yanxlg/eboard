@@ -11,7 +11,7 @@ import {
     IBaseFrame,
     IMessage,
 } from './interface/IFrame';
-import {MessageTag} from './static/MessageTag';
+import {MessageTag} from './enums/MessageTag';
 import {EventEmitter} from './untils/EventMitter';
 import {IDGenerator} from './untils/IDGenerator';
 import {EMap} from './untils/Map';

@@ -8,9 +8,9 @@
 
 import {ActiveSelection, Group, IEvent} from 'fabric/fabric-impl';
 import {Bind} from 'lodash-decorators';
-import {EventList, IEBoardContext} from '../EBoardContext';
-import {IObject} from '../interface/IBrush';
-import {MessageTag} from '../static/MessageTag';
+import {EventList} from '../EBoardContext';
+import {IBrushContext, IObject} from '../interface/IBrush';
+import {MessageTag} from '../enums/MessageTag';
 import {Cursor} from '../untils/Cursor';
 import {IDGenerator} from '../untils/IDGenerator';
 import {Canvas} from './Canvas';
@@ -22,7 +22,7 @@ import {Clipboard} from "../untils/Clipboard";
 class SelectBrush {
     public cursorType=Cursor.ferule;
     public canvas:Canvas;
-    private context:IEBoardContext;
+    private context:IBrushContext;
     private clipBoard = new Clipboard();
     private _position?:{x:number;y:number};
     private containsProperties=["borderColor","cornerColor","cornerStrokeColor","cornerStyle","transparentCorners","cornerSize","borderScaleFactor","selectable","id","sourceId"];
@@ -30,7 +30,7 @@ class SelectBrush {
     private idGenerator:IDGenerator;
     private wbNumber:string;
     private pageNum?:number;
-    constructor(canvas:Canvas,context:IEBoardContext,wbNumber:string,pageNum?:number){
+    constructor(canvas:Canvas,context:IBrushContext,wbNumber:string,pageNum?:number){
         this.canvas=canvas;
         this.wbNumber=wbNumber;
         this.pageNum=pageNum;

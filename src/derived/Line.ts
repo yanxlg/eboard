@@ -7,7 +7,7 @@
  */
 import {fabric} from "fabric";
 import {ILineOptions} from 'fabric/fabric-impl';
-import {IEBoardContext} from '../EBoardContext';
+import {IBrushContext} from '../interface/IBrush';
 import {Common} from '../untils/Common';
 import {Point} from './Point';
 
@@ -15,7 +15,7 @@ class Line extends fabric.Line{
     public objectId:string;
     public startPoint:Point;
     public endPoint:Point;
-    constructor(objectId:string,context:IEBoardContext,points: number[], objObjects?: ILineOptions){
+    constructor(objectId:string,context:IBrushContext,points: number[], objObjects?: ILineOptions){
         super(points,Common.filterParams(objObjects,context));
         this.objectId=objectId;
         this.startPoint=new Point(points[0],points[1]);

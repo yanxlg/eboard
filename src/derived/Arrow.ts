@@ -7,7 +7,7 @@
  */
 import {fabric} from "fabric";
 import {IPathOptions} from 'fabric/fabric-impl';
-import {IEBoardContext} from '../EBoardContext';
+import {IBrushContext} from '../interface/IBrush';
 import {Common} from '../untils/Common';
 import {Point} from './Point';
 
@@ -15,7 +15,7 @@ class Arrow extends fabric.Path{
     public objectId:string;
     public startPoint:Point;
     public endPoint:Point;
-    constructor(objectId:string,context:IEBoardContext,start:Point,end:Point,path?: string, options?: IPathOptions) {
+    constructor(objectId:string,context:IBrushContext,start:Point,end:Point,path?: string, options?: IPathOptions) {
         super(path,Common.filterParams(options,context));
         this.objectId=objectId;
         this.startPoint=start;

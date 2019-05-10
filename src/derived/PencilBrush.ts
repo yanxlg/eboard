@@ -10,8 +10,9 @@
 import {fabric} from "fabric";
 import {Bind, Debounce} from 'lodash-decorators';
 import {TOOL_TYPE} from '../Config';
-import {EventList, IEBoardContext} from '../EBoardContext';
-import {MessageTag} from '../static/MessageTag';
+import {EventList} from '../EBoardContext';
+import {MessageTag} from '../enums/MessageTag';
+import {IBrushContext} from '../interface/IBrush';
 import {Cursor} from '../untils/Cursor';
 import {IBaseBrush} from './BaseBrush';
 import {Canvas} from './Canvas';
@@ -26,10 +27,10 @@ class PencilBrush extends fabric.PencilBrush implements IBaseBrush{
     protected objectId?:string;
     public cursorType=Cursor.hand;
     private _points:Point[];
-    private readonly context:IEBoardContext;
+    private readonly context:IBrushContext;
     private wbNumber:string;
     private pageNum?:number;
-    constructor(canvas:Canvas,context:IEBoardContext,wbNumber:string,pageNum?:number){
+    constructor(canvas:Canvas,context:IBrushContext,wbNumber:string,pageNum?:number){
         super();
         this.canvas=canvas;
         this.context=context;

@@ -7,7 +7,7 @@
  */
 import {fabric} from 'fabric';
 import {ITriangleOptions} from 'fabric/fabric-impl';
-import {IEBoardContext} from '../EBoardContext';
+import {IBrushContext} from '../interface/IBrush';
 import {Common} from '../untils/Common';
 import {Point} from './Point';
 
@@ -15,7 +15,7 @@ class Triangle extends fabric.Triangle{
     public objectId:string;
     public start:Point;
     public end:Point;
-    constructor(objectId:string,context:IEBoardContext,start:Point,end:Point,options?: ITriangleOptions){
+    constructor(objectId:string,context:IBrushContext,start:Point,end:Point,options?: ITriangleOptions){
         super(Common.filterParams(options,context));
         this.objectId=objectId;
         this.start=start;

@@ -6,7 +6,7 @@ import {FRAME_TYPE_ENUM} from './enums/EBoardEnum';
 import './font/iconfont.css';
 import {IBaseFrame} from './interface/IFrame';
 import './style/tab.less';
-import {MessageTag} from './static/MessageTag';
+import {MessageTag} from './enums/MessageTag';
 
 declare interface ITabInterface{
     showPager:boolean;

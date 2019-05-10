@@ -6,9 +6,9 @@
  * @disc:Eraser 橡皮擦
  */
 import {Bind} from 'lodash-decorators';
-import {EventList, IEBoardContext} from '../EBoardContext';
-import {IObject} from '../interface/IBrush';
-import {MessageTag} from '../static/MessageTag';
+import {EventList} from '../EBoardContext';
+import {IBrushContext, IObject} from '../interface/IBrush';
+import {MessageTag} from '../enums/MessageTag';
 import {Cursor} from '../untils/Cursor';
 import {Canvas} from './Canvas';
 import {IEvent} from 'fabric/fabric-impl';
@@ -16,10 +16,10 @@ import {IEvent} from 'fabric/fabric-impl';
 class EraserBrush{
     public cursorType=Cursor.erase;
     public canvas:Canvas;
-    private context:IEBoardContext;
+    private context:IBrushContext;
     private wbNumber:string;
     private pageNum:number;
-    constructor(canvas:Canvas,context:IEBoardContext,wbNumber:string,pageNum?:number){
+    constructor(canvas:Canvas,context:IBrushContext,wbNumber:string,pageNum?:number){
         this.canvas=canvas;
         this.context=context;
         this.wbNumber=wbNumber;

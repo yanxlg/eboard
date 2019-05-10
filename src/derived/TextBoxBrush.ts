@@ -8,8 +8,9 @@
 import {IEvent} from 'fabric/fabric-impl';
 import {Bind} from 'lodash-decorators';
 import {TOOL_TYPE} from '../Config';
-import {EventList, IEBoardContext} from '../EBoardContext';
-import {MessageTag} from '../static/MessageTag';
+import {EventList} from '../EBoardContext';
+import {MessageTag} from '../enums/MessageTag';
+import {IBrushContext} from '../interface/IBrush';
 import {Cursor} from '../untils/Cursor';
 import {Canvas} from './Canvas';
 import {Point} from './Point';
@@ -18,7 +19,7 @@ import {TextBox} from './TextBox';
 class TextBoxBrush{
     public cursorType=Cursor.text;
     public canvas:Canvas;
-    private readonly context:IEBoardContext;
+    private readonly context:IBrushContext;
     public fontSize:number;
     public fontColor:string;
     private instance:TextBox;
@@ -27,7 +28,7 @@ class TextBoxBrush{
     public static fontFamily:string='Microsoft YaHei,"Times New Roman"';
     private wbNumber:string;
     private pageNum?:number;
-    constructor(canvas:Canvas,context:IEBoardContext,wbNumber:string,pageNum?:number){
+    constructor(canvas:Canvas,context:IBrushContext,wbNumber:string,pageNum?:number){
         this.canvas=canvas;
         this.context=context;
         this.wbNumber=wbNumber;

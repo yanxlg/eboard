@@ -7,7 +7,7 @@
  */
 import {SHAPE_TYPE, TOOL_TYPE} from '../Config';
 import {FRAME_TYPE_ENUM} from "../enums/EBoardEnum";
-import {MessageTag} from '../static/MessageTag';
+import {MessageTag} from '../enums/MessageTag';
 
 
 export declare interface ITab{

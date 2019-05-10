@@ -6,13 +6,10 @@
  * @disc:Brush interface
  */
 import {fabric} from "fabric";
-
-export declare interface ICirclePoint extends fabric.Point{
-    radius?:number;
-    fill?:string;
-    rx?:number;
-    ry?:number;
-}
+import {IConfig} from '../Config';
+import {EventList} from '../EBoardContext';
+import {EventEmitter} from '../untils/EventMitter';
+import {IDGenerator} from '../untils/IDGenerator';
 
 export declare interface IBrush {
     clear:()=>void;
@@ -22,4 +19,13 @@ export declare interface IBrush {
 export declare interface IObject extends fabric.Object{
     objectId:string;
     sourceId:string;
+}
+
+
+export declare interface IBrushContext {
+    idGenerator:IDGenerator;
+    config:IConfig;
+    eventEmitter:EventEmitter<EventList>;
+    onMessageListener:(message:object)=>void;
+    pushUndoStack:(action:any,wbNumber:string,pageNum?:number)=>void;
 }

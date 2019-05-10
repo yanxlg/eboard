@@ -7,14 +7,14 @@
  */
 import {fabric} from 'fabric';
 import {IPolylineOptions} from 'fabric/fabric-impl';
-import {IEBoardContext} from '../EBoardContext';
+import {IBrushContext} from '../interface/IBrush';
 import {Common} from '../untils/Common';
 
 class Star extends fabric.Polygon{
     public objectId:string;
     public radius:number;
     public calcAngle:number;
-    constructor(objectId:string,context:IEBoardContext,radius:number,angle:number,points: Array<{ x: number; y: number }>, options?: IPolylineOptions) {
+    constructor(objectId:string,context:IBrushContext,radius:number,angle:number,points: Array<{ x: number; y: number }>, options?: IPolylineOptions) {
         super(points, Common.filterParams(options,context));
         this.objectId = objectId;
         this.radius=radius||0;

@@ -8,18 +8,17 @@
 import {Bind} from 'lodash-decorators';
 import {TOOL_TYPE} from '../Config';
 import {Canvas} from '../derived/Canvas';
-import {EventList, IEBoardContext} from '../EBoardContext';
-import {MessageTag} from '../static/MessageTag';
+import {EventList} from '../EBoardContext';
+import {MessageTag} from '../enums/MessageTag';
 import {fabric} from "fabric";
+import {IBrushContext} from '../interface/IBrush';
 
 class UndoRedoDispatch {
     protected readonly canvas:Canvas;
-    public context:IEBoardContext;
-    constructor(canvas:Canvas,context:IEBoardContext) {
+    public context:IBrushContext;
+    constructor(canvas:Canvas,context:IBrushContext) {
         this.canvas=canvas;
         this.context=context;
-        
-        
         this.context.eventEmitter.on(EventList.ObjectAdd, this.onObjectAdd);
         this.context.eventEmitter.on(EventList.ObjectModify, this.onObjectModified);
         // current stack
@@ -28,14 +27,12 @@ class UndoRedoDispatch {
     private onObjectAdd(ev:any){
         const data = ev.data;
         const {wbNumber,pageNum} = data;
-        console.log(data);
         this.context.pushUndoStack({...data},wbNumber,pageNum);
     }
     @Bind
     private onObjectModified(ev:any){
         const data = ev.data;
         const {wbNumber,pageNum} = data;
-        console.log(data);
         this.context.pushUndoStack({...data},wbNumber,pageNum);
     }
     

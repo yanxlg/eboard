@@ -10,20 +10,19 @@ import {Canvas} from '../derived/Canvas';
 import {Pencil} from '../derived/Pencil';
 import {fabric} from "fabric";
 import {Point} from '../derived/Point';
-import {IEBoardContext} from '../EBoardContext';
-import {IObject} from '../interface/IBrush';
+import {IBrushContext, IObject} from '../interface/IBrush';
 
 
 
 class PencilDispatch{
     private canvas:Canvas;
-    private readonly context:IEBoardContext;
+    private readonly context:IBrushContext;
     private _promise:Promise<any>=new Promise<any>((resolve)=>resolve());
     @Bind
     public getObject(objectId:string){
         return this.canvas.getObjects().find((obj:IObject)=>obj.objectId===objectId);
     }
-    constructor(canvas:Canvas,context:IEBoardContext){
+    constructor(canvas:Canvas,context:IBrushContext){
         this.canvas=canvas;
         this.context=context;
     }

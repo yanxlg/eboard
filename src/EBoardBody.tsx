@@ -7,7 +7,7 @@
 import {Bind} from 'lodash-decorators';
 import React, {RefObject} from 'react';
 import {EBoardContext, EventList, IEBoardContext} from './EBoardContext';
-import {MixFrame} from './frames/MixFrame';
+import {BasicFrame} from './frames/BasicFrame';
 import './style/cursor.less';
 
 // 延迟初始化加载
@@ -66,38 +66,14 @@ class EBoardBody extends React.Component<{},IEboardBodyState>{
     componentDidMount(): void {
         this.resize();
     }
-    
-  /*  shouldComponentUpdate(
-        nextProps: Readonly<{}>, nextState: Readonly<IEboardBodyState>,
-        nextContext: IEBoardContext): boolean {
-        // 仅当active resize发生改变才会重新render
-   /!*     const {activeBoard} = this.context;
-        console.log(activeBoard!==nextContext.activeBoard);
-        if(activeBoard!==nextContext.activeBoard||nextState.width!==this.state.width||nextState.height!==this.state.height){
-            return true;
-        }*!/
-        return false;
-    }*/
     render(){
         const {width,height,dimensions} = this.state;
         const board = this.context.getActiveBoard();
-        // 最多显示3个
         return (
             <div className="layout-board-container cursor-default" ref={this.containerRef}>
                 {
-                    board&&dimensions?<MixFrame {...board} width={width} height={height} dimensions={dimensions} active={true}/>:null
+                    board&&dimensions?<BasicFrame {...board} width={width} height={height} dimensions={dimensions} active={true}/>:null
                 }
-            
-      {/*          {
-                    width&&height&&boardList.map((board)=>{
-                        const {wbType} = board;
-                        return wbType===FRAME_TYPE_ENUM.EMPTY?
-                            <EmptyFrame active={activeBoard===board.wbNumber} key={board.wbNumber} {...board} width={width} height={height} dimensions={dimensions}/>:
-                            wbType===FRAME_TYPE_ENUM.IMAGE?<ImageFrame active={activeBoard===board.wbNumber} key={board.wbNumber} {...(board as IImageFrame)} dimensions={dimensions} height={height} width={width}/>:
-                                wbType===FRAME_TYPE_ENUM.IMAGES?<ImagesFrame active={activeBoard===board.wbNumber} wbType={FRAME_TYPE_ENUM.IMAGES} key={board.wbNumber} {...board as IImagesFrame} dimensions={dimensions} width={width} height={height}/>:
-                                    wbType===FRAME_TYPE_ENUM.PDF?<PdfFrame key={board.wbNumber} active={activeBoard===board.wbNumber} width={width} height={height} dimensions={dimensions} wbType={FRAME_TYPE_ENUM.PDF} {...board as IPdfFrame}/>:null;
-                    })
-                }*/}
             </div>
         )
     }

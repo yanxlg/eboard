@@ -7,7 +7,7 @@
  */
 import {fabric} from "fabric";
 import {Bind} from 'lodash-decorators';
-import {IEBoardContext} from '../EBoardContext';
+import {IBrushContext} from '../interface/IBrush';
 import {Canvas} from './Canvas';
 
 export declare interface IBaseBrush{
@@ -24,13 +24,13 @@ class BaseBrush<InstanceType extends fabric.Object> extends fabric.BaseBrush imp
     protected needsFullRender:boolean;
     protected _setShadow:()=>void;
     protected _resetShadow:()=>void;
-    protected context:IEBoardContext;
+    protected context:IBrushContext;
     public fill?:string;
     public stroke?:string;
     public cursorType:string;
     protected wbNumber:string;
     protected pageNum?:number;
-    constructor(canvas:Canvas,context:IEBoardContext,wbNumber:string,pageNum?:number){
+    constructor(canvas:Canvas,context:IBrushContext,wbNumber:string,pageNum?:number){
         super();
         this.canvas=canvas;
         this.context=context;

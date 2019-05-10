@@ -11,7 +11,7 @@ import {EBoardContext, EventList, IEBoardContext} from '../EBoardContext';
 import {FRAME_TYPE_ENUM} from '../enums/EBoardEnum';
 import "../style/frames.less";
 import PerfectScrollbar from "kxt-web/lib/perfectscrollbar";
-import {MessageTag} from '../static/MessageTag';
+import {MessageTag} from '../enums/MessageTag';
 
 declare interface IFrameProps{
     canRemove?:boolean;
@@ -34,7 +34,7 @@ declare interface IFrameProps{
     active:boolean;
 }
 
-class MixFrame extends React.PureComponent<IFrameProps>{
+class BasicFrame extends React.PureComponent<IFrameProps>{
     public static contextType = EBoardContext.Context;
     public context:IEBoardContext;
     private eBoardCanvasRef:RefObject<EBoardCanvas>=React.createRef();
@@ -136,22 +136,21 @@ class MixFrame extends React.PureComponent<IFrameProps>{
     }
     render(){
         const {active,width,height,dimensions,wbType,pageNum,images} = this.props;
-        const {disabled,allowDocControl} = this.context;
+        const {disabled,allowDocControl,eventEmitter,config,onMessageListener,idGenerator,clearUndoRedo,dispatchMessage,pushUndoStack,setCacheData} = this.context;
         const scrollDisabled=allowDocControl?false:disabled;
         
         if(wbType===FRAME_TYPE_ENUM.EMPTY){
             return [
                 <div key="content" className={`board-frame ${active?"board-frame-active":""}`} style={{width,height}}>
-                    <EBoardCanvas ref={this.eBoardCanvasRef} onContainerSizeChange={this.onContainerSizeChange} property={this.props} width={width} height={height} dimensions={dimensions}/>
+                    <EBoardCanvas ref={this.eBoardCanvasRef} onContainerSizeChange={this.onContainerSizeChange} property={this.props} width={width} height={height} dimensions={dimensions} disabled={disabled} eventEmitter={eventEmitter} config={config} onMessageListener={onMessageListener} idGenerator={idGenerator} clearUndoRedo={clearUndoRedo} dispatchMessage={dispatchMessage} pushUndoStack={pushUndoStack} setCacheData={setCacheData}/>
                 </div>,
             ]
         }else{
             // disabled 表示是主讲还是非主讲，主讲可操作，需要显示touch不可用，非主讲不可操作，支持touch
             const handlers:any = disabled?['click-rail','drag-thumb','keyboard','wheel','touch']:['click-rail','drag-thumb','keyboard','wheel'];
-            console.log(handlers,scrollDisabled);
             return [
                 <PerfectScrollbar handlers={handlers} key="content" ref={this.scrollRef} className={`board-frame ${active?"board-frame-active":""}`} style={{width,height}} disabled={scrollDisabled}>
-                    <EBoardCanvas ref={this.eBoardCanvasRef} onContainerSizeChange={this.onContainerSizeChange} property={this.props} dimensions={dimensions} height={height} width={width}/>
+                    <EBoardCanvas ref={this.eBoardCanvasRef} onContainerSizeChange={this.onContainerSizeChange} property={this.props} height={height} width={width} dimensions={dimensions} disabled={disabled} eventEmitter={eventEmitter} config={config} onMessageListener={onMessageListener} idGenerator={idGenerator} clearUndoRedo={clearUndoRedo} dispatchMessage={dispatchMessage} pushUndoStack={pushUndoStack} setCacheData={setCacheData}/>
                 </PerfectScrollbar>,
                 (wbType===FRAME_TYPE_ENUM.IMAGES||wbType===FRAME_TYPE_ENUM.PDF)&&images.length>1?<Pagination key="pagination" disabled={scrollDisabled} current={pageNum} total={images.length} onChange={this.onPageChange}/>:null
             ]
@@ -159,4 +158,4 @@ class MixFrame extends React.PureComponent<IFrameProps>{
     }
 }
 
-export {MixFrame}
+export {BasicFrame}

@@ -29,11 +29,12 @@ import {StarDispatch} from './dispatch/StarDispatch';
 import {TextBoxDispatch} from './dispatch/TextBoxDispatch';
 import {TriangleDispatch} from './dispatch/TriangleDispatch';
 import {UndoRedoDispatch} from './dispatch/UndoRedoDispatch';
-import {EBoardContext, EventList, IEBoardContext} from './EBoardContext';
+import {EventList, IEBoardContext} from './EBoardContext';
 import {FRAME_TYPE_ENUM} from './enums/EBoardEnum';
-import {IBaseFrame} from './interface/IFrame';
+import {IBrushContext} from './interface/IBrush';
+import {IBaseFrame, IMessage} from './interface/IFrame';
 import './style/cursor.less';
-import {MessageTag} from './static/MessageTag';
+import {MessageTag} from './enums/MessageTag';
 import {Common} from './untils/Common';
 import {Cursor} from './untils/Cursor';
 
@@ -58,7 +59,7 @@ fabric.Object.prototype.toObject=function(){
 };
 
 
-declare interface IEBoardCanvas{
+declare interface IEBoardCanvas extends IBrushContext{
     property:IBaseFrame;
     width:number;
     height:number;
@@ -67,11 +68,18 @@ declare interface IEBoardCanvas{
         height:number;
     }
     onContainerSizeChange:()=>void;
+    
+    
+    disabled:boolean;
+    dispatchMessage:(message:IMessage,timestamp:number,animation?:boolean)=>void;
+    setCacheData:(json:any,wbNumber:string,pageNo?:number)=>void;
+    clearUndoRedo:()=>void;
 }
 
+
+
+
 class EBoardCanvas extends React.Component<IEBoardCanvas>{
-    public static contextType = EBoardContext.Context;
-    public context:IEBoardContext;
     private containerRef:RefObject<HTMLCanvasElement>=React.createRef();
     private fabricCanvas:Canvas;
     private image:HTMLImageElement;
@@ -93,50 +101,9 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
     private transformDispatch:SelectDispatch;
     private feruleDispatch:FeruleDispatch;
     private undoRedoDispatch:UndoRedoDispatch;
-    constructor(props:IEBoardCanvas,context:IEBoardContext) {
+    constructor(props:IEBoardCanvas) {
         super(props);
         this.initImage(props);
-    }
-    shouldComponentUpdate(nextProps: Readonly<IEBoardCanvas>, nextState: Readonly<{}>, nextContext: any): boolean {
-        return false;
-    }
-    @Bind
-    private initImage(props:IEBoardCanvas){
-        const {property} = props;
-        const {wbType,images,pageNum} = property;
-        if(wbType===FRAME_TYPE_ENUM.IMAGES){
-            this.image=null;
-            this.image=new Image();
-            this.image.src=images[pageNum-1];
-        }else if(wbType===FRAME_TYPE_ENUM.IMAGE){
-            this.image=null;
-            this.image=new Image();
-            this.image.src=images[0];
-        }
-    }
-    @Bind
-    private init(){
-        // cache restore
-        this.fabricCanvas.clear();
-        this.initImage(this.props);
-        this.layout(this.props);
-        const {cacheJSON,cacheMessage} = this.props.property;
-        if(cacheJSON){
-            this.fabricCanvas.loadFromJSON(JSON.parse(cacheJSON),()=>this.fabricCanvas.renderAll());
-        }
-        if(cacheMessage){
-            // 根据消息进行恢复
-            cacheMessage.map((message:any)=>{
-                this.context.dispatchMessage(message,0,false);
-            })
-        }
-        // update brush
-        this.brush&&this.brush.update(this.props.property.wbNumber,this.props.property.pageNum);
-    }
-    @Bind
-    private destroy(){
-        const {wbNumber,pageNum} = this.props.property;
-        this.context.setCacheData(JSON.stringify(this.fabricCanvas),wbNumber,pageNum);
     }
     componentDidMount(): void {
         const container = this.containerRef.current;
@@ -145,26 +112,36 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
             skipTargetFind:true,
             enableRetinaScaling:false
         });
-        this.initBrush(this.context);
+        this.initBrush(this.props);
         this.initDispatch();
         this.dispatchListener();
         this.init();
     }
     componentWillReceiveProps(nextProps: Readonly<IEBoardCanvas>, nextContext: IEBoardContext): void {
-        if(nextProps.width!==this.props.width||nextProps.height!==this.props.height){
-            this.layout(nextProps);
-        }
-        this.initBrush(nextContext);
+        // 数据缓存
         if(this.props.property.wbNumber!==nextProps.property.wbNumber||this.props.property.pageNum!==nextProps.property.pageNum){
             this.destroy();
+        }
+    }
+    shouldComponentUpdate(nextProps: Readonly<IEBoardCanvas>, nextState: Readonly<{}>, nextContext: any): boolean {
+        // 判断什么时候需要更新，什么时候不需要更新
+        // dimensions更新变化需要更新，config更新变化需要更新，wbNumber,pageNum更新需要更新
+        if(JSON.stringify(this.props.config)!==JSON.stringify(nextProps.config)||this.props.width!==nextProps.width||this.props.height!==nextProps.height||this.props.property.wbNumber!==nextProps.property.wbNumber||this.props.property.pageNum!==nextProps.property.pageNum||this.props.disabled!==nextProps.disabled){
+            return true;
+        }else{
+            return false;
         }
     }
     componentDidUpdate(
         prevProps: Readonly<IEBoardCanvas>, prevState: Readonly<{}>,
         snapshot?: any): void {
         if(this.props.property.wbNumber!==prevProps.property.wbNumber||this.props.property.pageNum!==prevProps.property.pageNum){
-            this.init();// 需要执行完成才可以触发scroll
+            this.init();
+        }else if(prevProps.width!==this.props.width||prevProps.height!==this.props.height){
+            this.layout();
         }
+        this.initBrush(this.props);
+        
     }
     componentWillUnmount(): void {
         // 数据cache
@@ -188,6 +165,45 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
         this.undoRedoDispatch=null;
         this.unDispatchListener();
     }
+    
+    @Bind
+    private initImage(props:IEBoardCanvas){
+        const {property} = props;
+        const {wbType,images,pageNum} = property;
+        if(wbType===FRAME_TYPE_ENUM.IMAGES){
+            this.image=null;
+            this.image=new Image();
+            this.image.src=images[pageNum-1];
+        }else if(wbType===FRAME_TYPE_ENUM.IMAGE){
+            this.image=null;
+            this.image=new Image();
+            this.image.src=images[0];
+        }
+    }
+    @Bind
+    private init(){
+        // cache restore
+        this.fabricCanvas.clear();
+        this.initImage(this.props);
+        this.layout();
+        const {cacheJSON,cacheMessage} = this.props.property;
+        if(cacheJSON){
+            this.fabricCanvas.loadFromJSON(JSON.parse(cacheJSON),()=>this.fabricCanvas.renderAll());
+        }
+        if(cacheMessage){
+            // 根据消息进行恢复
+            cacheMessage.map((message:any)=>{
+                this.props.dispatchMessage(message,0,false);
+            })
+        }
+        // update brush
+        this.brush&&this.brush.update(this.props.property.wbNumber,this.props.property.pageNum);
+    }
+    @Bind
+    private destroy(){
+        const {wbNumber,pageNum} = this.props.property;
+        this.props.setCacheData(JSON.stringify(this.fabricCanvas),wbNumber,pageNum);
+    }
     @Bind
     private clearListener(e:any){
         const data = e.data;
@@ -197,7 +213,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
         if(wbNumber === property.wbNumber&&pageNum === currentPageNum){
             this.clear();
             if(data.evented){
-                this.context.onMessageListener({
+                this.props.onMessageListener({
                     tag:MessageTag.Clear,
                     wbNumber,
                     pageNum
@@ -288,11 +304,11 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
     @Bind
     private deleteListener(e:any){
         const data = e.data;
-        const {wbNumber,pageNum,objectIds,animation} = data;
+        const {wbNumber,pageNum,objectIds} = data;
         const {property} = this.props;
         const {pageNum:currentPageNum} = property;
         if(wbNumber===property.wbNumber&&pageNum===currentPageNum){
-            this.eraserDispatch.onDraw(objectIds,animation);
+            this.eraserDispatch.onDraw(objectIds);
         }
     }
     @Bind
@@ -337,43 +353,42 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
     }
     @Bind
     private dispatchListener(){
-        this.context.eventEmitter.on(EventList.Clear,this.clearListener);
-        this.context.eventEmitter.on(EventList.DrawPencil, this.pencilListener);
-        this.context.eventEmitter.on(EventList.DrawText, this.textListener);
-        this.context.eventEmitter.on(EventList.DrawLine, this.lineListener);
-        this.context.eventEmitter.on(EventList.DrawArrow, this.arrowListener);
-        this.context.eventEmitter.on(EventList.DrawCircle, this.circleListener);
-        this.context.eventEmitter.on(EventList.DrawRect, this.rectListener);
-        this.context.eventEmitter.on(EventList.DrawStar, this.starListener);
-        this.context.eventEmitter.on(EventList.DrawTriangle, this.triangleListener);
-        this.context.eventEmitter.on(EventList.Delete, this.deleteListener);
-        this.context.eventEmitter.on(EventList.Transform, this.transformListener);
-        this.context.eventEmitter.on(EventList.Ferule,this.feruleListener);
-        
-        this.context.eventEmitter.on(EventList.Undo,this.undoListener);
-        this.context.eventEmitter.on(EventList.Redo,this.redoListener);
+        this.props.eventEmitter.on(EventList.Clear,this.clearListener);
+        this.props.eventEmitter.on(EventList.DrawPencil, this.pencilListener);
+        this.props.eventEmitter.on(EventList.DrawText, this.textListener);
+        this.props.eventEmitter.on(EventList.DrawLine, this.lineListener);
+        this.props.eventEmitter.on(EventList.DrawArrow, this.arrowListener);
+        this.props.eventEmitter.on(EventList.DrawCircle, this.circleListener);
+        this.props.eventEmitter.on(EventList.DrawRect, this.rectListener);
+        this.props.eventEmitter.on(EventList.DrawStar, this.starListener);
+        this.props.eventEmitter.on(EventList.DrawTriangle, this.triangleListener);
+        this.props.eventEmitter.on(EventList.Delete, this.deleteListener);
+        this.props.eventEmitter.on(EventList.Transform, this.transformListener);
+        this.props.eventEmitter.on(EventList.Ferule,this.feruleListener);
+        this.props.eventEmitter.on(EventList.Undo,this.undoListener);
+        this.props.eventEmitter.on(EventList.Redo,this.redoListener);
     }
     @Bind
     private unDispatchListener(){
-        this.context.eventEmitter.off(EventList.Clear,this.clearListener);
-        this.context.eventEmitter.off(EventList.DrawPencil, this.pencilListener);
-        this.context.eventEmitter.off(EventList.DrawText, this.textListener);
-        this.context.eventEmitter.off(EventList.DrawLine, this.lineListener);
-        this.context.eventEmitter.off(EventList.DrawArrow, this.arrowListener);
-        this.context.eventEmitter.off(EventList.DrawCircle, this.circleListener);
-        this.context.eventEmitter.off(EventList.DrawRect, this.rectListener);
-        this.context.eventEmitter.off(EventList.DrawStar, this.starListener);
-        this.context.eventEmitter.off(EventList.DrawTriangle, this.triangleListener);
-        this.context.eventEmitter.off(EventList.Delete, this.deleteListener);
-        this.context.eventEmitter.off(EventList.Transform, this.transformListener);
-        this.context.eventEmitter.off(EventList.Ferule,this.feruleListener);
-        this.context.eventEmitter.off(EventList.Undo,this.undoListener);
-        this.context.eventEmitter.off(EventList.Redo,this.redoListener);
+        this.props.eventEmitter.off(EventList.Clear,this.clearListener);
+        this.props.eventEmitter.off(EventList.DrawPencil, this.pencilListener);
+        this.props.eventEmitter.off(EventList.DrawText, this.textListener);
+        this.props.eventEmitter.off(EventList.DrawLine, this.lineListener);
+        this.props.eventEmitter.off(EventList.DrawArrow, this.arrowListener);
+        this.props.eventEmitter.off(EventList.DrawCircle, this.circleListener);
+        this.props.eventEmitter.off(EventList.DrawRect, this.rectListener);
+        this.props.eventEmitter.off(EventList.DrawStar, this.starListener);
+        this.props.eventEmitter.off(EventList.DrawTriangle, this.triangleListener);
+        this.props.eventEmitter.off(EventList.Delete, this.deleteListener);
+        this.props.eventEmitter.off(EventList.Transform, this.transformListener);
+        this.props.eventEmitter.off(EventList.Ferule,this.feruleListener);
+        this.props.eventEmitter.off(EventList.Undo,this.undoListener);
+        this.props.eventEmitter.off(EventList.Redo,this.redoListener);
     }
     @Bind
-    private layout(props:IEBoardCanvas){
-        let {width:canvasWidth,height:canvasHeight,property} = props;
-        const dimensions = Object.assign({},props.dimensions);
+    private layout(){
+        let {width:canvasWidth,height:canvasHeight,property} = this.props;
+        const dimensions = Object.assign({},this.props.dimensions);
         const {wbType} = property;
         if(!this.fabricCanvas){return}
         switch (wbType) {
@@ -453,9 +468,24 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                 break;
         }
     }
+    
     @Bind
-    private initBrush(context:IEBoardContext){
-        const {config,disabled} = context;
+    private getBrushContext():IBrushContext{
+        // 获取brushContext
+        const {idGenerator,config,eventEmitter,onMessageListener,pushUndoStack} = this.props;
+        return {
+            idGenerator,
+            config,
+            eventEmitter,
+            onMessageListener,
+            pushUndoStack
+        }
+    }
+    
+    
+    @Bind
+    private initBrush(props:IEBoardCanvas){
+        const {config,disabled} = props;
         const {toolType,shapeType,shapeColor,pencilColor,pencilWidth,strokeWidth,fontSize,fontColor} = config;
         const {property} = this.props;
         const {wbNumber,pageNum} = property as any;
@@ -473,16 +503,20 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
             return;
         }
         
+        
+        
+        
+        const brushContext = this.getBrushContext();
         switch (toolType) {
             case TOOL_TYPE.Select:
                 this.fabricCanvas.isDrawingMode=false;
                 this.fabricCanvas.setCursor(Cursor.default);
                 this.fabricCanvas.defaultCursor=Cursor.default;
-                this.brush = new SelectBrush(this.fabricCanvas,this.context,wbNumber,pageNum);
+                this.brush = new SelectBrush(this.fabricCanvas,brushContext,wbNumber,pageNum);
                 break;
             case TOOL_TYPE.Pencil:
                 this.fabricCanvas.isDrawingMode=true;
-                this.brush = new PencilBrush(this.fabricCanvas,this.context,wbNumber,pageNum);
+                this.brush = new PencilBrush(this.fabricCanvas,brushContext,wbNumber,pageNum);
                 this.fabricCanvas.freeDrawingCursor=this.brush.cursorType;
                 this.fabricCanvas.setCursor(this.brush.cursorType);
                 this.brush.width=pencilWidth;
@@ -491,7 +525,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                 break;
             case TOOL_TYPE.Text:
                 this.fabricCanvas.isDrawingMode=false;
-                this.brush = new TextBoxBrush(this.fabricCanvas,this.context,wbNumber,pageNum);
+                this.brush = new TextBoxBrush(this.fabricCanvas,brushContext,wbNumber,pageNum);
                 this.fabricCanvas.defaultCursor=this.brush.cursorType;
                 this.fabricCanvas.setCursor(this.brush.cursorType);
                 this.brush.fontSize = fontSize;
@@ -501,7 +535,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                 switch (shapeType) {
                     case SHAPE_TYPE.Arrow:
                         this.fabricCanvas.isDrawingMode=true;
-                        this.brush = new ArrowBrush(this.fabricCanvas,this.context,wbNumber,pageNum);
+                        this.brush = new ArrowBrush(this.fabricCanvas,brushContext,wbNumber,pageNum);
                         this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
                         this.fabricCanvas.setCursor(this.brush.cursorType||Cursor.cross);
                         this.brush.width=strokeWidth;
@@ -511,7 +545,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                         break;
                     case SHAPE_TYPE.Line:
                         this.fabricCanvas.isDrawingMode=true;
-                        this.brush = new LineBrush(this.fabricCanvas,this.context,wbNumber,pageNum);
+                        this.brush = new LineBrush(this.fabricCanvas,brushContext,wbNumber,pageNum);
                         this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
                         this.fabricCanvas.setCursor(this.brush.cursorType||Cursor.cross);
                         this.brush.width=strokeWidth;
@@ -520,7 +554,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                         break;
                     case SHAPE_TYPE.Circle:
                         this.fabricCanvas.isDrawingMode=true;
-                        this.brush = new CircleBrush(this.fabricCanvas,this.context,wbNumber,pageNum);
+                        this.brush = new CircleBrush(this.fabricCanvas,brushContext,wbNumber,pageNum);
                         this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
                         this.fabricCanvas.setCursor(this.brush.cursorType||Cursor.cross);
                         this.brush.fill=shapeColor;
@@ -528,7 +562,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                         break;
                     case SHAPE_TYPE.HollowCircle:
                         this.fabricCanvas.isDrawingMode=true;
-                        this.brush = new CircleBrush(this.fabricCanvas,this.context,wbNumber,pageNum);
+                        this.brush = new CircleBrush(this.fabricCanvas,brushContext,wbNumber,pageNum);
                         this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
                         this.fabricCanvas.setCursor(this.brush.cursorType||Cursor.cross);
                         this.brush.stroke=shapeColor;
@@ -537,7 +571,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                         break;
                     case SHAPE_TYPE.Star:
                         this.fabricCanvas.isDrawingMode=true;
-                        this.brush = new StarBrush(this.fabricCanvas,this.context,wbNumber,pageNum);
+                        this.brush = new StarBrush(this.fabricCanvas,brushContext,wbNumber,pageNum);
                         this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
                         this.fabricCanvas.setCursor(this.brush.cursorType||Cursor.cross);
                         this.brush.fill=shapeColor;
@@ -545,7 +579,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                         break;
                     case SHAPE_TYPE.HollowStar:
                         this.fabricCanvas.isDrawingMode=true;
-                        this.brush = new StarBrush(this.fabricCanvas,this.context,wbNumber,pageNum);
+                        this.brush = new StarBrush(this.fabricCanvas,brushContext,wbNumber,pageNum);
                         this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
                         this.fabricCanvas.setCursor(this.brush.cursorType||Cursor.cross);
                         this.brush.stroke=shapeColor;
@@ -554,7 +588,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                         break;
                     case SHAPE_TYPE.Triangle:
                         this.fabricCanvas.isDrawingMode=true;
-                        this.brush = new TriangleBrush(this.fabricCanvas,this.context,wbNumber,pageNum);
+                        this.brush = new TriangleBrush(this.fabricCanvas,brushContext,wbNumber,pageNum);
                         this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
                         this.fabricCanvas.setCursor(this.brush.cursorType||Cursor.cross);
                         this.brush.fill=shapeColor;
@@ -562,7 +596,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                         break;
                     case SHAPE_TYPE.HollowTriangle:
                         this.fabricCanvas.isDrawingMode=true;
-                        this.brush = new TriangleBrush(this.fabricCanvas,this.context,wbNumber,pageNum);
+                        this.brush = new TriangleBrush(this.fabricCanvas,brushContext,wbNumber,pageNum);
                         this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
                         this.fabricCanvas.setCursor(this.brush.cursorType||Cursor.cross);
                         this.brush.stroke=shapeColor;
@@ -570,7 +604,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                         break;
                     case SHAPE_TYPE.Rect:
                         this.fabricCanvas.isDrawingMode=true;
-                        this.brush = new RectBrush(this.fabricCanvas,this.context,wbNumber,pageNum);
+                        this.brush = new RectBrush(this.fabricCanvas,brushContext,wbNumber,pageNum);
                         this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
                         this.fabricCanvas.setCursor(this.brush.cursorType||Cursor.cross);
                         this.brush.fill=shapeColor;
@@ -578,7 +612,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                         break;
                     case SHAPE_TYPE.HollowRect:
                         this.fabricCanvas.isDrawingMode=true;
-                        this.brush = new RectBrush(this.fabricCanvas,this.context,wbNumber,pageNum);
+                        this.brush = new RectBrush(this.fabricCanvas,brushContext,wbNumber,pageNum);
                         this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
                         this.fabricCanvas.setCursor(this.brush.cursorType||Cursor.cross);
                         this.brush.stroke=shapeColor;
@@ -588,14 +622,14 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
                 break;
             case TOOL_TYPE.Eraser:
                 this.fabricCanvas.isDrawingMode=false;
-                this.brush = new EraserBrush(this.fabricCanvas,this.context,wbNumber,pageNum);
+                this.brush = new EraserBrush(this.fabricCanvas,brushContext,wbNumber,pageNum);
                 this.fabricCanvas.defaultCursor=this.brush.cursorType;
                 this.fabricCanvas.hoverCursor=this.brush.cursorType;
                 this.fabricCanvas.setCursor(this.brush.cursorType);
                 break;
             case TOOL_TYPE.Ferule:
                 this.fabricCanvas.isDrawingMode=false;
-                this.brush = new FeruleBrush(this.fabricCanvas,this.context,wbNumber,pageNum);
+                this.brush = new FeruleBrush(this.fabricCanvas,brushContext,wbNumber,pageNum);
                 this.fabricCanvas.defaultCursor=this.brush.cursorType;
                 this.fabricCanvas.setCursor(this.brush.cursorType);
                 break;
@@ -603,7 +637,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
     }
     private clear(){
         this.fabricCanvas.clear();
-        this.context.clearUndoRedo();// 清空同时清空undoRedo列表
+        this.props.clearUndoRedo();// 清空同时清空undoRedo列表
         // 背景图需要保留
         if(this.bgObject){
             this.fabricCanvas.backgroundImage=this.bgObject;
@@ -611,24 +645,34 @@ class EBoardCanvas extends React.Component<IEBoardCanvas>{
     }
     @Bind
     private initDispatch(){
-        this.pencilDispatch=new PencilDispatch(this.fabricCanvas,this.context);
-        this.textDispatch=new TextBoxDispatch(this.fabricCanvas,this.context);
-        this.lineDispatch=new LineDispatch(this.fabricCanvas,this.context);
-        this.arrowDispatch=new ArrowDispatch(this.fabricCanvas,this.context);
-        this.circleDispatch=new CircleDispatch(this.fabricCanvas,this.context);
-        this.rectDispatch=new RectDispatch(this.fabricCanvas,this.context);
-        this.starDispatch=new StarDispatch(this.fabricCanvas,this.context);
-        this.triangleDispatch=new TriangleDispatch(this.fabricCanvas,this.context);
-        this.eraserDispatch=new EraserDispatch(this.fabricCanvas,this.context);
-        this.transformDispatch=new SelectDispatch(this.fabricCanvas,this.context);
-        this.feruleDispatch=new FeruleDispatch(this.fabricCanvas,this.context);
-        this.undoRedoDispatch=new UndoRedoDispatch(this.fabricCanvas,this.context);
+        const brushContext = this.getBrushContext();
+        this.pencilDispatch=new PencilDispatch(this.fabricCanvas,brushContext);
+        this.textDispatch=new TextBoxDispatch(this.fabricCanvas,brushContext);
+        this.lineDispatch=new LineDispatch(this.fabricCanvas,brushContext);
+        this.arrowDispatch=new ArrowDispatch(this.fabricCanvas,brushContext);
+        this.circleDispatch=new CircleDispatch(this.fabricCanvas,brushContext);
+        this.rectDispatch=new RectDispatch(this.fabricCanvas,brushContext);
+        this.starDispatch=new StarDispatch(this.fabricCanvas,brushContext);
+        this.triangleDispatch=new TriangleDispatch(this.fabricCanvas,brushContext);
+        this.eraserDispatch=new EraserDispatch(this.fabricCanvas,brushContext);
+        this.transformDispatch=new SelectDispatch(this.fabricCanvas,brushContext);
+        this.feruleDispatch=new FeruleDispatch(this.fabricCanvas,brushContext);
+        this.undoRedoDispatch=new UndoRedoDispatch(this.fabricCanvas,brushContext);
     }
     render(){
+        console.log("render");
         return (
             <canvas ref={this.containerRef}/>
         )
     }
 }
+
+
+
+
+
+
+
+
 
 export {EBoardCanvas};

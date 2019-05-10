@@ -13,7 +13,7 @@ import {FRAME_TYPE_ENUM} from './enums/EBoardEnum';
 import {IBaseFrame, IMessage} from './interface/IFrame';
 import {ResizeEmitter} from './ResizeEmitter';
 import "./style/layout.less";
-import {MessageTag} from './static/MessageTag';
+import {MessageTag} from './enums/MessageTag';
 import {EMap} from './untils/Map';
 
 

@@ -8,8 +8,7 @@
 import {Bind} from 'lodash-decorators';
 import {Canvas} from '../derived/Canvas';
 import {Point} from '../derived/Point';
-import {IEBoardContext} from '../EBoardContext';
-import {IObject} from '../interface/IBrush';
+import {IBrushContext, IObject} from '../interface/IBrush';
 import {fabric} from "fabric";
 
 // 教鞭显示在顶层
@@ -17,12 +16,12 @@ import {fabric} from "fabric";
 class FeruleDispatch{
     private object:fabric.Image;
     private canvas:Canvas;
-    protected readonly context:IEBoardContext;
+    protected readonly context:IBrushContext;
     @Bind
     public getObject(objectId:string){
         return this.canvas.getObjects().find((obj:IObject)=>obj.objectId===objectId);
     }
-    constructor(canvas:Canvas,context:IEBoardContext){
+    constructor(canvas:Canvas,context:IBrushContext){
         this.canvas=canvas;
         this.context=context;
     }

@@ -148,6 +148,7 @@ class MixFrame extends React.PureComponent<IFrameProps>{
         }else{
             // disabled 表示是主讲还是非主讲，主讲可操作，需要显示touch不可用，非主讲不可操作，支持touch
             const handlers:any = disabled?['click-rail','drag-thumb','keyboard','wheel','touch']:['click-rail','drag-thumb','keyboard','wheel'];
+            console.log(handlers,scrollDisabled);
             return [
                 <PerfectScrollbar handlers={handlers} key="content" ref={this.scrollRef} className={`board-frame ${active?"board-frame-active":""}`} style={{width,height}} disabled={scrollDisabled}>
                     <EBoardCanvas ref={this.eBoardCanvasRef} onContainerSizeChange={this.onContainerSizeChange} property={this.props} dimensions={dimensions} height={height} width={width}/>

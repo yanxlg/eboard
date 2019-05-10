@@ -140,7 +140,11 @@ class EBoard extends React.PureComponent<IEBoardProps>{
                     break;
                 case MessageTag.Scroll:
                     // TODO 设置board的滚动条位置
+                    console.log("scroll",wbNumber,pageNum);
+                    console.log(boardMap.clone());
+                    console.log(EBoardContext.getKey(wbNumber,pageNum));
                     const board3 = boardMap.get(EBoardContext.getKey(wbNumber,pageNum));
+                    console.log(board3);
                     if(board3){
                         board3.vScrollOffset=vScrollOffset;
                     }
@@ -161,6 +165,7 @@ class EBoard extends React.PureComponent<IEBoardProps>{
                     break;
             }
         });
+        console.log(boardMap);
         this.contextRef.current.recover(boardMap,docPageNumMap,imageListMap,activeWbNumber);
     }
     @Bind

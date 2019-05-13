@@ -31,13 +31,12 @@ class StarDispatch{
             this._promise=this._promise.then(()=>{
                 let obj = this.getObject(objectId) as Star;
                 const {center,radius,angle,fill,stroke,strokeWidth} = attributes;
-                const start = obj?obj.radius:0;
-                const _angle = obj?obj.calcAngle:0;
-                const offset = radius-start;
-                const duration = Math.max(offset,angle-_angle);
                 // finalPoints
                 const beforePoints = obj?obj.points:new Array(10).fill(center);
                 const finalPoints = StarBrush.calcPointsByRadius(center,radius,angle);
+                const _before = beforePoints[0];
+                const _next = finalPoints[0];
+                const duration= Math.sqrt(Math.pow(_next.x-_before.x,2)+Math.pow(_next.y-_before.y,2));
                 return new Promise((resolve,reject)=>{
                     fabric.util.animate({
                         byValue:100,
@@ -54,8 +53,7 @@ class StarDispatch{
                             if(obj){
                                 this.canvas.remove(obj);
                             }
-                            // const points = StarBrush.calcPointsByRadius(center,value,angle);
-                            obj=new Star(objectId,this.context,value,angle,points,{
+                            obj=new Star(objectId,this.context,points,{
                                 fill,
                                 stroke,
                                 strokeWidth,
@@ -78,7 +76,7 @@ class StarDispatch{
             if(obj){
                 this.canvas.remove(obj);
             }
-            obj=new Star(objectId,this.context,radius,angle,finalPoints,{
+            obj=new Star(objectId,this.context,finalPoints,{
                 fill,
                 stroke,
                 strokeWidth,

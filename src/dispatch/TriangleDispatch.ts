@@ -6,13 +6,12 @@
  * @disc:TriangleDispatcher
  */
 
+import {fabric} from 'fabric';
 import {Bind} from 'lodash-decorators';
 import {Canvas} from '../derived/Canvas';
 import {Point} from '../derived/Point';
 import {Triangle} from '../derived/Triangle';
-import {fabric} from "fabric";
 import {IBrushContext, IObject} from '../interface/IBrush';
-
 
 class TriangleDispatch{
     private canvas:Canvas;
@@ -37,8 +36,7 @@ class TriangleDispatch{
                 const widthOffset = Math.abs(endPoint.x-beforeEnd.x);
                 const heightOffset = Math.abs(endPoint.y-beforeEnd.y);
                 const byWidth = widthOffset>heightOffset;
-                const offset = byWidth?widthOffset:heightOffset;
-                const duration = offset;
+                const duration = byWidth ? widthOffset : heightOffset;
                 return new Promise((resolve,reject)=>{
                     fabric.util.animate({
                         byValue:100,

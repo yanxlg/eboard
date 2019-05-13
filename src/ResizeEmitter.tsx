@@ -6,18 +6,24 @@
 import {Bind,Debounce} from "lodash-decorators";
 import React, {RefObject} from 'react';
 import "./style/layout.less";
-import {EBoardContext, EventList, IEBoardContext} from './EBoardContext';
 
-class ResizeEmitter extends React.PureComponent{
-    public static contextType = EBoardContext.Context;
-    public context:IEBoardContext;
+declare interface IResizeEmitterProps {
+    onResize:({offsetWidth,offsetHeight}:{offsetWidth:number,offsetHeight:number})=>void;
+}
+class ResizeEmitter extends React.Component<IResizeEmitterProps>{
     private iframeRef:RefObject<HTMLIFrameElement>=React.createRef();
+    shouldComponentUpdate(
+        nextProps: Readonly<IResizeEmitterProps>, nextState: Readonly<{}>,
+        nextContext: any): boolean {
+        return false;
+    }
+    
     @Bind
     @Debounce(50)
     private onResize(){
         const iframe = this.iframeRef.current;
         const {offsetWidth,offsetHeight} = iframe;
-        this.context.eventEmitter.trigger(EventList.Resize,{offsetWidth,offsetHeight});
+        this.props.onResize({offsetWidth,offsetHeight});
     }
     componentDidMount(): void {
         const iframe = this.iframeRef.current;

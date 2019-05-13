@@ -36,9 +36,14 @@ class CircleBrush extends BaseBrush<Circle> implements IBrush{
         this.drawDot(this._startPoint);
     };
     protected onMouseMove(pointer:fabric.Point){
+        // pointer 相等就pass
         pointer=new Point(pointer);
-        this._startPoint.radius=Math.ceil(Math.sqrt(Math.pow(pointer.x-this._startPoint.x,2) +
+        const radius = Math.ceil(Math.sqrt(Math.pow(pointer.x-this._startPoint.x,2) +
             Math.pow(pointer.y-this._startPoint.y,2)));
+        if(radius===this._startPoint.radius){
+            return;
+        }
+        this._startPoint.radius=radius;
         this.canvas.clearContext(this.canvas.contextTop);
         this.drawDot(this._startPoint);
         this.dispatchMessage(this.objectId,this._startPoint);

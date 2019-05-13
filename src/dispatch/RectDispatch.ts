@@ -36,20 +36,20 @@ class RectDispatch{
                 const heightOffset = Math.abs(height-_height);
                 const byWidth = widthOffset>heightOffset;
                 const offset = byWidth?widthOffset:heightOffset;
-                const duration = offset;
+                const duration = offset/5;
                 return new Promise((resolve,reject)=>{
                     if(0 === offset){
                         resolve();
                         return;
                     }
                     fabric.util.animate({
-                        byValue:offset,
+                        byValue:100,
+                        endValue: 100,
+                        startValue: 0,
                         duration,
-                        endValue: offset,
-                        startValue: byWidth?_width:_height,
                         onChange:(value:number,valuePerc:number)=>{
-                            const __width = byWidth?value:(width-_width)*valuePerc+_width;
-                            const __height = byWidth?(height-_height)*valuePerc+_height:value;
+                            const __width = (width-_width)*valuePerc+_width;
+                            const __height = (height-_height)*valuePerc+_height;
                             this.canvas.renderOnAddRemove=false;
                             if(obj){
                                 this.canvas.remove(obj);

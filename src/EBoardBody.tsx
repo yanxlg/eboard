@@ -12,7 +12,7 @@ import './style/cursor.less';
 
 // 延迟初始化加载
 
-declare interface IEboardBodyState {
+declare interface IEBoardBodyState {
     width?:number;
     height?:number;
     dimensions?:{
@@ -21,7 +21,7 @@ declare interface IEboardBodyState {
     }
 }
 
-class EBoardBody extends React.Component<{},IEboardBodyState>{
+class EBoardBody extends React.Component<{},IEBoardBodyState>{
     public static contextType = EBoardContext.Context;
     public context:IEBoardContext;
     private containerRef:RefObject<HTMLDivElement>=React.createRef();
@@ -66,13 +66,19 @@ class EBoardBody extends React.Component<{},IEboardBodyState>{
     componentDidMount(): void {
         this.resize();
     }
+    @Bind
+    private getFrameProps(){
+        const {allowDocControl,updateVScrollOffset,hasBoard,updateActiveWbNumber,addBoard,disabled,dispatchMessage,setCacheData,clearUndoRedo,idGenerator,config,eventEmitter,onMessageListener,pushUndoStack} = this.context;
+        return {allowDocControl,updateVScrollOffset,hasBoard,updateActiveWbNumber,addBoard,disabled,dispatchMessage,setCacheData,clearUndoRedo,idGenerator,config,eventEmitter,onMessageListener,pushUndoStack};
+    }
     render(){
         const {width,height,dimensions} = this.state;
         const board = this.context.getActiveBoard();
+        const props=this.getFrameProps();
         return (
             <div className="layout-board-container cursor-default" ref={this.containerRef}>
                 {
-                    board&&dimensions?<BasicFrame {...board} width={width} height={height} dimensions={dimensions} active={true}/>:null
+                    board&&dimensions?<BasicFrame {...board} width={width} height={height} dimensions={dimensions} active={true} {...props}/>:null
                 }
             </div>
         )

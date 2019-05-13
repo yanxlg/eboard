@@ -5,12 +5,11 @@
  * @Last Modified time: 2019/4/16 18:12
  * @disc:CircleDispatch
  */
+import {fabric} from 'fabric';
 import {Bind} from 'lodash-decorators';
 import {Canvas} from '../derived/Canvas';
-import {fabric} from "fabric";
 import {Circle} from '../derived/Circle';
 import {IBrushContext, IObject} from '../interface/IBrush';
-
 
 class CircleDispatch{
     private canvas:Canvas;
@@ -31,15 +30,14 @@ class CircleDispatch{
                 let obj = this.getObject(objectId) as Circle;
                 const {radius,left,top,fill,stroke,strokeWidth} = attributes;
                 const start = obj?obj.radius:0;
-                const end = radius;
-                const offset = end-start;
-                const duration = offset*3;
+                const offset = radius-start;
+                const duration = offset*2;
                 return new Promise((resolve,reject)=>{
                     fabric.util.animate({
-                        byValue:offset,
+                        byValue:100,
+                        endValue: 100,
+                        startValue: 0,
                         duration,
-                        endValue: end,
-                        startValue: start,
                         onChange:(value:number,valuePerc:number)=>{
                             this.canvas.renderOnAddRemove=false;
                             if(obj){
@@ -48,7 +46,7 @@ class CircleDispatch{
                             obj=new Circle(objectId,this.context,{
                                 top,
                                 left,
-                                radius:value,
+                                radius:offset*valuePerc+start,
                                 stroke,
                                 fill,
                                 strokeWidth,

@@ -6,7 +6,7 @@
 import {Bind} from 'lodash-decorators';
 import React, {RefObject} from 'react';
 import {EBoardBody} from './EBoardBody';
-import {EBoardContext} from './EBoardContext';
+import {EBoardContext, EventList} from './EBoardContext';
 import {EBoardTab} from './EBoardTab';
 import {EBoardTool} from './EBoardTool';
 import {FRAME_TYPE_ENUM} from './enums/EBoardEnum';
@@ -196,11 +196,15 @@ class EBoard extends React.PureComponent<IEBoardProps>{
         });
         return wbNumber;
     }
+    @Bind
+    private onResize({offsetWidth,offsetHeight}:{offsetWidth:number,offsetHeight:number}){
+        this.contextRef.current.eventEmitter.trigger(EventList.Resize,{offsetWidth,offsetHeight});
+    }
     public render(){
         const {disabled,allowDocControl} = this.props;
         return (
             <EBoardContext ref={this.contextRef} onMessageListener={this.onMessageListener} disabled={disabled} allowDocControl={allowDocControl}>
-                <ResizeEmitter/>
+                <ResizeEmitter onResize={this.onResize}/>
                 {
                     disabled?null:[
                         <EBoardTab key="tab"/>,

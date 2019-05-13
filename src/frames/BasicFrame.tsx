@@ -6,14 +6,25 @@
 import {Bind} from 'lodash-decorators';
 import React, {RefObject} from 'react';
 import {Pagination} from '../components/pagination';
-import {EBoardCanvas} from '../EBoardCanvas';
-import {EBoardContext, EventList, IEBoardContext} from '../EBoardContext';
+import {EBoardCanvas, IEBoardCanvasContext} from '../EBoardCanvas';
+import {EventList} from '../EBoardContext';
 import {FRAME_TYPE_ENUM} from '../enums/EBoardEnum';
 import "../style/frames.less";
 import PerfectScrollbar from "kxt-web/lib/perfectscrollbar";
 import {MessageTag} from '../enums/MessageTag';
+import {IBaseFrame} from '../interface/IFrame';
 
-declare interface IFrameProps{
+
+export declare interface IFrameContext extends IEBoardCanvasContext{
+    allowDocControl?:boolean;
+    updateVScrollOffset:(vScrollOffset:number,webNumber:string,pageNum?:number)=>void;
+    hasBoard:(wbNumber:string,pageNum?:number)=>boolean;
+    updateActiveWbNumber:(wbNumber:string,pageNum?:number)=>void;
+    addBoard:(frame:IBaseFrame,wbNumber:string,pageNum?:number)=>void;
+}
+
+
+declare interface IFrameProps extends IFrameContext{
     canRemove?:boolean;
     wbIcon?:string;
     wbName?:string;
@@ -35,8 +46,6 @@ declare interface IFrameProps{
 }
 
 class BasicFrame extends React.PureComponent<IFrameProps>{
-    public static contextType = EBoardContext.Context;
-    public context:IEBoardContext;
     private eBoardCanvasRef:RefObject<EBoardCanvas>=React.createRef();
     private scrollRef:RefObject<PerfectScrollbar>=React.createRef();
     constructor(props:IFrameProps){
@@ -51,7 +60,7 @@ class BasicFrame extends React.PureComponent<IFrameProps>{
             const container = this.scrollRef.current.container as HTMLDivElement;
             const top = vScrollOffset*container.scrollHeight;
             this.scrollRef.current.scrollTop(top,true);
-            this.context.updateVScrollOffset(vScrollOffset,wbNumber,pageNum);
+            this.props.updateVScrollOffset(vScrollOffset,wbNumber,pageNum);5
         }
     }
     @Bind
@@ -61,18 +70,18 @@ class BasicFrame extends React.PureComponent<IFrameProps>{
         const {wbNumber,pageNum} = this.props;
         // 记录状态
         const vScrollOffset = container.scrollTop/container.scrollHeight;
-        this.context.onMessageListener({
+        this.props.onMessageListener({
             tag:MessageTag.Scroll,
             wbNumber,
             pageNum,
             vScrollOffset,
         });
-        this.context.updateVScrollOffset(vScrollOffset,wbNumber,pageNum);
+        this.props.updateVScrollOffset(vScrollOffset,wbNumber,pageNum);
     }
     @Bind
     private destroy(){
         if(this.scrollRef.current){
-            this.context.eventEmitter.off(EventList.Scroll, this.scrollListener);
+            this.props.eventEmitter.off(EventList.Scroll, this.scrollListener);
             // @ts-ignore
             const container = this.scrollRef.current.container as HTMLDivElement;
             container.removeEventListener("ps-scroll-end",this.scrollEndListener);
@@ -86,7 +95,7 @@ class BasicFrame extends React.PureComponent<IFrameProps>{
             // @ts-ignore
             const container = this.scrollRef.current.container as HTMLDivElement;
             container.addEventListener("ps-scroll-end",this.scrollEndListener);
-            this.context.eventEmitter.on(EventList.Scroll, this.scrollListener);
+            this.props.eventEmitter.on(EventList.Scroll, this.scrollListener);
         }
     }
     componentDidMount(): void {
@@ -105,10 +114,10 @@ class BasicFrame extends React.PureComponent<IFrameProps>{
     @Bind
     private onPageChange(pageNum:number){
         const {wbNumber,images} = this.props;
-        if(this.context.hasBoard(wbNumber,pageNum)){
-            this.context.updateActiveWbNumber(wbNumber,pageNum);
+        if(this.props.hasBoard(wbNumber,pageNum)){
+            this.props.updateActiveWbNumber(wbNumber,pageNum);
         }else{
-            this.context.addBoard({
+            this.props.addBoard({
                 wbType:FRAME_TYPE_ENUM.IMAGES,
                 wbNumber,
                 layoutMode:"top_auto",
@@ -116,9 +125,9 @@ class BasicFrame extends React.PureComponent<IFrameProps>{
                 images,
                 missTab:true,
             },wbNumber,pageNum);
-            this.context.updateActiveWbNumber(wbNumber,pageNum);
+            this.props.updateActiveWbNumber(wbNumber,pageNum);
         }
-        this.context.onMessageListener({
+        this.props.onMessageListener({
             tag:MessageTag.TurnPage,
             wbNumber,
             pageNum
@@ -134,23 +143,39 @@ class BasicFrame extends React.PureComponent<IFrameProps>{
             this.scrollRef.current.scrollTop(top,false);
         }
     }
+    @Bind
+    private getCanvasProps(){
+        const {disabled,allowDocControl,eventEmitter,config,onMessageListener,idGenerator,clearUndoRedo,dispatchMessage,pushUndoStack,setCacheData} = this.props;
+        return {
+            disabled,
+            allowDocControl,
+            eventEmitter,
+            config,
+            onMessageListener,
+            idGenerator,
+            clearUndoRedo,
+            dispatchMessage,
+            pushUndoStack,
+            setCacheData
+        }
+    }
     render(){
         const {active,width,height,dimensions,wbType,pageNum,images} = this.props;
-        const {disabled,allowDocControl,eventEmitter,config,onMessageListener,idGenerator,clearUndoRedo,dispatchMessage,pushUndoStack,setCacheData} = this.context;
-        const scrollDisabled=allowDocControl?false:disabled;
-        
+        const canvasProps = this.getCanvasProps();
+        const scrollDisabled=canvasProps.allowDocControl?false:canvasProps.disabled;
+        console.log("render frame");
         if(wbType===FRAME_TYPE_ENUM.EMPTY){
             return [
                 <div key="content" className={`board-frame ${active?"board-frame-active":""}`} style={{width,height}}>
-                    <EBoardCanvas ref={this.eBoardCanvasRef} onContainerSizeChange={this.onContainerSizeChange} property={this.props} width={width} height={height} dimensions={dimensions} disabled={disabled} eventEmitter={eventEmitter} config={config} onMessageListener={onMessageListener} idGenerator={idGenerator} clearUndoRedo={clearUndoRedo} dispatchMessage={dispatchMessage} pushUndoStack={pushUndoStack} setCacheData={setCacheData}/>
+                    <EBoardCanvas ref={this.eBoardCanvasRef} onContainerSizeChange={this.onContainerSizeChange} property={this.props} width={width} height={height} dimensions={dimensions} {...canvasProps}/>
                 </div>,
             ]
         }else{
             // disabled 表示是主讲还是非主讲，主讲可操作，需要显示touch不可用，非主讲不可操作，支持touch
-            const handlers:any = disabled?['click-rail','drag-thumb','keyboard','wheel','touch']:['click-rail','drag-thumb','keyboard','wheel'];
+            const handlers:any = canvasProps.disabled?['click-rail','drag-thumb','keyboard','wheel','touch']:['click-rail','drag-thumb','keyboard','wheel'];
             return [
                 <PerfectScrollbar handlers={handlers} key="content" ref={this.scrollRef} className={`board-frame ${active?"board-frame-active":""}`} style={{width,height}} disabled={scrollDisabled}>
-                    <EBoardCanvas ref={this.eBoardCanvasRef} onContainerSizeChange={this.onContainerSizeChange} property={this.props} height={height} width={width} dimensions={dimensions} disabled={disabled} eventEmitter={eventEmitter} config={config} onMessageListener={onMessageListener} idGenerator={idGenerator} clearUndoRedo={clearUndoRedo} dispatchMessage={dispatchMessage} pushUndoStack={pushUndoStack} setCacheData={setCacheData}/>
+                    <EBoardCanvas ref={this.eBoardCanvasRef} onContainerSizeChange={this.onContainerSizeChange} property={this.props} height={height} width={width} dimensions={dimensions} {...canvasProps}/>
                 </PerfectScrollbar>,
                 (wbType===FRAME_TYPE_ENUM.IMAGES||wbType===FRAME_TYPE_ENUM.PDF)&&images.length>1?<Pagination key="pagination" disabled={scrollDisabled} current={pageNum} total={images.length} onChange={this.onPageChange}/>:null
             ]

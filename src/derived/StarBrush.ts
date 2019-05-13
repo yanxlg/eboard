@@ -107,8 +107,14 @@ class StarBrush extends BaseBrush<Star>{
     }
     protected onMouseMove(pointer:fabric.Point) {
         pointer=new Point(pointer);
-        this._radius = Math.sqrt(Math.pow(this._startPoint.x-pointer.x,2)+Math.pow(this._startPoint.y-pointer.y,2));
-        this._angle = this.calcAngle(pointer);
+        // radius 和angle 不变则不触发
+        const radius = Math.sqrt(Math.pow(this._startPoint.x-pointer.x,2)+Math.pow(this._startPoint.y-pointer.y,2));
+        const angle = this.calcAngle(pointer);
+        if(this._angle===angle&&this._radius===radius){
+            return;
+        }
+        this._radius = radius;
+        this._angle = angle;
         this._points = StarBrush.calcPointsByRadius(this._startPoint,this._radius,this._angle);
         this.canvas.clearContext(this.canvas.contextTop);
         this._render();
@@ -167,7 +173,7 @@ class StarBrush extends BaseBrush<Star>{
     protected _finalizeAndAddPath(){
         const originalRenderOnAddRemove = this.canvas.renderOnAddRemove;
         this.canvas.renderOnAddRemove = false;
-        const square = new Star(this.objectId,this.context,this._radius,this._angle,this._points,{
+        const square = new Star(this.objectId,this.context,this._points,{
             fill:this.fill,
             stroke:this.stroke,
             strokeWidth:this.width,

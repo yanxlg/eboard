@@ -163,7 +163,6 @@ class BasicFrame extends React.PureComponent<IFrameProps>{
         const {active,width,height,dimensions,wbType,pageNum,images} = this.props;
         const canvasProps = this.getCanvasProps();
         const scrollDisabled=canvasProps.allowDocControl?false:canvasProps.disabled;
-        console.log("render frame");
         if(wbType===FRAME_TYPE_ENUM.EMPTY){
             return [
                 <div key="content" className={`board-frame ${active?"board-frame-active":""}`} style={{width,height}}>

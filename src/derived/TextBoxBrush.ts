@@ -42,8 +42,11 @@ class TextBoxBrush{
     }
     @Bind
     private onMouseDown(e:IEvent){
+        if(!this.instance){
+            e.e.stopPropagation();// 禁止冒泡
+        }
         if(void 0 !== this.instance){
-            window.removeEventListener("mouseDown",this.onMouseUp);
+            window.removeEventListener("mousedown",this.onMouseUp);
             this.canvas.renderOnAddRemove=false;
             this.instance.exitEditing();
             if("" === this.instance.text){
@@ -55,7 +58,7 @@ class TextBoxBrush{
             this.canvas.renderOnAddRemove=true;
             return;
         }
-        window.addEventListener("mouseDown",this.onMouseUp);
+        window.addEventListener("mousedown",this.onMouseUp);
         const _p = this.canvas.getPointer(e.e);
         const pointer=new Point(_p.x,_p.y);
         this.objectId=this.context.idGenerator.getId();
@@ -117,12 +120,12 @@ class TextBoxBrush{
         }
         this.instance=undefined;
         this.objectId=undefined;
-        window.removeEventListener("mouseDown",this.onMouseUp);
+        window.removeEventListener("mousedown",this.onMouseUp);
     }
     @Bind
     public destroy(){
         this.canvas.off("mouse:down",this.onMouseDown);
-        window.removeEventListener("mouseDown",this.onMouseUp);
+        window.removeEventListener("mousedown",this.onMouseUp);
     }
 }
 

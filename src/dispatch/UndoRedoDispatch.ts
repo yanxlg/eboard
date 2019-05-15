@@ -6,8 +6,9 @@
  * @disc:UndoRedo
  */
 import {Bind} from 'lodash-decorators';
-import {TOOL_TYPE} from '../Config';
+import {SHAPE_TYPE, TOOL_TYPE} from '../Config';
 import {Canvas} from '../derived/Canvas';
+import {EBoardCanvas} from '../EBoardCanvas';
 import {EventList} from '../EBoardContext';
 import {MessageTag} from '../enums/MessageTag';
 import {fabric} from "fabric";
@@ -16,9 +17,11 @@ import {IBrushContext} from '../interface/IBrush';
 class UndoRedoDispatch {
     protected readonly canvas:Canvas;
     public context:IBrushContext;
-    constructor(canvas:Canvas,context:IBrushContext) {
+    private eboardCanvas:EBoardCanvas;
+    constructor(canvas:Canvas,context:IBrushContext,eboardCanvas:EBoardCanvas) {
         this.canvas=canvas;
         this.context=context;
+        this.eboardCanvas=eboardCanvas;
         this.context.eventEmitter.on(EventList.ObjectAdd, this.onObjectAdd);
         this.context.eventEmitter.on(EventList.ObjectModify, this.onObjectModified);
         // current stack
@@ -114,6 +117,39 @@ class UndoRedoDispatch {
                     }else{
                         instance.visible=true;
                         this.canvas.requestRenderAll();
+                    }
+                }else{
+                    // TODO 如果没有需要添加
+                    const {objectId,attributes,timestamp} = data;
+                    switch (shapeType) {
+                        case TOOL_TYPE.Pencil:
+                            this.eboardCanvas.pencilDispatch.onDraw(objectId,timestamp,attributes,false);
+                            break;
+                        case TOOL_TYPE.Text:
+                            this.eboardCanvas.textDispatch.onDraw(objectId,timestamp,attributes,false);
+                            break;
+                        case SHAPE_TYPE.Line:
+                            this.eboardCanvas.lineDispatch.onDraw(objectId,timestamp,attributes,false);
+                            break;
+                        case SHAPE_TYPE.Arrow:
+                            this.eboardCanvas.arrowDispatch.onDraw(objectId,timestamp,attributes,false);
+                            break;
+                        case SHAPE_TYPE.Circle:
+                        case SHAPE_TYPE.HollowCircle:
+                            this.eboardCanvas.circleDispatch.onDraw(objectId,timestamp,attributes,false);
+                            break;
+                        case SHAPE_TYPE.Rect:
+                        case SHAPE_TYPE.HollowRect:
+                            this.eboardCanvas.rectDispatch.onDraw(objectId,timestamp,attributes,false);
+                            break;
+                        case SHAPE_TYPE.Star:
+                        case SHAPE_TYPE.HollowStar:
+                            this.eboardCanvas.starDispatch.onDraw(objectId,timestamp,attributes,false);
+                            break;
+                        case SHAPE_TYPE.Triangle:
+                        case SHAPE_TYPE.HollowTriangle:
+                            this.eboardCanvas.triangleDispatch.onDraw(objectId,timestamp,attributes,false);
+                            break;
                     }
                 }
                 break;

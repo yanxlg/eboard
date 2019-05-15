@@ -91,18 +91,18 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
     private brush:any;
     
     
-    private pencilDispatch:PencilDispatch;
-    private textDispatch:TextBoxDispatch;
-    private lineDispatch:LineDispatch;
-    private arrowDispatch:ArrowDispatch;
-    private circleDispatch:CircleDispatch;
-    private rectDispatch:RectDispatch;
-    private starDispatch:StarDispatch;
-    private triangleDispatch:TriangleDispatch;
-    private eraserDispatch:EraserDispatch;
-    private transformDispatch:SelectDispatch;
-    private feruleDispatch:FeruleDispatch;
-    private undoRedoDispatch:UndoRedoDispatch;
+    public pencilDispatch:PencilDispatch;
+    public textDispatch:TextBoxDispatch;
+    public lineDispatch:LineDispatch;
+    public arrowDispatch:ArrowDispatch;
+    public circleDispatch:CircleDispatch;
+    public rectDispatch:RectDispatch;
+    public starDispatch:StarDispatch;
+    public triangleDispatch:TriangleDispatch;
+    public eraserDispatch:EraserDispatch;
+    public transformDispatch:SelectDispatch;
+    public feruleDispatch:FeruleDispatch;
+    public undoRedoDispatch:UndoRedoDispatch;
     constructor(props:IEBoardCanvasProps) {
         super(props);
         this.initImage(props);
@@ -202,7 +202,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
         if(cacheMessage){
             // 根据消息进行恢复
             cacheMessage.map((message:any)=>{
-                props.dispatchMessage(message,0,false);
+                props.dispatchMessage(message,0,false);// undo redo 可能不起作用
             })
         }
         // update brush
@@ -666,7 +666,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
         this.eraserDispatch=new EraserDispatch(this.fabricCanvas,brushContext);
         this.transformDispatch=new SelectDispatch(this.fabricCanvas,brushContext);
         this.feruleDispatch=new FeruleDispatch(this.fabricCanvas,brushContext);
-        this.undoRedoDispatch=new UndoRedoDispatch(this.fabricCanvas,brushContext);
+        this.undoRedoDispatch=new UndoRedoDispatch(this.fabricCanvas,brushContext,this);
     }
     render(){
         return (

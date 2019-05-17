@@ -26,8 +26,9 @@ class EraserDispatch{
     public onDraw(objectIds:string[]){
         objectIds.map((objectId:string)=>{
             let obj = this.getObject(objectId);
-            obj.visible=false;
-            console.log(obj);
+            if(obj){
+                obj.visible=false;
+            }
         });
         this.canvas.discardActiveObject();
         this.canvas.requestRenderAll();

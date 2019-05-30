@@ -54,7 +54,9 @@ fabric.Object.prototype.toObject=function(){
         cornerSize:this.cornerSize,
         borderScaleFactor:this.borderScaleFactor,
         text:this["text"],
-        fontSize:this["fontSize"]
+        fontSize:this["fontSize"],
+        fill:this.fill||null,
+        radius:this["radius"],
     });
 };
 
@@ -133,25 +135,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
     }
     shouldComponentUpdate(nextProps: Readonly<IEBoardCanvasProps>, nextState: Readonly<{}>, nextContext: any): boolean {
         return false;
-        // 判断什么时候需要更新，什么时候不需要更新
-        // dimensions更新变化需要更新，config更新变化需要更新，wbNumber,pageNum更新需要更新
-       /* if(JSON.stringify(this.props.config)!==JSON.stringify(nextProps.config)||this.props.width!==nextProps.width||this.props.height!==nextProps.height||this.props.property.wbNumber!==nextProps.property.wbNumber||this.props.property.pageNum!==nextProps.property.pageNum||this.props.disabled!==nextProps.disabled){
-            return true;
-        }else{
-            return false;
-        }*/
     }
- /*   componentDidUpdate(
-        prevProps: Readonly<IEBoardCanvasProps>, prevState: Readonly<{}>,
-        snapshot?: any): void {
-        if(this.props.property.wbNumber!==prevProps.property.wbNumber||this.props.property.pageNum!==prevProps.property.pageNum){
-            this.init();
-        }else if(prevProps.width!==this.props.width||prevProps.height!==this.props.height){
-            this.layout();
-        }
-        this.initBrush(this.props);
-        
-    }*/
     componentWillUnmount(): void {
         // 数据cache
         this.destroy();
@@ -197,7 +181,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
         this.layout(props);
         const {cacheJSON,cacheMessage} = props.property;
         if(cacheJSON){
-            this.fabricCanvas.loadFromJSON(JSON.parse(cacheJSON),()=>this.fabricCanvas.renderAll());
+            this.fabricCanvas.loadFromJSON(cacheJSON,()=>this.fabricCanvas.renderAll());
         }
         if(cacheMessage){
             // 根据消息进行恢复

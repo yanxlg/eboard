@@ -40,6 +40,22 @@ import {Cursor} from './untils/Cursor';
 
 fabric.Object.prototype.objectCaching = false;// disable cache
 
+
+const _requestAnimFrame = function(callback:any) {
+    return window.setTimeout(callback, 1000 / 60);
+};
+
+fabric.util.requestAnimFrame=function requestAnimFrame() {
+    return _requestAnimFrame.apply(window, arguments);
+};
+
+// @ts-ignore
+fabric.util.cancelAnimFrame= function cancelAnimFrame() {
+    return window.clearTimeout.apply(window, arguments);
+};
+
+
+
 // 部分数据需要进行缓存
 const toObject = fabric.Object.prototype.toObject;
 fabric.Object.prototype.toObject=function(){
@@ -107,7 +123,8 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
     public undoRedoDispatch:UndoRedoDispatch;
     constructor(props:IEBoardCanvasProps) {
         super(props);
-        this.initImage(props);
+        console.log("props",this.props);
+        this.initImage();
     }
     componentDidMount(): void {
         const container = this.containerRef.current;
@@ -116,25 +133,37 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
             skipTargetFind:true,
             enableRetinaScaling:false
         });
-        this.initBrush(this.props);
+        this.initBrush();
         this.initDispatch();
         this.dispatchListener();
-        this.init(this.props);
+        this.init();
     }
     componentWillReceiveProps(nextProps: Readonly<IEBoardCanvasProps>, nextContext: IEBoardContext): void {
         // 数据缓存
         if(this.props.property.wbNumber!==nextProps.property.wbNumber||this.props.property.pageNum!==nextProps.property.pageNum){
             this.destroy();
-            this.init(nextProps);
+            this.forceUpdate(()=>{
+                this.init();// 需要使用nextProps
+            });
         }else if(nextProps.width!==this.props.width||nextProps.height!==this.props.height){
-            this.layout(nextProps);
+            this.forceUpdate(()=>{
+                this.layout();
+            });
         }
         if(JSON.stringify(this.props.config)!==JSON.stringify(nextProps.config)||this.props.disabled!==nextProps.disabled){
-            this.initBrush(nextProps);
+            this.forceUpdate(()=>{
+                this.initBrush();
+            });
         }
     }
     shouldComponentUpdate(nextProps: Readonly<IEBoardCanvasProps>, nextState: Readonly<{}>, nextContext: any): boolean {
         return false;
+    }
+    componentDidUpdate(
+        prevProps: Readonly<IEBoardCanvasProps>, prevState: Readonly<{}>,
+        snapshot?: any): void {
+        // 需要重新init
+        // this.init();
     }
     componentWillUnmount(): void {
         // 数据cache
@@ -160,8 +189,8 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
     }
     
     @Bind
-    private initImage(props:IEBoardCanvasProps){
-        const {property} = props;
+    private initImage(){
+        const {property} = this.props;
         const {wbType,images,pageNum} = property;
         if(wbType===FRAME_TYPE_ENUM.IMAGES){
             this.image=null;
@@ -174,23 +203,24 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
         }
     }
     @Bind
-    private init(props:IEBoardCanvasProps){
+    private init(){
         // cache restore
         this.fabricCanvas.clear();
-        this.initImage(props);
-        this.layout(props);
-        const {cacheJSON,cacheMessage} = props.property;
+        this.initImage();
+        this.layout();
+        const {property} = this.props;
+        const {cacheJSON,cacheMessage,wbNumber,pageNum} = property;
         if(cacheJSON){
             this.fabricCanvas.loadFromJSON(cacheJSON,()=>this.fabricCanvas.renderAll());
         }
         if(cacheMessage){
             // 根据消息进行恢复
             cacheMessage.map((message:any)=>{
-                props.dispatchMessage(message,0,false);// undo redo 可能不起作用
+                this.props.dispatchMessage(message,0,false);// undo redo 可能不起作用
             })
         }
         // update brush
-        this.brush&&this.brush.update(props.property.wbNumber,props.property.pageNum);
+        this.brush&&this.brush.update(wbNumber,pageNum);
     }
     @Bind
     private destroy(){
@@ -379,16 +409,16 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
         this.props.eventEmitter.off(EventList.Redo,this.redoListener);
     }
     @Bind
-    private layout(props:IEBoardCanvasProps){
-        let {width:canvasWidth,height:canvasHeight,property} = props;
-        const dimensions = Object.assign({},props.dimensions);
+    private layout(){
+        let {width:canvasWidth,height:canvasHeight,property,dimensions:_dimensions} = this.props;
+        const dimensions = Object.assign({},_dimensions);
         const {wbType} = property;
         if(!this.fabricCanvas){return}
         switch (wbType) {
             case FRAME_TYPE_ENUM.EMPTY:
                 this.fabricCanvas.setDimensions({width:canvasWidth,height:canvasHeight});// 设置样式大小
                 this.fabricCanvas.setDimensions(dimensions,{backstoreOnly:true});// 设置canvas 画布大小
-                props.onContainerSizeChange();
+                this.props.onContainerSizeChange();
                 break;
             case FRAME_TYPE_ENUM.IMAGES:
             case FRAME_TYPE_ENUM.PDF:
@@ -412,7 +442,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
                             dimensions.height=dimensions.width*imageRatio;
                             this.fabricCanvas.setDimensions({width:canvasWidth,height:canvasWidth*imageRatio});// 设置样式大小
                             this.fabricCanvas.setDimensions(dimensions,{backstoreOnly:true});// 设置canvas 画布大小
-                            props.onContainerSizeChange();
+                            this.props.onContainerSizeChange();
                             Common.imgeLoaded(this.image,()=>{
                                 this.bgObject = new fabric.Image(this.image, {
                                     height: size.height,
@@ -431,7 +461,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
                     // without scroll
                     this.fabricCanvas.setDimensions({width:canvasWidth,height:canvasHeight});// 设置样式大小
                     this.fabricCanvas.setDimensions(dimensions,{backstoreOnly:true});// 设置canvas 画布大小
-                    props.onContainerSizeChange();
+                    this.props.onContainerSizeChange();
                     // calc 图片大小
                     let imageW=0,imageH=0;
                     const xRatio = width / this.imageWidth;
@@ -477,8 +507,8 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
     
     
     @Bind
-    private initBrush(props:IEBoardCanvasProps){
-        const {config,disabled} = props;
+    private initBrush(){
+        const {config,disabled} = this.props;
         const {toolType,shapeType,shapeColor,pencilColor,pencilWidth,strokeWidth,fontSize,fontColor} = config;
         const {property} = this.props;
         const {wbNumber,pageNum} = property as any;
@@ -495,9 +525,6 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
         if(disabled){
             return;
         }
-        
-        
-        
         
         const brushContext = this.getBrushContext();
         switch (toolType) {

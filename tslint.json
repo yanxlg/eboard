@@ -16,7 +16,8 @@
     "no-unused-expression": false,
     "no-bitwise": false,
     "no-string-literal": false,
-    "comment-format": false
+    "comment-format": false,
+    "only-arrow-functions": false
   },
   "linterOptions": {
     "exclude": [

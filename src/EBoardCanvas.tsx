@@ -15,7 +15,7 @@ import {PencilBrush} from './derived/PencilBrush';
 import {RectBrush} from './derived/RectBrush';
 import {SelectBrush} from './derived/SelectBrush';
 import {StarBrush} from './derived/StarBrush';
-import {TextBoxBrush} from './derived/TextBoxBrush';
+import {ITextBrush} from './derived/ITextBrush';
 import {TriangleBrush} from './derived/TriangleBrush';
 import {ArrowDispatch} from './dispatch/ArrowDispatch';
 import {CircleDispatch} from './dispatch/CircleDispatch';
@@ -26,7 +26,7 @@ import {PencilDispatch} from './dispatch/PencilDispatch';
 import {RectDispatch} from './dispatch/RectDispatch';
 import {SelectDispatch} from './dispatch/SelectDispatch';
 import {StarDispatch} from './dispatch/StarDispatch';
-import {TextBoxDispatch} from './dispatch/TextBoxDispatch';
+import {ITextDispatch} from './dispatch/ITextDispatch';
 import {TriangleDispatch} from './dispatch/TriangleDispatch';
 import {UndoRedoDispatch} from './dispatch/UndoRedoDispatch';
 import {EventList, IEBoardContext} from './EBoardContext';
@@ -110,7 +110,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
     
     
     public pencilDispatch:PencilDispatch;
-    public textDispatch:TextBoxDispatch;
+    public textDispatch:ITextDispatch;
     public lineDispatch:LineDispatch;
     public arrowDispatch:ArrowDispatch;
     public circleDispatch:CircleDispatch;
@@ -545,7 +545,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
                 break;
             case TOOL_TYPE.Text:
                 this.fabricCanvas.isDrawingMode=false;
-                this.brush = new TextBoxBrush(this.fabricCanvas,brushContext,wbNumber,pageNum);
+                this.brush = new ITextBrush(this.fabricCanvas,brushContext,wbNumber,pageNum);
                 this.fabricCanvas.defaultCursor=this.brush.cursorType;
                 this.fabricCanvas.setCursor(this.brush.cursorType);
                 this.brush.fontSize = fontSize;
@@ -667,7 +667,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
     private initDispatch(){
         const brushContext = this.getBrushContext();
         this.pencilDispatch=new PencilDispatch(this.fabricCanvas,brushContext);
-        this.textDispatch=new TextBoxDispatch(this.fabricCanvas,brushContext);
+        this.textDispatch=new ITextDispatch(this.fabricCanvas,brushContext);
         this.lineDispatch=new LineDispatch(this.fabricCanvas,brushContext);
         this.arrowDispatch=new ArrowDispatch(this.fabricCanvas,brushContext);
         this.circleDispatch=new CircleDispatch(this.fabricCanvas,brushContext);

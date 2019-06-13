@@ -8,12 +8,12 @@
 
 import {Bind} from 'lodash-decorators';
 import {Canvas} from '../derived/Canvas';
-import {TextBox} from '../derived/TextBox';
-import {TextBoxBrush} from '../derived/TextBoxBrush';
+import {IText} from '../derived/IText';
+import {ITextBrush} from '../derived/ITextBrush';
 import {IBrushContext, IObject} from '../interface/IBrush';
 
 
-class TextBoxDispatch{
+class ITextDispatch{
     private canvas:Canvas;
     private readonly context:IBrushContext;
     private _promise:Promise<any>=new Promise<any>((resolve)=>resolve());
@@ -29,18 +29,18 @@ class TextBoxDispatch{
     public onDraw(objectId:string,timestamp:number,attributes:any,animation:boolean){
         this._promise=this._promise.then(()=>{
             return new Promise((resolve,reject)=>{
-                let obj = this.getObject(objectId) as TextBox;
+                let obj = this.getObject(objectId) as IText;
                 const {text,fontSize,left,top,fill} = attributes;
                 this.canvas.renderOnAddRemove=false;
                 if(obj){
                     this.canvas.remove(obj);
                 }
-                obj=new TextBox(objectId,this.context,text,{
+                obj=new IText(objectId,this.context,text,{
                     fontSize,
                     left,
                     fill,
                     top,
-                    fontFamily:TextBoxBrush.fontFamily
+                    fontFamily:ITextBrush.fontFamily
                 });
                 this.canvas.add(obj);
                 this.canvas.requestRenderAll();
@@ -51,4 +51,4 @@ class TextBoxDispatch{
     }
 }
 
-export {TextBoxDispatch};
+export {ITextDispatch};

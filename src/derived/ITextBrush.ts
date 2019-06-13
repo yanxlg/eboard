@@ -14,15 +14,15 @@ import {IBrushContext} from '../interface/IBrush';
 import {Cursor} from '../untils/Cursor';
 import {Canvas} from './Canvas';
 import {Point} from './Point';
-import {TextBox} from './TextBox';
+import {IText} from './IText';
 
-class TextBoxBrush{
+class ITextBrush{
     public cursorType=Cursor.text;
     public canvas:Canvas;
     private readonly context:IBrushContext;
     public fontSize:number;
     public fontColor:string;
-    private instance:TextBox;
+    private instance:IText;
     private _cacheBeforeText:string;
     private objectId:string;
     public static fontFamily:string='Microsoft YaHei,"Times New Roman"';
@@ -62,12 +62,12 @@ class TextBoxBrush{
         const _p = this.canvas.getPointer(e.e);
         const pointer=new Point(_p.x,_p.y);
         this.objectId=this.context.idGenerator.getId();
-        this.instance = new TextBox(this.objectId,this.context,'',{
+        this.instance = new IText(this.objectId,this.context,'',{
             left:pointer.x,
             top:pointer.y,
             fontSize:this.fontSize,
             fill:this.fontColor,
-            fontFamily:TextBoxBrush.fontFamily,
+            fontFamily:ITextBrush.fontFamily,
         });
         this._cacheBeforeText="";
         this.instance.on("changed",()=>{
@@ -129,4 +129,4 @@ class TextBoxBrush{
     }
 }
 
-export {TextBoxBrush}
+export {ITextBrush}

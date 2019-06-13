@@ -6,16 +6,16 @@
  * @disc:Textbox
  */
 import {fabric} from "fabric";
-import {ITextboxOptions} from 'fabric/fabric-impl';
+import {ITextOptions} from 'fabric/fabric-impl';
 import {IBrushContext} from '../interface/IBrush';
 import {Common} from '../untils/Common';
 
-class TextBox extends fabric.Textbox{
+class IText extends fabric.IText{
     public objectId:string;
-    constructor(objectId:string,context:IBrushContext,text: string, options?: ITextboxOptions){
+    constructor(objectId:string,context:IBrushContext,text: string, options?: ITextOptions){
         super(text,Common.filterParams(options,context));
         this.objectId=objectId;
     }
 }
 
-export {TextBox}
+export {IText}

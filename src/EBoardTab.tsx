@@ -209,14 +209,14 @@ class EBoardTab extends React.PureComponent<{}, ITabInterface>{
         }
         this.context.removeBoard(wbNumber);
         this.context.updateActiveWbNumber(nextActiveId);
-        // 确保切换到同一个页面
-        this.context.onMessageListener({
-            tag:MessageTag.SwitchToFrame,
-            wbNumber:nextActiveId
-        });
         if(nextActiveId){
+            // 确保切换到同一个页面
+            this.context.onMessageListener({
+                tag:MessageTag.SwitchToFrame,
+                wbNumber:nextActiveId
+            });
             const activeItem = scroll.querySelector(`[data-e-id="${nextActiveId}"]`) as HTMLDivElement;
-            this.scrollToView(activeItem,item)
+            this.scrollToView(activeItem,item);
         }else{
             // 无元素
             this.setState({

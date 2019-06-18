@@ -16,7 +16,6 @@ import {IBrushContext, IObject} from '../interface/IBrush';
 class ITextDispatch{
     private canvas:Canvas;
     private readonly context:IBrushContext;
-    private _promise:Promise<any>=new Promise<any>((resolve)=>resolve());
     @Bind
     public getObject(objectId:string){
         return this.canvas.getObjects().find((obj:IObject)=>obj.objectId===objectId);
@@ -27,27 +26,22 @@ class ITextDispatch{
     }
     @Bind
     public onDraw(objectId:string,timestamp:number,attributes:any,animation:boolean){
-        this._promise=this._promise.then(()=>{
-            return new Promise((resolve,reject)=>{
-                let obj = this.getObject(objectId) as IText;
-                const {text,fontSize,left,top,fill} = attributes;
-                this.canvas.renderOnAddRemove=false;
-                if(obj){
-                    this.canvas.remove(obj);
-                }
-                obj=new IText(objectId,this.context,text,{
-                    fontSize,
-                    left,
-                    fill,
-                    top,
-                    fontFamily:ITextBrush.fontFamily
-                });
-                this.canvas.add(obj);
-                this.canvas.requestRenderAll();
-                this.canvas.renderOnAddRemove=true;
-                resolve();
-            })
+        let obj = this.getObject(objectId) as IText;
+        const {text,fontSize,left,top,fill} = attributes;
+        this.canvas.renderOnAddRemove=false;
+        if(obj){
+            this.canvas.remove(obj);
+        }
+        obj=new IText(objectId,this.context,text,{
+            fontSize,
+            left,
+            fill,
+            top,
+            fontFamily:ITextBrush.fontFamily
         });
+        this.canvas.add(obj);
+        this.canvas.requestRenderAll();
+        this.canvas.renderOnAddRemove=true;
     }
 }
 

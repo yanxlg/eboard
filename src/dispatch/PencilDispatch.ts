@@ -10,6 +10,7 @@ import {Canvas} from '../derived/Canvas';
 import {Pencil} from '../derived/Pencil';
 import {fabric} from "fabric";
 import {Point} from '../derived/Point';
+import {EBoardCanvas} from '../EBoardCanvas';
 import {IBrushContext, IObject} from '../interface/IBrush';
 
 
@@ -17,14 +18,16 @@ import {IBrushContext, IObject} from '../interface/IBrush';
 class PencilDispatch{
     private canvas:Canvas;
     private readonly context:IBrushContext;
+    private eBoardCanvas:EBoardCanvas;
     private _promise:Promise<any>=new Promise<any>((resolve)=>resolve());
     @Bind
     public getObject(objectId:string){
         return this.canvas.getObjects().find((obj:IObject)=>obj.objectId===objectId);
     }
-    constructor(canvas:Canvas,context:IBrushContext){
+    constructor(canvas:Canvas,context:IBrushContext,eBoardCanvas:EBoardCanvas){
         this.canvas=canvas;
         this.context=context;
+        this.eBoardCanvas=eBoardCanvas;
     }
     private convertPointsToSVGPath(points:Point[],strokeWidth:number) {
         let path = [], i, width = strokeWidth / 1000,
@@ -58,7 +61,12 @@ class PencilDispatch{
         return path;
     };
     @Bind
-    private renderPoint(objectId:string,obj:Pencil,points:any,stroke:string,strokeWidth:number,callback:()=>void){
+    private renderPoint(objectId:string,obj:Pencil,points:any,stroke:string,strokeWidth:number,wbNumber:string,pageNum:number,callback:()=>void){
+        const {wbNumber:_wbNumber,pageNum:_pageNum} = this.eBoardCanvas.props.property;
+        if(_wbNumber!==wbNumber||_pageNum!==pageNum){
+            callback();
+            return;
+        }
         let before = obj?obj.points.length:1;// 最小从2开始
         const total = points.length;
         if(before===total){
@@ -86,18 +94,18 @@ class PencilDispatch{
             return;
         }
         fabric.util.requestAnimFrame(()=>{
-            this.renderPoint(objectId,obj,points,stroke,strokeWidth,callback);
+            this.renderPoint(objectId,obj,points,stroke,strokeWidth,wbNumber,pageNum,callback);
         });
     }
     @Bind
-    public onDraw(objectId:string,timestamp:number,attributes:any,animation:boolean){
+    public onDraw(objectId:string,timestamp:number,attributes:any,animation:boolean,wbNumber:string,pageNum?:number){
         if(animation){
             this._promise=this._promise.then(()=>{
                 let obj = this.getObject(objectId) as Pencil;
                 const {points,stroke,strokeWidth} = Object.assign({},attributes);
                 return new Promise((resolve,reject)=>{
                     // 按照点进行绘制
-                    this.renderPoint(objectId,obj,points,stroke,strokeWidth,()=>{
+                    this.renderPoint(objectId,obj,points,stroke,strokeWidth,wbNumber,pageNum,()=>{
                         resolve();
                     })
                 })

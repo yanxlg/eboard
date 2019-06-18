@@ -9,22 +9,25 @@ import {fabric} from 'fabric';
 import {Bind} from 'lodash-decorators';
 import {Canvas} from '../derived/Canvas';
 import {Circle} from '../derived/Circle';
+import {EBoardCanvas} from '../EBoardCanvas';
 import {IBrushContext, IObject} from '../interface/IBrush';
 
 class CircleDispatch{
     private canvas:Canvas;
     private readonly context:IBrushContext;
     private _promise:Promise<any>=new Promise<any>((resolve)=>resolve());
+    private eBoardCanvas:EBoardCanvas;
     @Bind
     public getObject(objectId:string){
         return this.canvas.getObjects().find((obj:IObject)=>obj.objectId===objectId);
     }
-    constructor(canvas:Canvas,context:IBrushContext){
+    constructor(canvas:Canvas,context:IBrushContext,eBoardCanvas:EBoardCanvas){
         this.canvas=canvas;
         this.context=context;
+        this.eBoardCanvas=eBoardCanvas;
     }
     @Bind
-    public onDraw(objectId:string,timestamp:number,attributes:any,animation:boolean){
+    public onDraw(objectId:string,timestamp:number,attributes:any,animation:boolean,wbNumber:string,pageNum?:number){
         if(animation){
             this._promise=this._promise.then(()=>{
                 let obj = this.getObject(objectId) as Circle;
@@ -38,6 +41,10 @@ class CircleDispatch{
                         endValue: 100,
                         startValue: 0,
                         duration,
+                        abort:()=>{
+                            const {wbNumber:_wbNumber,pageNum:_pageNum} = this.eBoardCanvas.props.property;
+                            return _wbNumber!==wbNumber||_pageNum!==pageNum;
+                        },
                         onChange:(value:number,valuePerc:number)=>{
                             this.canvas.renderOnAddRemove=false;
                             if(obj){
@@ -60,7 +67,7 @@ class CircleDispatch{
                         onComplete:()=>{
                             resolve();
                         }
-                    });
+                    } as any);
                 })
             });
         }else{

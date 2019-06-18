@@ -8,6 +8,7 @@
 import {SHAPE_TYPE, TOOL_TYPE} from '../Config';
 import {FRAME_TYPE_ENUM} from "../enums/EBoardEnum";
 import {MessageTag} from '../enums/MessageTag';
+import {CacheMessageList} from '../untils/CacheMessageList';
 
 
 export declare interface ITab{
@@ -24,7 +25,7 @@ export declare interface IBaseFrame extends ITab{
     pageNum?:number;
     total?:number;
     cacheJSON?:string;
-    cacheMessage?:string[];
+    cacheMessage?:CacheMessageList;
     missTab?:boolean;
     vScrollOffset?:number;
 }

@@ -6,26 +6,25 @@ import {EBoard} from './EBoard';
 import registerServiceWorker from './registerServiceWorker';
 import {MessageTag} from './enums/MessageTag';
 
-let promise = new Promise((resolve)=>{setTimeout(()=>{resolve()},5000)});
+// let promise = new Promise((resolve)=>{setTimeout(()=>{resolve()},5000)});
 
-// const eBoardRef:RefObject<EBoard> = React.createRef();
+const eBoardRef:RefObject<EBoard> = React.createRef();
 const eBoardRef1:RefObject<EBoard> = React.createRef();
 
 
 function onMessage(message:string){
     // 延迟5s + random()[0-2]s 处理，通过promise来处理
-    console.log(JSON.parse(message));
-    // eBoardRef.current.dispatchMessage(JSON.parse(message) as any,0,true);
-    promise=promise.then(()=>{
+    eBoardRef.current.dispatchMessage(JSON.parse(message) as any,0,true);
+   /* promise=promise.then(()=>{
         return new Promise((resolve)=>{
             const time = Math.random()*100*2;
            setTimeout(()=>{
                // console.log(JSON.stringify(message));
-               // eBoardRef.current.dispatchMessage(JSON.parse(message) as any,0,true);
+               eBoardRef.current.dispatchMessage(JSON.parse(message) as any,0,true);
                resolve();
            },time);
         });
-    })
+    })*/
 }
 
 function addImages(){
@@ -212,11 +211,9 @@ ReactDOM.render(
   document.getElementById('root') as HTMLElement
 );
 
-/*
 ReactDOM.render(
     <EBoard ref={eBoardRef} disabled={true}/>,
     document.getElementById('child') as HTMLElement
 );
-*/
 
 registerServiceWorker();

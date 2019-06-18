@@ -101,7 +101,7 @@ class UndoRedoDispatch {
     }
     @Bind
     public redoAction(data:any){
-        const {tag,objectId,evented} = data;
+        const {tag,objectId,evented,wbNumber,pageNum} = data;
         switch (tag) {
             case MessageTag.Shape:
                 const {shapeType,text} = data;
@@ -123,32 +123,32 @@ class UndoRedoDispatch {
                     const {objectId,attributes,timestamp} = data;
                     switch (shapeType) {
                         case TOOL_TYPE.Pencil:
-                            this.eboardCanvas.pencilDispatch.onDraw(objectId,timestamp,attributes,false);
+                            this.eboardCanvas.pencilDispatch.onDraw(objectId,timestamp,attributes,false,wbNumber,pageNum);
                             break;
                         case TOOL_TYPE.Text:
                             this.eboardCanvas.textDispatch.onDraw(objectId,timestamp,attributes,false);
                             break;
                         case SHAPE_TYPE.Line:
-                            this.eboardCanvas.lineDispatch.onDraw(objectId,timestamp,attributes,false);
+                            this.eboardCanvas.lineDispatch.onDraw(objectId,timestamp,attributes,false,wbNumber,pageNum);
                             break;
                         case SHAPE_TYPE.Arrow:
-                            this.eboardCanvas.arrowDispatch.onDraw(objectId,timestamp,attributes,false);
+                            this.eboardCanvas.arrowDispatch.onDraw(objectId,timestamp,attributes,false,wbNumber,pageNum);
                             break;
                         case SHAPE_TYPE.Circle:
                         case SHAPE_TYPE.HollowCircle:
-                            this.eboardCanvas.circleDispatch.onDraw(objectId,timestamp,attributes,false);
+                            this.eboardCanvas.circleDispatch.onDraw(objectId,timestamp,attributes,false,wbNumber,pageNum);
                             break;
                         case SHAPE_TYPE.Rect:
                         case SHAPE_TYPE.HollowRect:
-                            this.eboardCanvas.rectDispatch.onDraw(objectId,timestamp,attributes,false);
+                            this.eboardCanvas.rectDispatch.onDraw(objectId,timestamp,attributes,false,wbNumber,pageNum);
                             break;
                         case SHAPE_TYPE.Star:
                         case SHAPE_TYPE.HollowStar:
-                            this.eboardCanvas.starDispatch.onDraw(objectId,timestamp,attributes,false);
+                            this.eboardCanvas.starDispatch.onDraw(objectId,timestamp,attributes,false,wbNumber,pageNum);
                             break;
                         case SHAPE_TYPE.Triangle:
                         case SHAPE_TYPE.HollowTriangle:
-                            this.eboardCanvas.triangleDispatch.onDraw(objectId,timestamp,attributes,false);
+                            this.eboardCanvas.triangleDispatch.onDraw(objectId,timestamp,attributes,false,wbNumber,pageNum);
                             break;
                     }
                 }

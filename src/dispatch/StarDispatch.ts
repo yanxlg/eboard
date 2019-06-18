@@ -11,22 +11,25 @@ import {Canvas} from '../derived/Canvas';
 import {Point} from '../derived/Point';
 import {Star} from '../derived/Star';
 import {StarBrush} from '../derived/StarBrush';
+import {EBoardCanvas} from '../EBoardCanvas';
 import {IBrushContext, IObject} from '../interface/IBrush';
 
 class StarDispatch{
     private canvas:Canvas;
     private readonly context:IBrushContext;
+    private eBoardCanvas:EBoardCanvas;
     private _promise:Promise<any>=new Promise<any>((resolve)=>resolve());
     @Bind
     public getObject(objectId:string){
         return this.canvas.getObjects().find((obj:IObject)=>obj.objectId===objectId);
     }
-    constructor(canvas:Canvas,context:IBrushContext){
+    constructor(canvas:Canvas,context:IBrushContext,eBoardCanvas:EBoardCanvas){
         this.canvas=canvas;
         this.context=context;
+        this.eBoardCanvas=eBoardCanvas;
     }
     @Bind
-    public onDraw(objectId:string,timestamp:number,attributes:any,animation:boolean){
+    public onDraw(objectId:string,timestamp:number,attributes:any,animation:boolean,wbNumber:string,pageNum?:number){
         if(animation){
             this._promise=this._promise.then(()=>{
                 let obj = this.getObject(objectId) as Star;
@@ -43,6 +46,10 @@ class StarDispatch{
                         duration,
                         endValue: 100,
                         startValue: 0,
+                        abort:()=>{
+                            const {wbNumber:_wbNumber,pageNum:_pageNum} = this.eBoardCanvas.props.property;
+                            return _wbNumber!==wbNumber||_pageNum!==pageNum;
+                        },
                         onChange:(value:number,valuePerc:number)=>{
                             const points = finalPoints.map((point,index)=>{
                                 const _before = beforePoints[index];
@@ -65,7 +72,7 @@ class StarDispatch{
                         onComplete:()=>{
                             resolve();
                         }
-                    });
+                    } as any);
                 })
             });
         }else{

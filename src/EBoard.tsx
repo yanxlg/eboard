@@ -14,6 +14,7 @@ import {IBaseFrame, IMessage} from './interface/IFrame';
 import {ResizeEmitter} from './ResizeEmitter';
 import "./style/layout.less";
 import {MessageTag} from './enums/MessageTag';
+import {CacheMessageList} from './untils/CacheMessageList';
 import {EMap} from './untils/Map';
 
 
@@ -127,7 +128,7 @@ class EBoard extends React.PureComponent<IEBoardProps>{
                     // TODO 形状，需要记录在board实例中
                     const board1 = boardMap.get(EBoardContext.getKey(wbNumber,pageNum));
                     if(board1){
-                        board1.cacheMessage=board1.cacheMessage||[];
+                        board1.cacheMessage=CacheMessageList.from(board1.cacheMessage);
                         board1.cacheMessage.push(message);
                     }
                     break;
@@ -135,7 +136,7 @@ class EBoard extends React.PureComponent<IEBoardProps>{
                     // TODO 清空board中的缓存字段
                     const board2 = boardMap.get(EBoardContext.getKey(wbNumber,pageNum));
                     if(board2){
-                        board2.cacheMessage=[];
+                        board2.cacheMessage.clear();
                     }
                     break;
                 case MessageTag.Scroll:

@@ -123,7 +123,6 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
     public undoRedoDispatch:UndoRedoDispatch;
     constructor(props:IEBoardCanvasProps) {
         super(props);
-        console.log("props",this.props);
         this.initImage();
     }
     componentDidMount(): void {
@@ -215,7 +214,9 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
         }
         if(cacheMessage){
             // 根据消息进行恢复
+            console.log("读取本地消息缓存---------------------------------------");
             cacheMessage.map((message:any)=>{
+                console.log(message);
                 this.props.dispatchMessage(message,0,false);// undo redo 可能不起作用
             })
         }
@@ -251,7 +252,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
         const {property} = this.props;
         const {pageNum:currentPageNum} = property;
         if(wbNumber===property.wbNumber&&pageNum===currentPageNum){
-            this.pencilDispatch.onDraw(objectId,timestamp,attributes,animation);
+            this.pencilDispatch.onDraw(objectId,timestamp,attributes,animation,wbNumber,pageNum);
         }
     }
     @Bind
@@ -271,7 +272,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
         const {property} = this.props;
         const {pageNum:currentPageNum} = property;
         if(wbNumber===property.wbNumber&&pageNum===currentPageNum){
-            this.lineDispatch.onDraw(objectId,timestamp,attributes,animation);
+            this.lineDispatch.onDraw(objectId,timestamp,attributes,animation,wbNumber,pageNum);
         }
     }
     @Bind
@@ -281,7 +282,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
         const {property} = this.props;
         const {pageNum:currentPageNum} = property;
         if(wbNumber===property.wbNumber&&pageNum===currentPageNum){
-            this.arrowDispatch.onDraw(objectId,timestamp,attributes,animation);
+            this.arrowDispatch.onDraw(objectId,timestamp,attributes,animation,wbNumber,pageNum);
         }
     }
     @Bind
@@ -291,7 +292,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
         const {property} = this.props;
         const {pageNum:currentPageNum} = property;
         if(wbNumber===property.wbNumber&&pageNum===currentPageNum){
-            this.circleDispatch.onDraw(objectId,timestamp,attributes,animation);
+            this.circleDispatch.onDraw(objectId,timestamp,attributes,animation,wbNumber,pageNum);
         }
     }
     @Bind
@@ -301,7 +302,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
         const {property} = this.props;
         const {pageNum:currentPageNum} = property;
         if(wbNumber===property.wbNumber&&pageNum===currentPageNum){
-            this.rectDispatch.onDraw(objectId,timestamp,attributes,animation);
+            this.rectDispatch.onDraw(objectId,timestamp,attributes,animation,wbNumber,pageNum);
         }
     }
     @Bind
@@ -311,7 +312,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
         const {property} = this.props;
         const {pageNum:currentPageNum} = property;
         if(wbNumber===property.wbNumber&&pageNum===currentPageNum){
-            this.starDispatch.onDraw(objectId,timestamp,attributes,animation);
+            this.starDispatch.onDraw(objectId,timestamp,attributes,animation,wbNumber,pageNum);
         }
     }
     @Bind
@@ -321,7 +322,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
         const {property} = this.props;
         const {pageNum:currentPageNum} = property;
         if(wbNumber===property.wbNumber&&pageNum===currentPageNum){
-            this.triangleDispatch.onDraw(objectId,timestamp,attributes,animation);
+            this.triangleDispatch.onDraw(objectId,timestamp,attributes,animation,wbNumber,pageNum);
         }
     }
     @Bind
@@ -666,14 +667,14 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
     @Bind
     private initDispatch(){
         const brushContext = this.getBrushContext();
-        this.pencilDispatch=new PencilDispatch(this.fabricCanvas,brushContext);
+        this.pencilDispatch=new PencilDispatch(this.fabricCanvas,brushContext,this);
         this.textDispatch=new ITextDispatch(this.fabricCanvas,brushContext);
-        this.lineDispatch=new LineDispatch(this.fabricCanvas,brushContext);
-        this.arrowDispatch=new ArrowDispatch(this.fabricCanvas,brushContext);
-        this.circleDispatch=new CircleDispatch(this.fabricCanvas,brushContext);
-        this.rectDispatch=new RectDispatch(this.fabricCanvas,brushContext);
-        this.starDispatch=new StarDispatch(this.fabricCanvas,brushContext);
-        this.triangleDispatch=new TriangleDispatch(this.fabricCanvas,brushContext);
+        this.lineDispatch=new LineDispatch(this.fabricCanvas,brushContext,this);
+        this.arrowDispatch=new ArrowDispatch(this.fabricCanvas,brushContext,this);
+        this.circleDispatch=new CircleDispatch(this.fabricCanvas,brushContext,this);
+        this.rectDispatch=new RectDispatch(this.fabricCanvas,brushContext,this);
+        this.starDispatch=new StarDispatch(this.fabricCanvas,brushContext,this);
+        this.triangleDispatch=new TriangleDispatch(this.fabricCanvas,brushContext,this);
         this.eraserDispatch=new EraserDispatch(this.fabricCanvas,brushContext);
         this.transformDispatch=new SelectDispatch(this.fabricCanvas,brushContext);
         this.feruleDispatch=new FeruleDispatch(this.fabricCanvas,brushContext);

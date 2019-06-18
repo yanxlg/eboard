@@ -12,6 +12,7 @@ import {
     IMessage,
 } from './interface/IFrame';
 import {MessageTag} from './enums/MessageTag';
+import {CacheMessageList} from './untils/CacheMessageList';
 import {EventEmitter} from './untils/EventMitter';
 import {IDGenerator} from './untils/IDGenerator';
 import {EMap} from './untils/Map';
@@ -270,7 +271,7 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
     private setCacheData(json:any,wbNumber:string,pageNum?:number){
         const {boardMap} = this.state;
         const board = boardMap.get(EBoardContext.getKey(wbNumber,pageNum));
-        board&&(board.cacheJSON=json,board.cacheMessage=undefined);
+        board&&(board.cacheJSON=json);
     }
     @Bind
     public addBoard(frame:IBaseFrame,wbNumber:string,pageNum?:number){
@@ -330,6 +331,11 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
     @Bind
     public dispatchMessage(message:IMessage,timestamp:number,animation?:boolean){
         const {tag,wbNumber,pageNum,shapeType,objectId,attributes,wbType,canRemove,wbName,wbIcon,vScrollOffset,objectIds,images,layoutMode,action} = message;
+        const board = this.getBoard(wbNumber,pageNum);
+        if(board){
+            board.cacheMessage=CacheMessageList.from(board.cacheMessage);
+            board.cacheMessage.push(message);
+        }
         if(action==="undo"||action==="redo"){
             this.state.eventEmitter.trigger(action==="undo"?EventList.Undo:EventList.Redo,{
                 ...message,
@@ -510,6 +516,7 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                     wbNumber,
                     pageNum,
                 });
+                board&&board.cacheMessage&&board.cacheMessage.clear();
                 break;
             case MessageTag.Transform:
                 this.state.eventEmitter.trigger(EventList.Transform,{
@@ -538,6 +545,7 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                     objectIds,
                     animation
                 });
+                board&&board.cacheMessage&&board.cacheMessage.delete(objectIds);
                 break;
             case MessageTag.Cursor:
                 this.state.eventEmitter.trigger(EventList.Ferule,{

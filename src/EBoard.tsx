@@ -211,6 +211,10 @@ class EBoard extends React.PureComponent<IEBoardProps>{
             </EBoardContext>
         )
     }
+    @Bind
+    public getActiveWbNumber(){
+        return this.contextRef.current.getActiveWbNumber();
+    }
 }
 
 export {EBoard}

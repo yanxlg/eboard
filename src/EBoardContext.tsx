@@ -129,6 +129,10 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
         };
     }
     @Bind
+    public getActiveWbNumber(){
+        return this.state.activeWbNumber;
+    }
+    @Bind
     public addEmptyFrame(){
         const wbNumber = Date.now().toString();
         const frame = {

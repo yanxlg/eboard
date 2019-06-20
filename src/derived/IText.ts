@@ -16,6 +16,15 @@ class IText extends fabric.IText{
         super(text,Common.filterParams(options,context));
         this.objectId=objectId;
     }
+    // @ts-ignore
+    private _calcTextareaPosition(){// fix textarea position
+        // @ts-ignore
+        const calcPosition = super._calcTextareaPosition();
+        const maxWidth = window.innerWidth;
+        const left = parseInt(calcPosition.left,10);
+        calcPosition.left = Math.min(maxWidth-10,left) + "px";
+        return calcPosition;
+    }
 }
 
 export {IText}

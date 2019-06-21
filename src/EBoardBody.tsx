@@ -68,8 +68,8 @@ class EBoardBody extends React.Component<{},IEBoardBodyState>{
     }
     @Bind
     private getFrameProps(){
-        const {allowDocControl,updateVScrollOffset,hasBoard,updateActiveWbNumber,addBoard,disabled,dispatchMessage,setCacheData,clearUndoRedo,idGenerator,config,eventEmitter,onMessageListener,pushUndoStack} = this.context;
-        return {allowDocControl,updateVScrollOffset,hasBoard,updateActiveWbNumber,addBoard,disabled,dispatchMessage,setCacheData,clearUndoRedo,idGenerator,config,eventEmitter,onMessageListener,pushUndoStack};
+        const {allowDocControl,updateVScrollOffset,hasBoard,updateActiveWbNumber,addBoard,disabled,dispatchMessage,setCacheData,clearCacheMessage,clearUndoRedo,idGenerator,config,eventEmitter,onMessageListener,pushUndoStack} = this.context;
+        return {allowDocControl,updateVScrollOffset,hasBoard,updateActiveWbNumber,addBoard,disabled,dispatchMessage,setCacheData,clearCacheMessage,clearUndoRedo,idGenerator,config,eventEmitter,onMessageListener,pushUndoStack};
     }
     render(){
         const {width,height,dimensions} = this.state;

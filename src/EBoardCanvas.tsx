@@ -81,6 +81,7 @@ export declare interface IEBoardCanvasContext extends IBrushContext{
     disabled:boolean;
     dispatchMessage:(message:IMessage,timestamp:number,animation?:boolean)=>void;
     setCacheData:(json:any,wbNumber:string,pageNo?:number)=>void;
+    clearCacheMessage:(wbNumber:string,pageNo?:number)=>void;
     clearUndoRedo:()=>void;
 }
 
@@ -214,11 +215,11 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
         }
         if(cacheMessage){
             // 根据消息进行恢复
-            console.log("读取本地消息缓存---------------------------------------");
             cacheMessage.map((message:any)=>{
-                console.log(message);
                 this.props.dispatchMessage(message,0,false);// undo redo 可能不起作用
-            })
+            });
+            // 恢复完成后需要清除cacheMessage
+            this.props.clearCacheMessage(wbNumber,pageNum);
         }
         // update brush
         this.brush&&this.brush.update(wbNumber,pageNum);

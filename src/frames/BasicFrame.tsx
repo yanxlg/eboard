@@ -173,7 +173,7 @@ class BasicFrame extends React.PureComponent<IFrameProps>{
             // disabled 表示是主讲还是非主讲，主讲可操作，需要显示touch不可用，非主讲不可操作，支持touch
             const handlers:any = canvasProps.disabled?['click-rail','drag-thumb','keyboard','wheel','touch']:['click-rail','drag-thumb','keyboard','wheel'];
             return [
-                <PerfectScrollbar handlers={handlers} key="content" ref={this.scrollRef} className={`board-frame ${active?"board-frame-active":""}`} style={{width,height}} disabled={scrollDisabled}>
+                <PerfectScrollbar autoHide={false} handlers={handlers} key="content" ref={this.scrollRef} className={`board-frame ${active?"board-frame-active":""}`} style={{width,height}} disabled={scrollDisabled}>
                     <EBoardCanvas ref={this.eBoardCanvasRef} onContainerSizeChange={this.onContainerSizeChange} property={this.props} height={height} width={width} dimensions={dimensions} {...canvasProps}/>
                 </PerfectScrollbar>,
                 (wbType===FRAME_TYPE_ENUM.IMAGES||wbType===FRAME_TYPE_ENUM.PDF)&&images.length>1?<Pagination key="pagination" disabled={scrollDisabled} current={pageNum} total={images.length} onChange={this.onPageChange}/>:null

@@ -135,6 +135,11 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
         return this.state.activeWbNumber;
     }
     @Bind
+    public getCurrentPageNo(){
+        const {docPageNumMap,activeWbNumber} = this.state;
+        return activeWbNumber?docPageNumMap.get(activeWbNumber):undefined;
+    }
+    @Bind
     public addEmptyFrame(){
         const wbNumber = Date.now().toString();
         const frame = {

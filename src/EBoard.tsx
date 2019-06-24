@@ -135,7 +135,7 @@ class EBoard extends React.PureComponent<IEBoardProps>{
                 case MessageTag.Clear:
                     // TODO 清空board中的缓存字段
                     const board2 = boardMap.get(EBoardContext.getKey(wbNumber,pageNum));
-                    if(board2){
+                    if(board2&&board2.cacheMessage){
                         board2.cacheMessage.clear();
                     }
                     break;

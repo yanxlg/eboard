@@ -1,6 +1,6 @@
 {
   "name": "rc-eboard",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "dependencies": {
     "lodash-decorators": "^6.0.1",
     "fabric": "^2.7.0",

@@ -216,8 +216,8 @@ class EBoard extends React.PureComponent<IEBoardProps>{
         return this.contextRef.current.getActiveWbNumber();
     }
     @Bind
-    public getCurrentPageNo(){// 获取当前翻页Index
-        return this.contextRef.current.getCurrentPageNo();
+    public getCurrentPageNum(){// 获取当前翻页Index
+        return this.contextRef.current.getCurrentPageNum();
     }
 }
 

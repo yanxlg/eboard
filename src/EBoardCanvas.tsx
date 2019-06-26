@@ -79,7 +79,7 @@ fabric.Object.prototype.toObject=function(){
 
 export declare interface IEBoardCanvasContext extends IBrushContext{
     disabled:boolean;
-    dispatchMessage:(message:IMessage,timestamp:number,animation?:boolean)=>void;
+    dispatchMessage:(message:IMessage,timestamp:number,animation?:boolean)=>Promise<{}>;
     setCacheData:(json:any,wbNumber:string,pageNo?:number)=>void;
     clearCacheMessage:(wbNumber:string,pageNo?:number)=>void;
     clearUndoRedo:()=>void;
@@ -210,17 +210,31 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
         this.layout();
         const {property} = this.props;
         const {cacheJSON,cacheMessage,wbNumber,pageNum} = property;
-        if(cacheJSON){
-            this.fabricCanvas.loadFromJSON(cacheJSON,()=>this.fabricCanvas.renderAll());
-        }
-        if(cacheMessage){
-            // 根据消息进行恢复
-            cacheMessage.map((message:any)=>{
-                this.props.dispatchMessage(message,0,false);// undo redo 可能不起作用
-            });
-            // 恢复完成后需要清除cacheMessage
-            this.props.clearCacheMessage(wbNumber,pageNum);
-        }
+        let promise=new Promise((resolve,reject)=>{
+           if(cacheJSON){
+               this.fabricCanvas.loadFromJSON(cacheJSON,()=>{
+                   this.fabricCanvas.renderAll();
+                   resolve();
+               });
+           }else{
+               resolve();
+           }
+        });
+        promise.then(()=>{
+            if(cacheMessage){
+                // 根据消息进行恢复
+                let _promise=new Promise((resolve)=>resolve());
+                cacheMessage.map((message:any)=>{
+                    console.log(message);
+                    _promise.then(()=>{
+                        return this.props.dispatchMessage(message,0,false);
+                    });
+                });
+                _promise.then(()=>{
+                    this.props.clearCacheMessage(wbNumber,pageNum);
+                })
+            }
+        });
         // update brush
         this.brush&&this.brush.update(wbNumber,pageNum);
     }

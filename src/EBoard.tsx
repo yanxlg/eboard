@@ -127,7 +127,9 @@ class EBoard extends React.PureComponent<IEBoardProps>{
                 case MessageTag.Delete:
                     // TODO 形状，需要记录在board实例中
                     const board1 = boardMap.get(EBoardContext.getKey(wbNumber,pageNum));
+                    console.log(tag);
                     if(board1){
+                        console.log(board1);
                         board1.cacheMessage=CacheMessageList.from(board1.cacheMessage);
                         board1.cacheMessage.push(message);
                     }
@@ -163,6 +165,7 @@ class EBoard extends React.PureComponent<IEBoardProps>{
             }
         });
         this.contextRef.current.recover(boardMap,docPageNumMap,imageListMap,activeWbNumber);
+        console.log(boardMap);
     }
     @Bind
     public addEmptyFrame(){

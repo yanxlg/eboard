@@ -48,7 +48,7 @@ export declare interface IEBoardContext{
     clearUndoRedo:()=>void;
     undo:()=>void;
     redo:()=>void;
-    dispatchMessage:(message:IMessage,timestamp:number,animation?:boolean)=>void;
+    dispatchMessage:(message:IMessage,timestamp:number,animation?:boolean)=>Promise<{}>;
 }
 
 const Context=React.createContext(null);
@@ -358,7 +358,11 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                 ...message,
                 evented:true
             });
-            return;
+            return new Promise((resolve)=>{
+                setTimeout(()=>{
+                    resolve();
+                },0);// 确保操作结束
+            })
         }
         switch (tag) {
             case MessageTag.CreateFrame:
@@ -577,6 +581,11 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
                 this.removeBoard(wbNumber);
                 break;
         }
+        return new Promise((resolve)=>{
+            setTimeout(()=>{
+                resolve();
+            },0);// 确保操作结束
+        })
     }
     componentWillReceiveProps(
         nextProps: Readonly<IEboardContextProps>, nextContext: any): void {

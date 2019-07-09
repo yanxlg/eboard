@@ -125,13 +125,28 @@ class EBoard extends React.PureComponent<IEBoardProps>{
                 case MessageTag.Shape:
                 case MessageTag.Transform:
                 case MessageTag.Delete:
-                    // TODO 形状，需要记录在board实例中
                     const board1 = boardMap.get(EBoardContext.getKey(wbNumber,pageNum));
-                    console.log(tag);
                     if(board1){
-                        console.log(board1);
                         board1.cacheMessage=CacheMessageList.from(board1.cacheMessage);
                         board1.cacheMessage.push(message);
+                    }else{
+                        const key = EBoardContext.getKey(wbNumber,pageNum);
+                        const cacheMessage=CacheMessageList.from();
+                        cacheMessage.push(message);
+                        boardMap.set(key,{
+                            wbNumber,
+                            wbType:FRAME_TYPE_ENUM.IMAGES,
+                            canRemove,
+                            wbName,
+                            layoutMode:"top_auto",
+                            missTab:true,
+                            images:imageListMap.get(wbNumber)||[],
+                            pageNum,
+                            cacheMessage
+                        });
+                        if(void 0 !== pageNum){
+                            docPageNumMap.set(wbNumber,pageNum);
+                        }
                     }
                     break;
                 case MessageTag.Clear:
@@ -165,7 +180,6 @@ class EBoard extends React.PureComponent<IEBoardProps>{
             }
         });
         this.contextRef.current.recover(boardMap,docPageNumMap,imageListMap,activeWbNumber);
-        console.log(boardMap);
     }
     @Bind
     public addEmptyFrame(){

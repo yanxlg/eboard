@@ -20,7 +20,7 @@
 @dotSize:4px;
 @panelWidth:160px;
 @panelPadding:15px;
-
+@panelItemHeight:24px;
 
 .board-tool{
     position: absolute;
@@ -51,29 +51,6 @@
         &:hover,&.active{
             background-color: #4c84ff;
         }
-        &-pencil{
-            width: @dotSize;
-            height: @dotSize;
-            position: absolute;
-            right: (@padToolbarHeight - @padToolbarIconSize)/2;
-            bottom: (@padToolbarHeight - @padToolbarIconSize)/2;
-            border-radius: @dotSize;
-        }
-        &-text{
-            position: absolute;
-            width: 60%;
-            left: 20%;
-            height: 2px;
-            bottom: (@padToolbarHeight - @padToolbarIconSize)/4;
-        }
-        &-shape{
-            width: @dotSize;
-            height: @dotSize;
-            position: absolute;
-            right: (@padToolbarHeight - @padToolbarIconSize)/2;
-            bottom: (@padToolbarHeight - @padToolbarIconSize)/2;
-            border-radius: @dotSize;
-        }
         &.disabled{
             opacity: 0.5;
             &:extend(.cursor-not-allowed);
@@ -95,11 +72,9 @@
             visibility: visible;
         }
         &-header{
-            border-bottom: 1px solid #555555;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding-bottom: @panelPadding;
         }
         &-sub{
             padding-bottom: 0!important;
@@ -107,13 +82,20 @@
         }
         &-body{
             line-height: 0;
-            padding-top: @panelPadding;
         }
         &-item{
             display: flex;
             flex: 1;
-            //min-width: 25%;
             justify-content: center;
+            height: @panelItemHeight;
+            align-items: center;
+            cursor: pointer;
+        }
+        &-item:hover &-dot{
+            background: white!important;
+        }
+        &-item:hover &-shape,&-item:hover &-font{
+            color: white!important;
         }
         &-color{
             width: 25%;
@@ -151,7 +133,7 @@
             background: #000;
             border-radius: 999px;
             &:extend(.cursor-pointer);
-            &:hover,&.active{
+            &.active{
                 background: white!important;
             }
         }

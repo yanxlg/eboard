@@ -55,7 +55,6 @@ export declare interface IConfig {
     "strokeWidth":number;
     "stroke":string;
     "fill":string;
-    "fontColor":string;
     "fontSize":number;
     "compress":boolean;
     "arrowShape":string;
@@ -64,9 +63,8 @@ export declare interface IConfig {
     "defaultName": string;
     "toolType":TOOL_TYPE;
     "pencilWidth":number;
-    "pencilColor":string;
-    "shapeColor":string;
     "shapeType":SHAPE_TYPE;
+    "pickedColor":string;
 }
 
 const config:IConfig = require("./config.json");

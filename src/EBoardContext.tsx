@@ -78,10 +78,8 @@ declare interface IToolProps {
     toolType?:TOOL_TYPE;
     shapeType?:SHAPE_TYPE;
     pencilWidth?:number;
-    pencilColor?:string;
-    shapeColor?:string;
     fontSize?:number;
-    fontColor?:string;
+    pickedColor?:string;
 }
 
 declare interface IEboardContextProps {

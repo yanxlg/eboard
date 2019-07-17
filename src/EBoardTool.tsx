@@ -15,7 +15,7 @@ declare interface IEBoardToolState {
     left?:number;
     top?:number;
     showPanel:boolean;
-    type?:"pencil"|"text"|"shape"
+    type?:"pencil"|"text"|"shape"|"color"
 }
 
 
@@ -164,12 +164,12 @@ class EBoardTool extends React.Component<{},IEBoardToolState>{
     private showPanel(e:MouseEvent<HTMLButtonElement>){
         const element = e.currentTarget;
         const {offsetLeft,offsetTop,offsetHeight,title} = element;
-        if(/画笔|文字|图形/.test(title)){
+        if(/画笔|文字|图形|颜色/.test(title)){
             this.setState({
                 showPanel:true,
                 left:offsetLeft,
                 top:offsetTop+offsetHeight,
-                type:title==="画笔"?"pencil":title==="文字"?"text":"shape"
+                type:title==="画笔"?"pencil":title==="文字"?"text":title==="颜色"?"color":"shape"
             })
         }else{
             this.setState({
@@ -205,35 +205,14 @@ class EBoardTool extends React.Component<{},IEBoardToolState>{
     private setColor(e:MouseEvent<HTMLDivElement>){
         const element = e.currentTarget;
         const color = element.getAttribute("data-color");
-        const {type} = this.state;
-        switch (type) {
-            case 'pencil':
-                this.context.setToolProps({
-                    toolType:TOOL_TYPE.Pencil,
-                    pencilColor:color
-                });
-                break;
-            case 'shape':
-                this.context.setToolProps({
-                    toolType:TOOL_TYPE.Shape,
-                    shapeColor:color
-                });
-                break;
-            case 'text':
-                this.context.setToolProps({
-                    toolType:TOOL_TYPE.Text,
-                    fontColor:color
-                });
-                break;
-            default:
-                break;
-        }
+        this.context.setToolProps({
+            pickedColor:color
+        });
     }
     render(){
         const {showPanel,left,top,type} = this.state;
         const {config} = this.context;
-        const {fontColor,fontSize,shapeColor,toolType,pencilWidth,pencilColor,shapeType} = config;
-        const activeColor = type==="pencil"?pencilColor:type==="text"?fontColor:shapeColor;
+        const {pickedColor,fontSize,toolType,pencilWidth,shapeType} = config;
         const {activeWbNumber,docPageNumMap} = this.context;
         const pageNum = docPageNumMap.get(activeWbNumber);
         const undoStack = this.context.getUndoStack(activeWbNumber,pageNum);
@@ -242,15 +221,10 @@ class EBoardTool extends React.Component<{},IEBoardToolState>{
             <div className="board-tool">
                 <div className="board-tool-wrap" onMouseLeave={this.hidePanel}>
                     <button className={`board-tool-item eboard-icon eboard-icon-xuanze ${toolType===TOOL_TYPE.Select?"active":""}`} onClick={this.onClick} title={"选择"} onMouseEnter={this.showPanel}/>
-                    <button className={`board-tool-item eboard-icon eboard-icon-huabi ${toolType===TOOL_TYPE.Pencil?"active":""}`} onClick={this.onClick} title="画笔" onMouseEnter={this.showPanel} >
-                        <i className="board-tool-item-pencil" style={{backgroundColor:pencilColor}}/>
-                    </button>
-                    <button className={`board-tool-item eboard-icon eboard-icon-wenzi ${toolType===TOOL_TYPE.Text?"active":""}`} onClick={this.onClick} title="文字" onMouseEnter={this.showPanel}>
-                        <i className="board-tool-item-text" style={{backgroundColor:fontColor}}/>
-                    </button>
-                    <button className={`board-tool-item eboard-icon eboard-icon-tuxing ${toolType===TOOL_TYPE.Shape?"active":""}`} title="图形" onClick={this.onClick} onMouseEnter={this.showPanel}>
-                        <i className="board-tool-item-shape" style={{backgroundColor:shapeColor}}/>
-                    </button>
+                    <button className={`board-tool-item eboard-icon eboard-icon-huabi ${toolType===TOOL_TYPE.Pencil?"active":""}`} onClick={this.onClick} title="画笔" onMouseEnter={this.showPanel}/>
+                    <button className={`board-tool-item eboard-icon eboard-icon-wenzi ${toolType===TOOL_TYPE.Text?"active":""}`} onClick={this.onClick} title="文字" onMouseEnter={this.showPanel}/>
+                    <button className={`board-tool-item eboard-icon eboard-icon-tuxing ${toolType===TOOL_TYPE.Shape?"active":""}`} title="图形" onClick={this.onClick} onMouseEnter={this.showPanel}/>
+                    <button className="board-tool-item eboard-icon eboard-icon-colour" title="颜色" onMouseEnter={this.showPanel} style={{color:pickedColor}}/>
                     <button className={`board-tool-item eboard-icon eboard-icon-rubber ${toolType===TOOL_TYPE.Eraser?" active":""}`} onClick={this.onClick} title="橡皮擦" onMouseEnter={this.showPanel}/>
                     <button className="board-tool-item eboard-icon eboard-icon-qingkong" onClick={this.onClick} title="清空" onMouseEnter={this.showPanel}/>
                     <button className={`board-tool-item eboard-icon eboard-icon-jiaobian ${toolType===TOOL_TYPE.Ferule?" active":""}`} onClick={this.onClick} title="教鞭" onMouseEnter={this.showPanel}/>
@@ -282,54 +256,57 @@ class EBoardTool extends React.Component<{},IEBoardToolState>{
                                         })
                                     }
                                 </div>
-                            ):[
-                                <div key={1} className="board-tool-panel-header board-tool-panel-sub">
-                                    <div className="board-tool-panel-item" >
-                                        <div title="直线" onClick={this.onClick} className={`board-tool-panel-shape eboard-icon eboard-icon-zhixian ${shapeType===SHAPE_TYPE.Line?"active":""}`}/>
-                                    </div>
-                                    <div className="board-tool-panel-item">
-                                        <div title="实心圆" onClick={this.onClick} className={`board-tool-panel-shape eboard-icon eboard-icon-shixinyuan ${shapeType===SHAPE_TYPE.Circle?"active":""}`}/>
-                                    </div>
-                                    <div className="board-tool-panel-item">
-                                        <div title="实心星" onClick={this.onClick} className={`board-tool-panel-shape eboard-icon eboard-icon-shixinxing ${shapeType===SHAPE_TYPE.Star?"active":""}`}/>
-                                    </div>
-                                    <div className="board-tool-panel-item">
-                                        <div title="实心三角" onClick={this.onClick} className={`board-tool-panel-shape eboard-icon eboard-icon-shixinsanjiao ${shapeType===SHAPE_TYPE.Triangle?"active":""}`}/>
-                                    </div>
-                                    <div className="board-tool-panel-item">
-                                        <div title="实心方形" onClick={this.onClick} className={`board-tool-panel-shape eboard-icon eboard-icon-shixinfangxing ${shapeType===SHAPE_TYPE.Rect?"active":""}`}/>
-                                    </div>
-                                </div>,
-                                <div key={2} className="board-tool-panel-header">
-                                    <div className="board-tool-panel-item" >
-                                        <div title="箭头" onClick={this.onClick} className={`board-tool-panel-shape eboard-icon eboard-icon-jiantou ${shapeType===SHAPE_TYPE.Arrow?"active":""}`}/>
-                                    </div>
-                                    <div className="board-tool-panel-item">
-                                        <div title="空心圆" onClick={this.onClick} className={`board-tool-panel-shape eboard-icon eboard-icon-kongxinyuan ${shapeType===SHAPE_TYPE.HollowCircle?"active":""}`}/>
-                                    </div>
-                                    <div className="board-tool-panel-item">
-                                        <div title="空心星" onClick={this.onClick} className={`board-tool-panel-shape eboard-icon eboard-icon-kongxinxing ${shapeType===SHAPE_TYPE.HollowStar?"active":""}`}/>
-                                    </div>
-                                    <div className="board-tool-panel-item">
-                                        <div title="空心三角" onClick={this.onClick} className={`board-tool-panel-shape eboard-icon eboard-icon-kongxinsanjiao ${shapeType===SHAPE_TYPE.HollowTriangle?"active":""}`}/>
-                                    </div>
-                                    <div className="board-tool-panel-item">
-                                        <div title="空心方形" onClick={this.onClick} className={`board-tool-panel-shape eboard-icon eboard-icon-kongxinfangxing ${shapeType===SHAPE_TYPE.HollowRect?"active":""}`}/>
-                                    </div>
+                            ):type==="color"?(
+                                <div className="board-tool-panel-body">
+                                    {
+                                        this.colors.map((color)=>{
+                                            return (
+                                                <div key={color} className={`board-tool-panel-color ${pickedColor===color?"active":""}`} data-color={color} onClick={this.setColor}>
+                                                    <div className="board-tool-panel-color-inner" style={{backgroundColor:color}}/>
+                                                </div>
+                                            )
+                                        })
+                                    }
                                 </div>
-                            ]
-                        }
-                        <div className="board-tool-panel-body">
-                            {
-                                this.colors.map((color)=>{
-                                    return (
-                                        <div key={color} className={`board-tool-panel-color ${activeColor===color?"active":""}`} data-color={color} onClick={this.setColor}>
-                                            <div className="board-tool-panel-color-inner" style={{backgroundColor:color}}/>
+                            ):(
+                                <React.Fragment>
+                                    <div className="board-tool-panel-header board-tool-panel-sub">
+                                        <div className="board-tool-panel-item" >
+                                            <div title="直线" onClick={this.onClick} className={`board-tool-panel-shape eboard-icon eboard-icon-zhixian ${shapeType===SHAPE_TYPE.Line?"active":""}`}/>
                                         </div>
-                                    )
-                                })
-                            }
-                        </div>
+                                        <div className="board-tool-panel-item">
+                                            <div title="实心圆" onClick={this.onClick} className={`board-tool-panel-shape eboard-icon eboard-icon-shixinyuan ${shapeType===SHAPE_TYPE.Circle?"active":""}`}/>
+                                        </div>
+                                        <div className="board-tool-panel-item">
+                                            <div title="实心星" onClick={this.onClick} className={`board-tool-panel-shape eboard-icon eboard-icon-shixinxing ${shapeType===SHAPE_TYPE.Star?"active":""}`}/>
+                                        </div>
+                                        <div className="board-tool-panel-item">
+                                            <div title="实心三角" onClick={this.onClick} className={`board-tool-panel-shape eboard-icon eboard-icon-shixinsanjiao ${shapeType===SHAPE_TYPE.Triangle?"active":""}`}/>
+                                        </div>
+                                        <div className="board-tool-panel-item">
+                                            <div title="实心方形" onClick={this.onClick} className={`board-tool-panel-shape eboard-icon eboard-icon-shixinfangxing ${shapeType===SHAPE_TYPE.Rect?"active":""}`}/>
+                                        </div>
+                                    </div>
+                                    <div className="board-tool-panel-header">
+                                        <div className="board-tool-panel-item" >
+                                            <div title="箭头" onClick={this.onClick} className={`board-tool-panel-shape eboard-icon eboard-icon-jiantou ${shapeType===SHAPE_TYPE.Arrow?"active":""}`}/>
+                                        </div>
+                                        <div className="board-tool-panel-item">
+                                            <div title="空心圆" onClick={this.onClick} className={`board-tool-panel-shape eboard-icon eboard-icon-kongxinyuan ${shapeType===SHAPE_TYPE.HollowCircle?"active":""}`}/>
+                                        </div>
+                                        <div className="board-tool-panel-item">
+                                            <div title="空心星" onClick={this.onClick} className={`board-tool-panel-shape eboard-icon eboard-icon-kongxinxing ${shapeType===SHAPE_TYPE.HollowStar?"active":""}`}/>
+                                        </div>
+                                        <div className="board-tool-panel-item">
+                                            <div title="空心三角" onClick={this.onClick} className={`board-tool-panel-shape eboard-icon eboard-icon-kongxinsanjiao ${shapeType===SHAPE_TYPE.HollowTriangle?"active":""}`}/>
+                                        </div>
+                                        <div className="board-tool-panel-item">
+                                            <div title="空心方形" onClick={this.onClick} className={`board-tool-panel-shape eboard-icon eboard-icon-kongxinfangxing ${shapeType===SHAPE_TYPE.HollowRect?"active":""}`}/>
+                                        </div>
+                                    </div>
+                                </React.Fragment>
+                            )
+                        }
                     </div>
                 </div>
             </div>

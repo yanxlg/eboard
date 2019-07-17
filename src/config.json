@@ -16,16 +16,14 @@
     "strokeWidth":2,
     "stroke":"#000",
     "fill":"#000",
-    "fontColor":"#f66c00",
+    "pickedColor": "#f66c00",
     "fontSize":18,
     "compress":false,
     "arrowShape":"fish",
     "escKey":true,
     "ctrlKey":true,
     "defaultName": "白板",
-    "shapeColor": "#f66c00",
     "pencilWidth": 2,
-    "pencilColor": "#f66c00",
     "toolType": "none",
     "shapeType": "line"
 }

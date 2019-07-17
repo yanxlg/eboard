@@ -525,7 +525,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
     @Bind
     private initBrush(){
         const {config,disabled} = this.props;
-        const {toolType,shapeType,shapeColor,pencilColor,pencilWidth,strokeWidth,fontSize,fontColor} = config;
+        const {toolType,shapeType,pickedColor,pencilWidth,strokeWidth,fontSize} = config;
         const {property} = this.props;
         const {wbNumber,pageNum} = property as any;
         if(this.brush&&this.brush.destroy){
@@ -556,7 +556,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
                 this.fabricCanvas.freeDrawingCursor=this.brush.cursorType;
                 this.fabricCanvas.setCursor(this.brush.cursorType);
                 this.brush.width=pencilWidth;
-                this.brush.color=pencilColor;
+                this.brush.color=pickedColor;
                 this.fabricCanvas.freeDrawingBrush = this.brush;
                 break;
             case TOOL_TYPE.Text:
@@ -565,7 +565,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
                 this.fabricCanvas.defaultCursor=this.brush.cursorType;
                 this.fabricCanvas.setCursor(this.brush.cursorType);
                 this.brush.fontSize = fontSize;
-                this.brush.fontColor = fontColor;
+                this.brush.fontColor = pickedColor;
                 break;
             case TOOL_TYPE.Shape:
                 switch (shapeType) {
@@ -575,8 +575,8 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
                         this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
                         this.fabricCanvas.setCursor(this.brush.cursorType||Cursor.cross);
                         this.brush.width=strokeWidth;
-                        this.brush.stroke=shapeColor;
-                        this.brush.fill=shapeColor;
+                        this.brush.stroke=pickedColor;
+                        this.brush.fill=pickedColor;
                         this.fabricCanvas.freeDrawingBrush = this.brush;
                         break;
                     case SHAPE_TYPE.Line:
@@ -585,7 +585,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
                         this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
                         this.fabricCanvas.setCursor(this.brush.cursorType||Cursor.cross);
                         this.brush.width=strokeWidth;
-                        this.brush.stroke=shapeColor;
+                        this.brush.stroke=pickedColor;
                         this.fabricCanvas.freeDrawingBrush = this.brush;
                         break;
                     case SHAPE_TYPE.Circle:
@@ -593,7 +593,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
                         this.brush = new CircleBrush(this.fabricCanvas,brushContext,wbNumber,pageNum);
                         this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
                         this.fabricCanvas.setCursor(this.brush.cursorType||Cursor.cross);
-                        this.brush.fill=shapeColor;
+                        this.brush.fill=pickedColor;
                         this.fabricCanvas.freeDrawingBrush = this.brush;
                         break;
                     case SHAPE_TYPE.HollowCircle:
@@ -601,7 +601,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
                         this.brush = new CircleBrush(this.fabricCanvas,brushContext,wbNumber,pageNum);
                         this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
                         this.fabricCanvas.setCursor(this.brush.cursorType||Cursor.cross);
-                        this.brush.stroke=shapeColor;
+                        this.brush.stroke=pickedColor;
                         this.brush.width=strokeWidth;
                         this.fabricCanvas.freeDrawingBrush = this.brush;
                         break;
@@ -610,7 +610,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
                         this.brush = new StarBrush(this.fabricCanvas,brushContext,wbNumber,pageNum);
                         this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
                         this.fabricCanvas.setCursor(this.brush.cursorType||Cursor.cross);
-                        this.brush.fill=shapeColor;
+                        this.brush.fill=pickedColor;
                         this.fabricCanvas.freeDrawingBrush = this.brush;
                         break;
                     case SHAPE_TYPE.HollowStar:
@@ -618,7 +618,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
                         this.brush = new StarBrush(this.fabricCanvas,brushContext,wbNumber,pageNum);
                         this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
                         this.fabricCanvas.setCursor(this.brush.cursorType||Cursor.cross);
-                        this.brush.stroke=shapeColor;
+                        this.brush.stroke=pickedColor;
                         this.brush.width=strokeWidth;
                         this.fabricCanvas.freeDrawingBrush = this.brush;
                         break;
@@ -627,7 +627,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
                         this.brush = new TriangleBrush(this.fabricCanvas,brushContext,wbNumber,pageNum);
                         this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
                         this.fabricCanvas.setCursor(this.brush.cursorType||Cursor.cross);
-                        this.brush.fill=shapeColor;
+                        this.brush.fill=pickedColor;
                         this.fabricCanvas.freeDrawingBrush = this.brush;
                         break;
                     case SHAPE_TYPE.HollowTriangle:
@@ -635,7 +635,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
                         this.brush = new TriangleBrush(this.fabricCanvas,brushContext,wbNumber,pageNum);
                         this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
                         this.fabricCanvas.setCursor(this.brush.cursorType||Cursor.cross);
-                        this.brush.stroke=shapeColor;
+                        this.brush.stroke=pickedColor;
                         this.fabricCanvas.freeDrawingBrush = this.brush;
                         break;
                     case SHAPE_TYPE.Rect:
@@ -643,7 +643,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
                         this.brush = new RectBrush(this.fabricCanvas,brushContext,wbNumber,pageNum);
                         this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
                         this.fabricCanvas.setCursor(this.brush.cursorType||Cursor.cross);
-                        this.brush.fill=shapeColor;
+                        this.brush.fill=pickedColor;
                         this.fabricCanvas.freeDrawingBrush = this.brush;
                         break;
                     case SHAPE_TYPE.HollowRect:
@@ -651,7 +651,7 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
                         this.brush = new RectBrush(this.fabricCanvas,brushContext,wbNumber,pageNum);
                         this.fabricCanvas.freeDrawingCursor=this.brush.cursorType||Cursor.cross;
                         this.fabricCanvas.setCursor(this.brush.cursorType||Cursor.cross);
-                        this.brush.stroke=shapeColor;
+                        this.brush.stroke=pickedColor;
                         this.fabricCanvas.freeDrawingBrush = this.brush;
                         break;
                 }

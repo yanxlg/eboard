@@ -10,7 +10,7 @@ import {Circle} from "./Circle";
 import {Point} from './Point';
 
 class CircleBrush extends BaseBrush<Circle> implements IBrush{
-    protected _startPoint:Point;
+    protected _circleData:Point;
     protected drawDot(pointer:Point) {
         const ctx = this.canvas.contextTop;
         this._saveAndTransform(ctx);
@@ -18,7 +18,7 @@ class CircleBrush extends BaseBrush<Circle> implements IBrush{
         ctx.strokeStyle = this.stroke;
         ctx.lineWidth=this.width;
         ctx.beginPath();
-        ctx.transform(1, 0, 0, 1, pointer.x, pointer.y);
+        ctx.transform(1, 0, 0, 1, pointer.cx, pointer.cy);
         ctx.arc(0, 0, pointer.radius, 0, Common.piBy2, false);
         ctx.closePath();
         this.fill&&ctx.fill();
@@ -29,34 +29,36 @@ class CircleBrush extends BaseBrush<Circle> implements IBrush{
     protected onMouseDown(pointer:fabric.Point){
         pointer=new Point(pointer);
         this.objectId=this.context.idGenerator.getId();
-        this._startPoint = pointer;
-        this._startPoint.radius=0;
+        this._circleData = pointer;
+        this._circleData.radius=0;
         this.canvas.clearContext(this.canvas.contextTop);
         this._setShadow();
-        this.drawDot(this._startPoint);
+        this.drawDot(this._circleData);
     };
     protected onMouseMove(pointer:fabric.Point){
         // pointer 相等就pass
         pointer=new Point(pointer);
-        const radius = Math.ceil(Math.sqrt(Math.pow(pointer.x-this._startPoint.x,2) +
-            Math.pow(pointer.y-this._startPoint.y,2)));
-        if(radius===this._startPoint.radius){
-            return;
-        }
-        this._startPoint.radius=radius;
+        const offsetX = pointer.x-this._circleData.x;
+        const offsetY = pointer.y-this._circleData.y;
+        const absOffsetX = Math.abs(offsetX);
+        const absOffsetY = Math.abs(offsetY);
+        const radius = Math.min(absOffsetX,absOffsetY)/2;
+        this._circleData.cx=this._circleData.x+radius*(offsetX>0?1:-1);
+        this._circleData.cy=this._circleData.y+radius*(offsetY>0?1:-1);
+        this._circleData.radius=radius;
         this.canvas.clearContext(this.canvas.contextTop);
-        this.drawDot(this._startPoint);
-        this.dispatchMessage(this.objectId,this._startPoint);
+        this.drawDot(this._circleData);
+        this.dispatchMessage(this.objectId,this._circleData);
     };
     // @override
     protected onMouseUp(){
         const originalRenderOnAddRemove = this.canvas.renderOnAddRemove;
         this.canvas.renderOnAddRemove = false;
-        const {x,y,radius} = this._startPoint;
+        const {cx,cy,radius} = this._circleData;
         const circle = new Circle(this.objectId,this.context,{
             radius,
-            left: x,
-            top: y,
+            left: cx,
+            top: cy,
             originX: 'center',
             originY: 'center',
             fill:this.fill,
@@ -79,8 +81,8 @@ class CircleBrush extends BaseBrush<Circle> implements IBrush{
             pageNum:this.pageNum,
             attributes:{
                 radius,
-                left: x,
-                top: y,
+                left: cx,
+                top: cy,
                 fill:this.fill,
                 stroke:this.stroke,
                 strokeWidth:this.width,
@@ -91,7 +93,7 @@ class CircleBrush extends BaseBrush<Circle> implements IBrush{
     @Bind
     @Debounce(40,{maxWait:40,trailing:true})
     protected dispatchMessage(objectId:string,center:Point){
-        const {x,y,radius} = center;
+        const {cx,cy,radius} = center;
         const message = {
             objectId,
             tag:MessageTag.Shape,
@@ -100,8 +102,8 @@ class CircleBrush extends BaseBrush<Circle> implements IBrush{
             pageNum:this.pageNum,
             attributes:{
                 radius,
-                left: x,
-                top: y,
+                left: cx,
+                top: cy,
                 fill:this.fill,
                 stroke:this.stroke,
                 strokeWidth:this.width,

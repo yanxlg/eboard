@@ -24,9 +24,9 @@ class EllipseBrush extends CircleBrush{
         ctx.lineWidth=this.width;
         ctx.beginPath();
         if(ctx.ellipse){
-            ctx.ellipse(pointer.x,pointer.y,pointer.rx,pointer.ry,0,0,Common.piBy2,false);
+            ctx.ellipse(pointer.cx,pointer.cy,pointer.rx,pointer.ry,0,0,Common.piBy2,false);
         }else{
-            ctx.transform(1, 0, 0, pointer.ry / pointer.rx, pointer.x, pointer.y);
+            ctx.transform(1, 0, 0, pointer.ry / pointer.rx, pointer.cx, pointer.cy);
             ctx.arc(0, 0 , pointer.rx, 0, Common.piBy2, false);
         }
         this.fill&&ctx.fill();
@@ -34,19 +34,21 @@ class EllipseBrush extends CircleBrush{
         ctx.restore();
     };
     protected onMouseMove(pointer:fabric.Point){
-        this._startPoint.rx=~~ (0.5 + Math.abs(pointer.x-this._startPoint.x));
-        this._startPoint.ry=~~ (0.5 + Math.abs(pointer.y-this._startPoint.y));
+        this._circleData.rx=~~ (0.5 + Math.abs(pointer.x-this._circleData.x));
+        this._circleData.ry=~~ (0.5 + Math.abs(pointer.y-this._circleData.y));
+        this._circleData.cx = (pointer.x+this._circleData.x)/2;
+        this._circleData.cy = (pointer.y+this._circleData.y)/2;
         this.canvas.clearContext(this.canvas.contextTop);
-        this.drawDot(this._startPoint);
-        this.dispatchMessage(this.objectId,this._startPoint);
+        this.drawDot(this._circleData);
+        this.dispatchMessage(this.objectId,this._circleData);
     };
     protected onMouseUp(){
         const originalRenderOnAddRemove = this.canvas.renderOnAddRemove;
         this.canvas.renderOnAddRemove = false;
-        const {x,y,rx,ry} = this._startPoint;
+        const {cx,cy,rx,ry} = this._circleData;
         const ellipse = new Ellipse(this.objectId,this.context,{
-            left: x,
-            top: y,
+            left: cx,
+            top: cy,
             rx,
             ry,
             originX: 'center',
@@ -70,8 +72,8 @@ class EllipseBrush extends CircleBrush{
             wbNumber:this.wbNumber,
             pageNum:this.pageNum,
             attributes:{
-                left: x,
-                top: y,
+                left: cx,
+                top: cy,
                 fill:this.fill,
                 stroke:this.stroke,
                 strokeWidth:this.width,
@@ -83,7 +85,7 @@ class EllipseBrush extends CircleBrush{
     @Bind
     @Debounce(40,{maxWait:40,trailing:true})
     protected dispatchMessage(objectId:string,center:Point){
-        const {x,y} = center;
+        const {cx,cy,rx,ry} = center;
         const message = {
             objectId,
             tag:MessageTag.Shape,
@@ -91,13 +93,13 @@ class EllipseBrush extends CircleBrush{
             wbNumber:this.wbNumber,
             pageNum:this.pageNum,
             attributes:{
-                left: x,
-                top: y,
+                left: cx,
+                top: cy,
                 fill:this.fill,
                 stroke:this.stroke,
                 strokeWidth:this.width,
-                rx:center.rx,
-                ry:center.ry
+                rx,
+                ry
             }
         };
         this.context.onMessageListener&&this.context.onMessageListener(message);

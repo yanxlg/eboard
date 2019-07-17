@@ -89,13 +89,12 @@
             justify-content: center;
             height: @panelItemHeight;
             align-items: center;
-            cursor: pointer;
+            &-pointer{
+                cursor: pointer;
+            }
         }
         &-item:hover &-dot{
             background: white!important;
-        }
-        &-item:hover &-shape,&-item:hover &-font{
-            color: white!important;
         }
         &-color{
             width: 25%;

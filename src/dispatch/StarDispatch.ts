@@ -33,10 +33,10 @@ class StarDispatch{
         if(animation){
             this._promise=this._promise.then(()=>{
                 let obj = this.getObject(objectId) as Star;
-                const {center,radius,angle,fill,stroke,strokeWidth} = attributes;
+                const {center,radius,fill,stroke,strokeWidth} = attributes;
                 // finalPoints
                 const beforePoints = obj?obj.points:new Array(10).fill(center);
-                const finalPoints = StarBrush.calcPointsByRadius(center,radius,angle);
+                const finalPoints = StarBrush.calcPointsByRadius(center,radius);
                 const _before = beforePoints[0];
                 const _next = finalPoints[0];
                 const duration= Math.sqrt(Math.pow(_next.x-_before.x,2)+Math.pow(_next.y-_before.y,2));
@@ -77,8 +77,8 @@ class StarDispatch{
             });
         }else{
             let obj = this.getObject(objectId) as Star;
-            const {center,radius,angle,fill,stroke,strokeWidth} = attributes;
-            const finalPoints = StarBrush.calcPointsByRadius(center,radius,angle);
+            const {center,radius,fill,stroke,strokeWidth} = attributes;
+            const finalPoints = StarBrush.calcPointsByRadius(center,radius);
             this.canvas.renderOnAddRemove=false;
             if(obj){
                 this.canvas.remove(obj);

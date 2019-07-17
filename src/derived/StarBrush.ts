@@ -14,51 +14,14 @@ import {MessageTag} from '../enums/MessageTag';
 import {Common} from '../untils/Common';
 import {BaseBrush} from './BaseBrush';
 import {Point} from './Point';
-import {Quadrant} from './SquareBrush';
 import {Star} from './Star';
 
 class StarBrush extends BaseBrush<Star>{
     private _startPoint:Point;
     private _points:Point[]=[];
     private _radius:number;
-    private _angle:number;
-    private calcQuadrant(point:{x:number,y:number}){
-        if(point.x>=this._startPoint.x){
-            if(point.y>=this._startPoint.y){
-                return Quadrant.RB;
-            }else{
-                return Quadrant.RT;
-            }
-        }else{
-            // 左侧
-            if(point.y>=this._startPoint.y){
-                return Quadrant.LB;
-            }else{
-                return Quadrant.LT;
-            }
-        }
-    }
-    private calcAngle(pointer:{x:number;y:number}){
-        const offsetY = pointer.y - this._startPoint.y;
-        const offsetX = pointer.x - this._startPoint.x;
-        if(0===offsetY&&0===offsetX){
-            return 0;
-        }
-        const angle = Math.atan(offsetY/offsetX)/Math.PI * 180;// 可能返回NaN 即0/0  没有移动，不做处理
-        const quadrant = this.calcQuadrant(pointer);
-        switch (quadrant){
-            case Quadrant.RT:
-                return 360 + angle;
-            case Quadrant.LB:
-                return 180 + angle;
-            case Quadrant.LT:
-                return 180 + angle;
-            case Quadrant.RB:
-            default:
-                return angle;
-        }
-    }
-    public static calcPointsByRadius(center:{x: number; y: number},radius:number,offsetAngle:number){
+    public static calcPointsByRadius({cx,cy}:Point,radius:number){
+        const offsetAngle=54;
         const innerRadius = radius / (3-4*Math.pow(Common.sin18,2));
         // angle相对于正位置的偏角   72°间隔
         const angles=[offsetAngle,offsetAngle+36,offsetAngle+72,offsetAngle+108,offsetAngle+144,offsetAngle+180,offsetAngle+216,offsetAngle+252,offsetAngle+288,offsetAngle+324];
@@ -78,24 +41,24 @@ class StarBrush extends BaseBrush<Star>{
             if(index%2===0){
                 // 外角
                 if(_angle>0 && _angle<=90){
-                    return new Point(center.x + radius*cosAngle,center.y + radius*sinAngle);
+                    return new Point(cx + radius*cosAngle,cy + radius*sinAngle);
                 }else if(_angle>90 && _angle<=180){
-                    return new fabric.Point(center.x - radius*cosAngle,center.y + radius*sinAngle);
+                    return new fabric.Point(cx - radius*cosAngle,cy + radius*sinAngle);
                 }else if(_angle>180 && _angle<=270){
-                    return new Point(center.x - radius*cosAngle,center.y - radius*sinAngle);
+                    return new Point(cx - radius*cosAngle,cy - radius*sinAngle);
                 }else{
-                    return new Point(center.x + radius*cosAngle,center.y - radius*sinAngle);
+                    return new Point(cx + radius*cosAngle,cy - radius*sinAngle);
                 }
             }else{
                 // 内角
                 if(_angle>0 && _angle<=90){
-                    return new Point(center.x + innerRadius*cosAngle,center.y + innerRadius*sinAngle);
+                    return new Point(cx + innerRadius*cosAngle,cy + innerRadius*sinAngle);
                 }else if(_angle>90 && _angle<=180){
-                    return new Point(center.x - innerRadius*cosAngle,center.y + innerRadius*sinAngle);
+                    return new Point(cx - innerRadius*cosAngle,cy + innerRadius*sinAngle);
                 }else if(_angle>180 && _angle<=270){
-                    return new Point(center.x - innerRadius*cosAngle,center.y - innerRadius*sinAngle);
+                    return new Point(cx - innerRadius*cosAngle,cy - innerRadius*sinAngle);
                 }else{
-                    return new Point(center.x + innerRadius*cosAngle,center.y - innerRadius*sinAngle);
+                    return new Point(cx + innerRadius*cosAngle,cy - innerRadius*sinAngle);
                 }
             }
         });
@@ -107,18 +70,18 @@ class StarBrush extends BaseBrush<Star>{
     }
     protected onMouseMove(pointer:fabric.Point) {
         pointer=new Point(pointer);
-        // radius 和angle 不变则不触发
-        const radius = Math.sqrt(Math.pow(this._startPoint.x-pointer.x,2)+Math.pow(this._startPoint.y-pointer.y,2));
-        const angle = this.calcAngle(pointer);
-        if(this._angle===angle&&this._radius===radius){
-            return;
-        }
+        const offsetX = pointer.x-this._startPoint.x;
+        const offsetY = pointer.y-this._startPoint.y;
+        const absOffsetX = Math.abs(offsetX);
+        const absOffsetY = Math.abs(offsetY);
+        const radius = Math.min(absOffsetX,absOffsetY)/2;
+        this._startPoint.cx=this._startPoint.x+radius*(offsetX>0?1:-1);
+        this._startPoint.cy=this._startPoint.y+radius*(offsetY>0?1:-1);
         this._radius = radius;
-        this._angle = angle;
-        this._points = StarBrush.calcPointsByRadius(this._startPoint,this._radius,this._angle);
+        this._points = StarBrush.calcPointsByRadius(this._startPoint,this._radius);
         this.canvas.clearContext(this.canvas.contextTop);
         this._render();
-        this.dispatchMessage(this.objectId,this._startPoint,this._radius,this._angle);
+        this.dispatchMessage(this.objectId,this._startPoint,this._radius);
     }
     protected onMouseUp() {
         this._finalizeAndAddPath();
@@ -131,7 +94,6 @@ class StarBrush extends BaseBrush<Star>{
             attributes:{
                 center:this._startPoint,
                 radius:this._radius,
-                angle:this._angle,
                 fill:this.fill,
                 stroke: this.stroke,
                 strokeWidth: this.width
@@ -141,7 +103,6 @@ class StarBrush extends BaseBrush<Star>{
     
     private _reset() {
         this._points=[];
-        this._angle=0;
         this._radius=0;
         this._setBrushStyles();
         const color = new fabric.Color(this.color);
@@ -189,7 +150,7 @@ class StarBrush extends BaseBrush<Star>{
     }
     @Bind
     @Debounce(40,{maxWait:40,trailing:true})
-    protected dispatchMessage(objectId:string,center:Point,radius:number,angle:number){
+    protected dispatchMessage(objectId:string,center:Point,radius:number){
         const message = {
             objectId,
             tag:MessageTag.Shape,
@@ -199,7 +160,6 @@ class StarBrush extends BaseBrush<Star>{
             attributes:{
                 center,
                 radius,
-                angle,
                 fill:this.fill,
                 stroke: this.stroke,
                 strokeWidth: this.width

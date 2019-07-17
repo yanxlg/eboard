@@ -237,7 +237,7 @@ class EBoardTool extends React.Component<{},IEBoardToolState>{
                                     {
                                         this.pencilDotSize.map((size:number)=>{
                                             return (
-                                                <div key={size} className="board-tool-panel-item" data-size={size} onClick={this.setPencilWidth}>
+                                                <div key={size} className="board-tool-panel-item board-tool-panel-item-pointer" data-size={size} onClick={this.setPencilWidth}>
                                                     <div className={`board-tool-panel-dot ${pencilWidth===size?"active":""}`} style={{width:size,height:size}}/>
                                                 </div>
                                             )

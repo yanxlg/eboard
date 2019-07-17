@@ -12,7 +12,7 @@ import {EventList} from '../EBoardContext';
 import {MessageTag} from '../enums/MessageTag';
 import {BaseBrush} from './BaseBrush';
 import {Point} from './Point';
-import {Square} from './Square';
+import {Rect} from './Rect';
 
 export enum Quadrant{
     LT,
@@ -21,69 +21,35 @@ export enum Quadrant{
     RB
 }
 
-class SquareBrush extends BaseBrush<Square>{
+class SquareBrush extends BaseBrush<Rect>{
     protected _saveAndTransform:(ctx:CanvasRenderingContext2D)=>void;
     public strokeMiterLimit:number;
     public shadow:fabric.Shadow;
     protected centerPoint:Point;
-    protected angle:number=0;
-    protected rx:number=0;
-    protected ry:number=0;
+    protected shapeType=SHAPE_TYPE.Square;
+    
+    protected calcRectData(pointer:Point){
+        const offsetX = pointer.x-this.centerPoint.x;
+        const offsetY = pointer.y-this.centerPoint.y;
+        const absOffsetX = Math.abs(offsetX);
+        const absOffsetY = Math.abs(offsetY);
+        const radius = Math.min(absOffsetX,absOffsetY)/2;
+        this.centerPoint.cx=this.centerPoint.x+radius*(offsetX>0?1:-1);
+        this.centerPoint.cy=this.centerPoint.y+radius*(offsetY>0?1:-1);
+        this.centerPoint.rx=this.centerPoint.ry=radius;
+    }
     
     protected onMouseDown(pointer:fabric.Point) {
         this.centerPoint=new Point(pointer);
         this.objectId=this.context.idGenerator.getId();
         this._reset();
     }
-    private calcQuadrant(point:{x:number,y:number}){
-        if(point.x>=this.centerPoint.x){
-            if(point.y>=this.centerPoint.y){
-                return Quadrant.RB;
-            }else{
-                return Quadrant.RT;
-            }
-        }else{
-            // 左侧
-            if(point.y>=this.centerPoint.y){
-                return Quadrant.LB;
-            }else{
-                return Quadrant.LT;
-            }
-        }
-    }
-    private calcAngle(pointer:{x:number;y:number}){
-        const offsetY = pointer.y - this.centerPoint.y;
-        const offsetX = pointer.x - this.centerPoint.x;
-        if(0===offsetY&&0===offsetX){
-            return 0;
-        }
-        const angle = Math.atan(offsetY/offsetX)/Math.PI * 180;// 可能返回NaN 即0/0  没有移动，不做处理
-        const quadrant = this.calcQuadrant(pointer);
-        switch (quadrant){
-            case Quadrant.RT:
-                return 360 + angle;
-            case Quadrant.LB:
-                return 180 + angle;
-            case Quadrant.LT:
-                return 180 + angle;
-            case Quadrant.RB:
-            default:
-                return angle;
-        }
-    }
-    protected calcPoints(pointer:fabric.Point){
-        const xOffset = Math.pow(pointer.x-this.centerPoint.x,2);
-        const yOffset = Math.pow(pointer.y-this.centerPoint.y,2);
-        this.ry=this.rx=Math.sqrt(xOffset + yOffset) / Math.sqrt(2);
-        this.angle = this.calcAngle(pointer) - 45;
-    }
     protected onMouseMove(pointer:fabric.Point) {
         pointer=new Point(pointer);
-        // points
-        this.calcPoints(pointer);
+        this.calcRectData(pointer);
         this.canvas.clearContext(this.canvas.contextTop);
         this._render();
-        this.dispatchMessage(this.objectId,this.centerPoint,this.rx,this.ry,this.angle);
+        this.dispatchMessage(this.objectId,this.centerPoint);
     }
     protected onMouseUp() {
         this._finalizeAndAddPath();
@@ -103,27 +69,25 @@ class SquareBrush extends BaseBrush<Square>{
         ctx.strokeStyle = this.stroke;
         ctx.lineWidth=this.width;
         ctx.beginPath();
-        ctx.translate( this.centerPoint.x, this.centerPoint.y );
-        ctx.rotate(this.angle*Math.PI/180);
-        ctx.moveTo(-this.rx, -this.rx);
-        ctx.lineTo(this.rx, -this.rx);
-        ctx.lineTo(this.rx, this.rx);
-        ctx.lineTo(-this.rx, this.rx);
+        ctx.translate( this.centerPoint.cx, this.centerPoint.cy );
+        ctx.moveTo(-this.centerPoint.rx, -this.centerPoint.ry);
+        ctx.lineTo(this.centerPoint.rx, -this.centerPoint.ry);
+        ctx.lineTo(this.centerPoint.rx, this.centerPoint.ry);
+        ctx.lineTo(-this.centerPoint.rx, this.centerPoint.ry);
         ctx.closePath();
         this.fill&&ctx.fill();
         this.stroke&&ctx.stroke();
-        ctx.stroke();
         ctx.restore();
     }
     
     protected _finalizeAndAddPath(){
         const originalRenderOnAddRemove = this.canvas.renderOnAddRemove;
         this.canvas.renderOnAddRemove = false;
-        const width = this.rx*2;
-        const height = this.rx*2;
-        const square = new Square(this.objectId,this.context,{
-            left:this.centerPoint.x,
-            top:this.centerPoint.y,
+        const width = this.centerPoint.rx*2;
+        const height = this.centerPoint.ry*2;
+        const square = new Rect(this.objectId,this.context,{
+            left:this.centerPoint.cx,
+            top:this.centerPoint.cy,
             originX: 'center',
             originY: 'center',
             fill:this.fill,
@@ -131,7 +95,6 @@ class SquareBrush extends BaseBrush<Square>{
             strokeWidth:this.width,
             width,
             height,
-            angle:this.angle,
         });
         this.canvas.add(square);
         this.canvas.fire('path:created', { path: square });
@@ -144,38 +107,37 @@ class SquareBrush extends BaseBrush<Square>{
         this.context.eventEmitter.trigger(EventList.ObjectAdd,{
             objectId:this.objectId,
             tag:MessageTag.Shape,
-            shapeType:SHAPE_TYPE.Square,
+            shapeType:this.shapeType,
             wbNumber:this.wbNumber,
             pageNum:this.pageNum,
             attributes:{
                 stroke: this.stroke,
                 strokeWidth: this.width,
-                left:this.centerPoint.x,
-                top:this.centerPoint.y,
+                left:this.centerPoint.cx,
+                top:this.centerPoint.cy,
                 width,
                 height,
-                angle:this.angle,
             }
         });
     }
     
     @Bind
     @Debounce(40,{maxWait:40,trailing:true})
-    protected dispatchMessage(objectId:string,center:Point,rx:number,ry:number,angle:number){
+    protected dispatchMessage(objectId:string,center:Point){
         const message = {
             objectId,
             tag:MessageTag.Shape,
-            shapeType:SHAPE_TYPE.Square,
+            shapeType:this.shapeType,
             wbNumber:this.wbNumber,
             pageNum:this.pageNum,
             attributes:{
                 stroke: this.stroke,
                 strokeWidth: this.width,
-                left:center.x,
-                top:center.y,
-                width:rx*2,
-                height:ry*2,
-                angle
+                left:center.cx,
+                top:center.cy,
+                width:center.rx*2,
+                height:center.ry*2,
+                fill:this.fill
             }
         };
         this.context.onMessageListener&&this.context.onMessageListener(message);

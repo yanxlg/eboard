@@ -39,7 +39,7 @@ class TriangleDispatch{
                 const widthOffset = Math.abs(endPoint.x-beforeEnd.x);
                 const heightOffset = Math.abs(endPoint.y-beforeEnd.y);
                 const byWidth = widthOffset>heightOffset;
-                const duration = byWidth ? widthOffset : heightOffset;
+                const duration = (byWidth ? widthOffset : heightOffset)/2;
                 return new Promise((resolve,reject)=>{
                     fabric.util.animate({
                         byValue:100,

@@ -8,7 +8,6 @@
 import {fabric} from 'fabric';
 import {Bind} from 'lodash-decorators';
 import {Canvas} from '../derived/Canvas';
-import {Point} from '../derived/Point';
 import {Star} from '../derived/Star';
 import {StarBrush} from '../derived/StarBrush';
 import {EBoardCanvas} from '../EBoardCanvas';
@@ -34,12 +33,8 @@ class StarDispatch{
             this._promise=this._promise.then(()=>{
                 let obj = this.getObject(objectId) as Star;
                 const {center,radius,fill,stroke,strokeWidth} = attributes;
-                // finalPoints
-                const beforePoints = obj?obj.points:new Array(10).fill(center);
-                const finalPoints = StarBrush.calcPointsByRadius(center,radius);
-                const _before = beforePoints[0];
-                const _next = finalPoints[0];
-                const duration= Math.sqrt(Math.pow(_next.x-_before.x,2)+Math.pow(_next.y-_before.y,2));
+                const _radius = obj?obj.radius:0;
+                const duration= Math.abs(_radius-radius);
                 return new Promise((resolve,reject)=>{
                     fabric.util.animate({
                         byValue:100,
@@ -51,16 +46,13 @@ class StarDispatch{
                             return _wbNumber!==wbNumber||_pageNum!==pageNum;
                         },
                         onChange:(value:number,valuePerc:number)=>{
-                            const points = finalPoints.map((point,index)=>{
-                                const _before = beforePoints[index];
-                                const {x,y} = _before;
-                                return new Point((point.x-x)*valuePerc+x,(point.y-y)*valuePerc+y);
-                            });
                             this.canvas.renderOnAddRemove=false;
                             if(obj){
                                 this.canvas.remove(obj);
                             }
-                            obj=new Star(objectId,this.context,points,{
+                            const nextRadius = _radius+(radius-_radius)*valuePerc;
+                            const points = StarBrush.calcPointsByRadius(center,nextRadius);
+                            obj=new Star(objectId,this.context,points,nextRadius,{
                                 fill,
                                 stroke,
                                 strokeWidth,
@@ -83,7 +75,7 @@ class StarDispatch{
             if(obj){
                 this.canvas.remove(obj);
             }
-            obj=new Star(objectId,this.context,finalPoints,{
+            obj=new Star(objectId,this.context,finalPoints,radius,{
                 fill,
                 stroke,
                 strokeWidth,

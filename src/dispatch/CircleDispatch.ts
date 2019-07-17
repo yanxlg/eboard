@@ -31,8 +31,12 @@ class CircleDispatch{
         if(animation){
             this._promise=this._promise.then(()=>{
                 let obj = this.getObject(objectId) as Circle;
-                const {radius,left,top,fill,stroke,strokeWidth} = attributes;
+                const {radius,fill,stroke,strokeWidth,left,top} = attributes;
+                console.log(JSON.stringify(obj));
                 const start = obj?obj.radius:0;
+                const startX = obj?obj.left:left;
+                const startY = obj?obj.top:top;
+                console.log(startX,startY);
                 const offset = radius-start;
                 const duration = offset*2;
                 return new Promise((resolve,reject)=>{
@@ -51,8 +55,8 @@ class CircleDispatch{
                                 this.canvas.remove(obj);
                             }
                             obj=new Circle(objectId,this.context,{
-                                top,
-                                left,
+                                top:offset*valuePerc+startY,
+                                left:offset*valuePerc+startX,
                                 radius:offset*valuePerc+start,
                                 stroke,
                                 fill,

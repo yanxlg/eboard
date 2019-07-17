@@ -35,6 +35,8 @@ class RectDispatch{
                 const {width,height,left,top,fill,stroke,strokeWidth} = attributes;
                 const _width = obj?obj.width:0;
                 const _height = obj?obj.height:0;
+                const _left = obj?obj.left:left;
+                const _top = obj?obj.top:top;
                 const widthOffset = Math.abs(width-_width);
                 const heightOffset = Math.abs(height-_height);
                 const byWidth = widthOffset>heightOffset;
@@ -57,13 +59,15 @@ class RectDispatch{
                         onChange:(value:number,valuePerc:number)=>{
                             const __width = (width-_width)*valuePerc+_width;
                             const __height = (height-_height)*valuePerc+_height;
+                            const __left = (left-_left)*valuePerc+_left;
+                            const __top = (top-_top)*valuePerc+_top;
                             this.canvas.renderOnAddRemove=false;
                             if(obj){
                                 this.canvas.remove(obj);
                             }
                             obj=new Rect(objectId,this.context,{
-                                left,
-                                top,
+                                left:__left,
+                                top:__top,
                                 originX: 'center',
                                 originY: 'center',
                                 fill,

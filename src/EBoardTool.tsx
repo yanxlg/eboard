@@ -200,11 +200,13 @@ class EBoardTool extends React.Component<{},IEBoardToolState>{
             fontSize:size,
             toolType:TOOL_TYPE.Text
         });
+        this.context.eventEmitter.trigger(EventList.FontSizeChange,{fontSize:size});
     }
     @Bind
     private setColor(e:MouseEvent<HTMLDivElement>){
         const element = e.currentTarget;
         const color = element.getAttribute("data-color");
+        this.context.eventEmitter.trigger(EventList.ColorChange,{fill:color});
         this.context.setToolProps({
             pickedColor:color
         });

@@ -131,7 +131,9 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
         this.fabricCanvas=new Canvas(container,{
             selection:false,
             skipTargetFind:true,
-            enableRetinaScaling:false
+            enableRetinaScaling:false,
+            selectionBorderColor:this.props.config.borderColor,
+            selectionLineWidth:this.props.config.borderWidth,
         });
         this.initBrush();
         this.initDispatch();

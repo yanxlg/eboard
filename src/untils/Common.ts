@@ -48,7 +48,8 @@ class Common {
             transparentCorners:config.transparentCorners,
             strokeLineCap:config.strokeLineCap,
             cornerSize:config.cornerSize,
-            borderScaleFactor:config.borderWidth
+            borderScaleFactor:config.borderWidth,
+            editingBorderColor:config.borderColor,
         },options);
     }
 }

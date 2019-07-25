@@ -72,6 +72,8 @@ export enum EventList {
     ObjectModify="object:modified",
     Undo="undo",
     Redo="redo",
+    ColorChange="color:change",
+    FontSizeChange="fontSize:change"
 }
 
 declare interface IToolProps {

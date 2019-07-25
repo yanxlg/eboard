@@ -27,7 +27,7 @@ class ITextDispatch{
     @Bind
     public onDraw(objectId:string,timestamp:number,attributes:any,animation:boolean){
         let obj = this.getObject(objectId) as IText;
-        const {text,fontSize,left,top,fill} = attributes;
+        const {text,fontSize,left,top,fill,padding=0,selectionStyleList} = attributes;
         this.canvas.renderOnAddRemove=false;
         if(obj){
             this.canvas.remove(obj);
@@ -36,11 +36,18 @@ class ITextDispatch{
             fontSize,
             left,
             fill,
-            top,
-            fontFamily:ITextBrush.fontFamily
+            top:top-padding,
+            fontFamily:ITextBrush.fontFamily,
+            padding
         });
+        if(selectionStyleList&&selectionStyleList.length>0){
+            selectionStyleList.map((item:any)=>{
+                const {start,end,...extra} = item;
+                obj.setSelectionStyles(extra,start,end);
+            })
+        }
         this.canvas.add(obj);
-        this.canvas.requestRenderAll();
+        this.canvas.renderAll();
         this.canvas.renderOnAddRemove=true;
     }
 }

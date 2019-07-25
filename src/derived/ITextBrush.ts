@@ -15,6 +15,7 @@ import {Cursor} from '../untils/Cursor';
 import {Canvas} from './Canvas';
 import {Point} from './Point';
 import {IText} from './IText';
+import {fabric} from "fabric";
 
 class ITextBrush{
     public cursorType=Cursor.text;
@@ -28,12 +29,65 @@ class ITextBrush{
     public static fontFamily:string='Microsoft YaHei,"Times New Roman"';
     private wbNumber:string;
     private pageNum?:number;
+    private padding:number=10;
     constructor(canvas:Canvas,context:IBrushContext,wbNumber:string,pageNum?:number){
         this.canvas=canvas;
         this.context=context;
         this.wbNumber=wbNumber;
         this.pageNum=pageNum;
+        this.canvas.skipTargetFind=false;// 需要支持对象捕获
+        this.canvas.hoverCursor=this.cursorType;
         canvas.on("mouse:down",this.onMouseDown);
+        context.eventEmitter.on(EventList.ColorChange,this.onDrawChange);
+        context.eventEmitter.on(EventList.FontSizeChange,this.onDrawChange);
+    }
+    @Bind
+    private onDrawChange(ev:any){
+        const data = ev.data;
+        const activeObject = this.canvas.getActiveObject();
+        if(activeObject&&activeObject instanceof IText){
+            activeObject.setSelectionStyles(data);
+            activeObject.selectionStyleList.push({
+                start:activeObject.selectionStart,
+                end:activeObject.selectionEnd,
+                ...data
+            });
+            
+            // 发送消息
+            this.context.onMessageListener({
+                tag:MessageTag.Shape,
+                shapeType:TOOL_TYPE.Text,
+                wbNumber:this.wbNumber,
+                pageNum:this.pageNum,
+                objectId:activeObject.objectId,
+                attributes:{
+                    left:activeObject.left,
+                    top:activeObject.top,
+                    text:activeObject.text,
+                    fill:activeObject.fill,
+                    fontSize:activeObject.fontSize,
+                    padding:this.padding,
+                    selectionStyleList:activeObject.selectionStyleList
+                }
+            });
+            this.context.eventEmitter.trigger(EventList.ObjectAdd,{
+                tag:MessageTag.Shape,
+                shapeType:TOOL_TYPE.Text,
+                wbNumber:this.wbNumber,
+                pageNum:this.pageNum,
+                objectId:activeObject.objectId,
+                attributes:{
+                    left:activeObject.left,
+                    top:activeObject.top,
+                    text:activeObject.text,
+                    fill:activeObject.fill,
+                    fontSize:activeObject.fontSize,
+                    beforeText:activeObject.text,
+                    padding:this.padding,
+                    selectionStyleList:activeObject.selectionStyleList
+                },
+            });
+        }
     }
     @Bind
     public update(wbNumber:string,pageNum?:number){
@@ -41,36 +95,64 @@ class ITextBrush{
         this.pageNum=pageNum;
     }
     @Bind
-    private onMouseDown(e:IEvent){
-        if(!this.instance){
-            e.e.stopPropagation();// 禁止冒泡
-        }
-        if(void 0 !== this.instance){
-            window.removeEventListener("mousedown",this.onMouseUp);
+    private enterEditing(target:IText){
+        this.canvas.setActiveObject(target);
+        target.enterEditing();
+        this.canvas.requestRenderAll();
+    }
+    @Bind
+    private exitEditing(target:IText){
+        if(target){
             this.canvas.renderOnAddRemove=false;
-            this.instance.exitEditing();
-            if("" === this.instance.text){
-                this.canvas.remove(this.instance);
-                this.instance=undefined as any;
+            target.isEditing&&target.exitEditing();
+            if(target&&"" === target.text){
+                this.canvas.remove(target);
             }
             this.instance=undefined as any;
+            this.canvas.discardActiveObject();
             this.canvas.renderAll();
             this.canvas.renderOnAddRemove=true;
+        }
+    }
+    @Bind
+    private onMouseDown(e:IEvent){
+        const target = e.target;
+        this.canvas.getObjects().map((obj:fabric.Object)=>{
+            obj.lockMovementX=true;
+            obj.lockMovementY=true;
+            obj.lockRotation=true;
+            obj.lockScalingX=true;
+            obj.lockScalingY=true;
+        });
+        if(target instanceof IText){
+            this.enterEditing(target);
             return;
         }
-        window.addEventListener("mousedown",this.onMouseUp);
+        if(void 0 !== this.instance){
+            this.exitEditing(this.instance);
+            return;
+        }
+        
+        // this.canvas.selection=true;
         const _p = this.canvas.getPointer(e.e);
         const pointer=new Point(_p.x,_p.y);
         this.objectId=this.context.idGenerator.getId();
         this.instance = new IText(this.objectId,this.context,'',{
             left:pointer.x,
-            top:pointer.y,
+            top:pointer.y-this.padding,
             fontSize:this.fontSize,
             fill:this.fontColor,
             fontFamily:ITextBrush.fontFamily,
+            padding:this.padding,
+            lockMovementX:true,
+            lockMovementY:true,
+            lockRotation:true,
+            lockScalingX:true,
+            lockScalingY:true,
         });
         this._cacheBeforeText="";
-        this.instance.on("changed",()=>{
+        const instance = this.instance;
+        this.instance.on("changed",(e)=>{
             this.context.onMessageListener({
                 tag:MessageTag.Shape,
                 shapeType:TOOL_TYPE.Text,
@@ -80,9 +162,11 @@ class ITextBrush{
                 attributes:{
                     left:pointer.x,
                     top:pointer.y,
-                    text:this.instance.text,
-                    fill:this.fontColor,
-                    fontSize:this.fontSize
+                    text:instance.text,
+                    fill:instance.fill,
+                    fontSize:instance.fontSize,
+                    padding:this.padding,
+                    selectionStyleList:instance.selectionStyleList
                 }
             });
             this.context.eventEmitter.trigger(EventList.ObjectAdd,{
@@ -94,38 +178,41 @@ class ITextBrush{
                 attributes:{
                     left:pointer.x,
                     top:pointer.y,
-                    text:this.instance.text,
-                    fill:this.fontColor,
-                    fontSize:this.fontSize,
-                    beforeText:this._cacheBeforeText
+                    text:instance.text,
+                    fill:instance.fill,
+                    fontSize:instance.fontSize,
+                    beforeText:this._cacheBeforeText,
+                    padding:this.padding,
+                    selectionStyleList:instance.selectionStyleList
                 },
             });
-            this._cacheBeforeText=this.instance.text||"";
+            this._cacheBeforeText=instance.text||"";
+        });
+        this.instance.on("editing:exited",()=>{
+           // 结束编辑
+            this.exitEditing(instance);
         });
         this.canvas.add(this.instance);
-        this.instance.enterEditing();// 进入编辑模式
+        this.enterEditing(this.instance);
     };
-    @Bind
-    private onMouseUp(){
-        if(this.instance){
-            this.canvas.renderOnAddRemove=false;
-            this.instance.exitEditing();
-            if("" === this.instance.text){
-                this.canvas.remove(this.instance);
-                this.instance=undefined;
-            }
-            this.instance=undefined;
-            this.canvas.renderAll();
-            this.canvas.renderOnAddRemove=true;
-        }
-        this.instance=undefined;
-        this.objectId=undefined;
-        window.removeEventListener("mousedown",this.onMouseUp);
-    }
     @Bind
     public destroy(){
         this.canvas.off("mouse:down",this.onMouseDown);
-        window.removeEventListener("mousedown",this.onMouseUp);
+        this.instance&&this.instance.exitEditing();
+        this.canvas.skipTargetFind=true;// 需要关闭对象捕获
+        this.canvas.discardActiveObject();
+        this.canvas.requestRenderAll();
+        this.instance=undefined;
+        this.objectId=undefined;
+        this.canvas.getObjects().map((obj:fabric.Object)=>{
+            obj.lockMovementX=false;
+            obj.lockMovementY=false;
+            obj.lockRotation=false;
+            obj.lockScalingX=false;
+            obj.lockScalingY=false;
+        });
+        this.context.eventEmitter.off(EventList.ColorChange,this.onDrawChange);
+        this.context.eventEmitter.off(EventList.FontSizeChange,this.onDrawChange);
     }
 }
 

@@ -12,6 +12,7 @@ import {Common} from '../untils/Common';
 
 class IText extends fabric.IText{
     public objectId:string;
+    public selectionStyleList:any[]=[];
     constructor(objectId:string,context:IBrushContext,text: string, options?: ITextOptions){
         super(text,Common.filterParams(options,context));
         this.objectId=objectId;

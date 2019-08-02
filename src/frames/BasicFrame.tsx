@@ -60,7 +60,7 @@ class BasicFrame extends React.PureComponent<IFrameProps>{
             const container = this.scrollRef.current.container as HTMLDivElement;
             const top = vScrollOffset*container.scrollHeight;
             this.scrollRef.current.scrollTop(top,true);
-            this.props.updateVScrollOffset(vScrollOffset,wbNumber,pageNum);5
+            this.props.updateVScrollOffset(vScrollOffset,wbNumber,pageNum);
         }
     }
     @Bind
@@ -106,6 +106,14 @@ class BasicFrame extends React.PureComponent<IFrameProps>{
         snapshot?: any): void {
         if(this.props.wbNumber!==prevProps.wbNumber||this.props.pageNum!==prevProps.pageNum){
             this.attachListener();
+        }
+        
+        if(this.props.height!==prevProps.height){
+            // @ts-ignore
+            const container = this.scrollRef.current.container as HTMLDivElement;
+            const _container = container.querySelector(".canvas-container") as HTMLDivElement;
+            const top = Math.min(this.props.vScrollOffset*_container.scrollHeight,_container.scrollHeight-container.offsetHeight);
+            this.scrollRef.current.scrollTop(top,false);
         }
     }
     componentWillUnmount(): void {

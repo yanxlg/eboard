@@ -265,7 +265,7 @@ class ArrowBrush extends LineBrush{
             pageNum:this.pageNum,
             attributes:{
                 startPoint:start,
-                endPoint:end,
+                endPoint:end||start,
                 stroke: this.stroke,
                 strokeWidth: this.width,
                 arrowType:this.arrowType,

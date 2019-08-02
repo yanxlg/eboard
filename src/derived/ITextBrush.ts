@@ -124,8 +124,8 @@ class ITextBrush{
             obj.lockScalingX=true;
             obj.lockScalingY=true;
         });
-        if(target instanceof IText){
-            this.enterEditing(target);
+        if(target&&(target instanceof IText||target.type==="i-text")){
+            this.enterEditing(target as IText);
             return;
         }
         if(void 0 !== this.instance){

@@ -34,6 +34,7 @@ class ArrowDispatch{
     public onDraw(objectId:string,timestamp:number,attributes:any,animation:boolean,wbNumber:string,pageNum?:number){
         if(animation){
             this._promise=this._promise.then(()=>{
+                console.log(attributes);
                 return new Promise((resolve,reject)=>{
                     let obj = this.getObject(objectId) as Arrow;
                     const {startPoint,endPoint,stroke,strokeWidth,arrowType,arrowOffset,theta} = attributes;

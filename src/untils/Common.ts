@@ -13,18 +13,14 @@ class Common {
         };
         interval = setInterval(check,50);
         check();
-        image.onerror=()=>{
-            if(interval){clearInterval(interval)};
-            callback();
-        }
     }
     public static imgeLoaded(image:HTMLImageElement,callback:()=>void){
         if(image.complete){
             callback();
         }else{
-            image.onload=()=>{
-                callback();
-            }
+            image.addEventListener("load",()=>{
+               callback();
+            });
         }
     }
     public static sin18:number=Math.abs(Math.sin(18/180 * Math.PI));

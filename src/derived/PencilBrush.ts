@@ -87,6 +87,7 @@ class PencilBrush extends fabric.PencilBrush implements IBaseBrush{
         this.dispatchMessage(this.objectId,this._points);
     };
     protected onMouseUp(){
+        this.objectId&&this._points.length>0&&this.dispatchMsg(this.objectId,this._points);
         this.context.eventEmitter.trigger(EventList.ObjectAdd,{
             tag:MessageTag.Shape,
             shapeType:TOOL_TYPE.Pencil,
@@ -111,9 +112,8 @@ class PencilBrush extends fabric.PencilBrush implements IBaseBrush{
     public render(){
         this._render();
     }
-    @Bind
-    @Debounce(40,{maxWait:40,trailing:true})
-    private dispatchMessage(objectId:string,points:Point[]){
+    
+    private dispatchMsg(objectId:string,points:Point[]){
         const message = {
             tag:MessageTag.Shape,
             shapeType:TOOL_TYPE.Pencil,
@@ -127,6 +127,12 @@ class PencilBrush extends fabric.PencilBrush implements IBaseBrush{
             },
         };
         this.context.onMessageListener&&this.context.onMessageListener(message);
+    }
+    
+    @Bind
+    @Debounce(40,{maxWait:40,trailing:true})
+    private dispatchMessage(objectId:string,points:Point[]){
+        this.dispatchMsg(objectId,points);
     }
 }
 

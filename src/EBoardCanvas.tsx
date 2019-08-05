@@ -190,18 +190,39 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
         this.unDispatchListener();
     }
     
+    /**
+     * 加载失败重试3次
+     * @param initCount
+     */
     @Bind
-    private initImage(){
+    private initImage(initCount=3){
+        if(initCount===0){
+            return;
+        }
         const {property} = this.props;
         const {wbType,images,pageNum} = property;
         if(wbType===FRAME_TYPE_ENUM.IMAGES){
-            this.image=null;
-            this.image=new Image();
-            this.image.src=images[pageNum-1];
+            if(initCount!==3){
+                this.image.src=images[pageNum-1];
+            }else{
+                this.image=null;
+                this.image=new Image();
+                this.image.src=images[pageNum-1];
+                this.image.onerror=()=>{
+                    this.initImage(initCount-1);
+                }
+            }
         }else if(wbType===FRAME_TYPE_ENUM.IMAGE){
-            this.image=null;
-            this.image=new Image();
-            this.image.src=images[0];
+            if(initCount!==3){
+                this.image.src=images[0];
+            }else{
+                this.image=null;
+                this.image=new Image();
+                this.image.src=images[0];
+                this.image.onerror=()=>{
+                    this.initImage(initCount-1);
+                }
+            }
         }
     }
     @Bind
@@ -227,7 +248,6 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
                 // 根据消息进行恢复
                 let _promise=new Promise((resolve)=>resolve());
                 cacheMessage.map((message:any)=>{
-                    console.log(message);
                     _promise.then(()=>{
                         return this.props.dispatchMessage(message,0,false);
                     });

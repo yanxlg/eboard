@@ -11,7 +11,6 @@ import {Canvas} from '../derived/Canvas';
 import {EBoardCanvas} from '../EBoardCanvas';
 import {EventList} from '../EBoardContext';
 import {MessageTag} from '../enums/MessageTag';
-import {fabric} from "fabric";
 import {IBrushContext} from '../interface/IBrush';
 
 class UndoRedoDispatch {
@@ -45,20 +44,12 @@ class UndoRedoDispatch {
         const {tag,objectId,evented} = data;
         switch (tag) {
             case MessageTag.Shape:
-                const {shapeType,attributes} = data;
                 const instance =  this.canvas.getObjects().find((obj:any)=>{
                     return obj.objectId === objectId;
                 });
                 if(instance){
-                    if(shapeType===TOOL_TYPE.Text){
-                        instance.visible=true;
-                        (instance as fabric.Textbox).text=attributes?attributes.beforeText:"";
-                        (instance as fabric.Textbox).exitEditing();
-                        this.canvas.requestRenderAll();
-                    }else{
-                        instance.visible=false;
-                        this.canvas.requestRenderAll();
-                    }
+                    instance.visible=false;
+                    this.canvas.requestRenderAll();
                 }
                 break;
             case MessageTag.Transform:
@@ -104,20 +95,13 @@ class UndoRedoDispatch {
         const {tag,objectId,evented,wbNumber,pageNum} = data;
         switch (tag) {
             case MessageTag.Shape:
-                const {shapeType,text} = data;
+                const {shapeType} = data;
                 const instance =  this.canvas.getObjects().find((obj:any)=>{
                     return obj.objectId === objectId;
                 });
                 if(instance){
-                    if(shapeType===TOOL_TYPE.Text){
-                        instance.visible=true;
-                        (instance as fabric.Textbox).text=text;
-                        (instance as fabric.Textbox).exitEditing();
-                        this.canvas.requestRenderAll();
-                    }else{
-                        instance.visible=true;
-                        this.canvas.requestRenderAll();
-                    }
+                    instance.visible=true;
+                    this.canvas.requestRenderAll();
                 }else{
                     // TODO 如果没有需要添加
                     const {objectId,attributes,timestamp} = data;

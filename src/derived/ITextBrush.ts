@@ -24,7 +24,6 @@ class ITextBrush{
     public fontSize:number;
     public fontColor:string;
     private instance:IText;
-    private _cacheBeforeText:string;
     private objectId:string;
     public static fontFamily:string='Microsoft YaHei,"Times New Roman"';
     private wbNumber:string;
@@ -40,6 +39,18 @@ class ITextBrush{
         canvas.on("mouse:down",this.onMouseDown);
         context.eventEmitter.on(EventList.ColorChange,this.onDrawChange);
         context.eventEmitter.on(EventList.FontSizeChange,this.onDrawChange);
+        document.addEventListener("mousedown",this.onExtraClick)
+    }
+    @Bind
+    private onExtraClick(e:MouseEvent){
+        if(e.target&&!this.canvas.container.contains(e.target as any)){
+            const activeObject = this.canvas.getActiveObject();
+            if(void 0 !== this.instance||activeObject&&(activeObject instanceof IText||activeObject.type==="i-text")){
+                setTimeout(()=>{
+                    this.exitEditing(this.instance||activeObject as IText);
+                },300);
+            }
+        }
     }
     @Bind
     private onDrawChange(ev:any){
@@ -150,7 +161,6 @@ class ITextBrush{
             lockScalingX:true,
             lockScalingY:true,
         });
-        this._cacheBeforeText="";
         const instance = this.instance;
         this.instance.on("changed",(e)=>{
             this.context.onMessageListener({
@@ -169,26 +179,27 @@ class ITextBrush{
                     selectionStyleList:instance.selectionStyleList
                 }
             });
-            this.context.eventEmitter.trigger(EventList.ObjectAdd,{
-                tag:MessageTag.Shape,
-                shapeType:TOOL_TYPE.Text,
-                wbNumber:this.wbNumber,
-                pageNum:this.pageNum,
-                objectId:this.objectId,
-                attributes:{
-                    left:pointer.x,
-                    top:pointer.y,
-                    text:instance.text,
-                    fill:instance.fill,
-                    fontSize:instance.fontSize,
-                    beforeText:this._cacheBeforeText,
-                    padding:this.padding,
-                    selectionStyleList:instance.selectionStyleList
-                },
-            });
-            this._cacheBeforeText=instance.text||"";
         });
+        
         this.instance.on("editing:exited",()=>{
+            if(instance.text){
+                this.context.eventEmitter.trigger(EventList.ObjectAdd,{
+                    tag:MessageTag.Shape,
+                    shapeType:TOOL_TYPE.Text,
+                    wbNumber:this.wbNumber,
+                    pageNum:this.pageNum,
+                    objectId:this.objectId,
+                    attributes:{
+                        left:pointer.x,
+                        top:pointer.y,
+                        text:instance.text,
+                        fill:instance.fill,
+                        fontSize:instance.fontSize,
+                        padding:this.padding,
+                        selectionStyleList:instance.selectionStyleList
+                    },
+                });
+            }
            // 结束编辑
             this.exitEditing(instance);
         });

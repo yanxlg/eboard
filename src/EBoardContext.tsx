@@ -234,7 +234,16 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
         nextRedoStack.set(key,[]);
         let undoStackInstance = nextUndoStack.get(key);
         if(undoStackInstance){
-            undoStackInstance.push(action);
+            if(action.shapeType===TOOL_TYPE.Text){
+                const index = undoStackInstance.findIndex((act)=>act.objectId===action.objectId);
+                if(index>-1){
+                    undoStackInstance.splice(index,1,action);
+                }else{
+                    undoStackInstance.push(action);
+                }
+            }else{
+                undoStackInstance.push(action);
+            }
         }else{
             nextUndoStack.set(key,[action]);
         }

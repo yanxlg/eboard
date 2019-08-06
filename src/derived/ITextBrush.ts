@@ -224,6 +224,7 @@ class ITextBrush{
         });
         this.context.eventEmitter.off(EventList.ColorChange,this.onDrawChange);
         this.context.eventEmitter.off(EventList.FontSizeChange,this.onDrawChange);
+        document.removeEventListener("mousedown",this.onExtraClick);
     }
 }
 

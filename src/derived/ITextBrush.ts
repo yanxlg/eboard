@@ -17,6 +17,10 @@ import {Point} from './Point';
 import {IText} from './IText';
 import {fabric} from "fabric";
 
+
+let prevOnDrawChange:any;
+
+
 class ITextBrush{
     public cursorType=Cursor.text;
     public canvas:Canvas;
@@ -36,49 +40,44 @@ class ITextBrush{
         this.pageNum=pageNum;
         this.canvas.skipTargetFind=false;// 需要支持对象捕获
         this.canvas.hoverCursor=this.cursorType;
-        canvas.on("mouse:down",this.onMouseDown);
-        context.eventEmitter.on(EventList.ColorChange,this.onDrawChange);
-        context.eventEmitter.on(EventList.FontSizeChange,this.onDrawChange);
-        document.addEventListener("mousedown",this.onExtraClick)
-    }
-    @Bind
-    private onExtraClick(e:MouseEvent){
-        if(e.target&&!this.canvas.container.contains(e.target as any)){
-            const activeObject = this.canvas.getActiveObject();
-            if(void 0 !== this.instance||activeObject&&(activeObject instanceof IText||activeObject.type==="i-text")){
-                setTimeout(()=>{
-                    this.exitEditing(this.instance||activeObject as IText);
-                },300);
-            }
+        if(prevOnDrawChange){
+            context.eventEmitter.off(EventList.ColorChange,prevOnDrawChange);
+            context.eventEmitter.off(EventList.FontSizeChange,prevOnDrawChange);
         }
+        prevOnDrawChange=this.onDrawChange;
+        context.eventEmitter.on(EventList.ColorChange,prevOnDrawChange);
+        context.eventEmitter.on(EventList.FontSizeChange,prevOnDrawChange);
+        canvas.on("mouse:down",this.onMouseDown);
     }
     @Bind
     private onDrawChange(ev:any){
         const data = ev.data;
         const activeObject = this.canvas.getActiveObject();
-        if(activeObject&&activeObject instanceof IText){
-            activeObject.setSelectionStyles(data);
-            activeObject.selectionStyleList.push({
-                start:activeObject.selectionStart,
-                end:activeObject.selectionEnd,
+        if(activeObject&&(activeObject instanceof IText||activeObject.type==="i-text")){
+            (activeObject as IText).setSelectionStyles(data);
+            if(!(activeObject as IText).selectionStyleList){
+                (activeObject as IText).selectionStyleList=[];
+            }
+            (activeObject as IText).selectionStyleList.push({
+                start:(activeObject as IText).selectionStart,
+                end:(activeObject as IText).selectionEnd,
                 ...data
             });
-            
             // 发送消息
             this.context.onMessageListener({
                 tag:MessageTag.Shape,
                 shapeType:TOOL_TYPE.Text,
                 wbNumber:this.wbNumber,
                 pageNum:this.pageNum,
-                objectId:activeObject.objectId,
+                objectId:(activeObject as IText).objectId,
                 attributes:{
                     left:activeObject.left,
                     top:activeObject.top,
-                    text:activeObject.text,
+                    text:(activeObject as IText).text,
                     fill:activeObject.fill,
-                    fontSize:activeObject.fontSize,
+                    fontSize:(activeObject as IText).fontSize,
                     padding:this.padding,
-                    selectionStyleList:activeObject.selectionStyleList
+                    selectionStyleList:(activeObject as IText).selectionStyleList
                 }
             });
             this.context.eventEmitter.trigger(EventList.ObjectAdd,{
@@ -86,16 +85,16 @@ class ITextBrush{
                 shapeType:TOOL_TYPE.Text,
                 wbNumber:this.wbNumber,
                 pageNum:this.pageNum,
-                objectId:activeObject.objectId,
+                objectId:(activeObject as IText).objectId,
                 attributes:{
                     left:activeObject.left,
                     top:activeObject.top,
-                    text:activeObject.text,
+                    text:(activeObject as IText).text,
                     fill:activeObject.fill,
-                    fontSize:activeObject.fontSize,
-                    beforeText:activeObject.text,
+                    fontSize:(activeObject as IText).fontSize,
+                    beforeText:(activeObject as IText).text,
                     padding:this.padding,
-                    selectionStyleList:activeObject.selectionStyleList
+                    selectionStyleList:(activeObject as IText).selectionStyleList
                 },
             });
         }
@@ -208,23 +207,26 @@ class ITextBrush{
     };
     @Bind
     public destroy(){
-        this.canvas.off("mouse:down",this.onMouseDown);
-        this.instance&&this.instance.exitEditing();
-        this.canvas.skipTargetFind=true;// 需要关闭对象捕获
-        this.canvas.discardActiveObject();
-        this.canvas.requestRenderAll();
-        this.instance=undefined;
-        this.objectId=undefined;
-        this.canvas.getObjects().map((obj:fabric.Object)=>{
-            obj.lockMovementX=false;
-            obj.lockMovementY=false;
-            obj.lockRotation=false;
-            obj.lockScalingX=false;
-            obj.lockScalingY=false;
-        });
-        this.context.eventEmitter.off(EventList.ColorChange,this.onDrawChange);
-        this.context.eventEmitter.off(EventList.FontSizeChange,this.onDrawChange);
-        document.removeEventListener("mousedown",this.onExtraClick);
+        try{
+            this.canvas.off("mouse:down",this.onMouseDown);
+            this.instance&&this.instance.exitEditing();
+            this.canvas.skipTargetFind=true;// 需要关闭对象捕获
+            this.canvas.discardActiveObject();
+            this.canvas.renderAll();
+            this.instance=undefined;
+            this.objectId=undefined;
+            this.canvas.getObjects().map((obj:fabric.Object)=>{
+                obj.lockMovementX=false;
+                obj.lockMovementY=false;
+                obj.lockRotation=false;
+                obj.lockScalingX=false;
+                obj.lockScalingY=false;
+            });
+            this.context.eventEmitter.off(EventList.ColorChange,prevOnDrawChange);
+            this.context.eventEmitter.off(EventList.FontSizeChange,prevOnDrawChange);
+        }catch (e) {
+            //
+        }
     }
 }
 

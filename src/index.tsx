@@ -8,14 +8,14 @@ import {MessageTag} from './enums/MessageTag';
 
 // let promise = new Promise((resolve)=>{setTimeout(()=>{resolve()},5000)});
 
-// const eBoardRef:RefObject<EBoard> = React.createRef();
+const eBoardRef:RefObject<EBoard> = React.createRef();
 const eBoardRef1:RefObject<EBoard> = React.createRef();
 
 
 function onMessage(message:string){
     console.log(message);
     // 延迟5s + random()[0-2]s 处理，通过promise来处理
-    // eBoardRef.current.dispatchMessage(JSON.parse(message) as any,0,true);
+    eBoardRef.current.dispatchMessage(JSON.parse(message) as any,0,true);
    /* promise=promise.then(()=>{
         return new Promise((resolve)=>{
             const time = Math.random()*100*2;
@@ -96,11 +96,9 @@ ReactDOM.render(
   document.getElementById('root') as HTMLElement
 );
 
-/*
 ReactDOM.render(
     <EBoard ref={eBoardRef} disabled={true}/>,
     document.getElementById('child') as HTMLElement
 );
-*/
 
 registerServiceWorker();

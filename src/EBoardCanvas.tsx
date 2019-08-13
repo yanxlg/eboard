@@ -73,7 +73,9 @@ fabric.Object.prototype.toObject=function(){
         fontSize:this["fontSize"],
         fill:this.fill||null,
         radius:this["radius"],
-        selectionStyleList:this["selectionStyleList"]
+        selectionStyleList:this["selectionStyleList"],
+        editingBorderColor:this["editingBorderColor"],
+        padding:this["padding"]
     });
 };
 

@@ -54,6 +54,7 @@ class FeruleBrush{
     @Bind
     public destroy(){
         this.canvas.off("mouse:move",this.onMouseMove);
+        this.canvas.off("mouse:out",this.onMouseMove);
     }
 }
 

@@ -125,8 +125,52 @@ class ITextBrush{
         }
     }
     @Bind
+    private bindEventsToInstance(instance:IText){
+        instance.on("changed",(e)=>{
+            this.context.onMessageListener({
+                tag:MessageTag.Shape,
+                shapeType:TOOL_TYPE.Text,
+                wbNumber:this.wbNumber,
+                pageNum:this.pageNum,
+                objectId:instance.objectId,
+                attributes:{
+                    left:instance.left,
+                    top:instance.top,
+                    text:instance.text,
+                    fill:instance.fill,
+                    fontSize:instance.fontSize,
+                    padding:this.padding,
+                    selectionStyleList:instance.selectionStyleList
+                }
+            });
+        });
+    
+        instance.on("editing:exited",()=>{
+            if(instance.text){
+                this.context.eventEmitter.trigger(EventList.ObjectAdd,{
+                    tag:MessageTag.Shape,
+                    shapeType:TOOL_TYPE.Text,
+                    wbNumber:this.wbNumber,
+                    pageNum:this.pageNum,
+                    objectId:instance.objectId,
+                    attributes:{
+                        left:instance.left,
+                        top:instance.top,
+                        text:instance.text,
+                        fill:instance.fill,
+                        fontSize:instance.fontSize,
+                        padding:this.padding,
+                        selectionStyleList:instance.selectionStyleList
+                    },
+                });
+            }
+            // 结束编辑
+            this.exitEditing(instance);
+        });
+    }
+    @Bind
     private onMouseDown(e:IEvent){
-        const target = e.target;
+        let target = e.target;
         this.canvas.getObjects().map((obj:fabric.Object)=>{
             obj.lockMovementX=true;
             obj.lockMovementY=true;
@@ -135,6 +179,9 @@ class ITextBrush{
             obj.lockScalingY=true;
         });
         if(target&&(target instanceof IText||target.type==="i-text")){
+            if(target.type==="i-text"){
+                this.bindEventsToInstance(target as IText);
+            }
             this.enterEditing(target as IText);
             return;
         }
@@ -160,48 +207,8 @@ class ITextBrush{
             lockScalingX:true,
             lockScalingY:true,
         });
-        const instance = this.instance;
-        this.instance.on("changed",(e)=>{
-            this.context.onMessageListener({
-                tag:MessageTag.Shape,
-                shapeType:TOOL_TYPE.Text,
-                wbNumber:this.wbNumber,
-                pageNum:this.pageNum,
-                objectId:this.objectId,
-                attributes:{
-                    left:pointer.x,
-                    top:pointer.y,
-                    text:instance.text,
-                    fill:instance.fill,
-                    fontSize:instance.fontSize,
-                    padding:this.padding,
-                    selectionStyleList:instance.selectionStyleList
-                }
-            });
-        });
-        
-        this.instance.on("editing:exited",()=>{
-            if(instance.text){
-                this.context.eventEmitter.trigger(EventList.ObjectAdd,{
-                    tag:MessageTag.Shape,
-                    shapeType:TOOL_TYPE.Text,
-                    wbNumber:this.wbNumber,
-                    pageNum:this.pageNum,
-                    objectId:this.objectId,
-                    attributes:{
-                        left:pointer.x,
-                        top:pointer.y,
-                        text:instance.text,
-                        fill:instance.fill,
-                        fontSize:instance.fontSize,
-                        padding:this.padding,
-                        selectionStyleList:instance.selectionStyleList
-                    },
-                });
-            }
-           // 结束编辑
-            this.exitEditing(instance);
-        });
+        console.log(this.instance);
+        this.bindEventsToInstance(this.instance);
         this.canvas.add(this.instance);
         this.enterEditing(this.instance);
     };

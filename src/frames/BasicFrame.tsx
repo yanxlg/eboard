@@ -108,7 +108,7 @@ class BasicFrame extends React.PureComponent<IFrameProps>{
             this.attachListener();
         }
         
-        if(this.props.height!==prevProps.height){
+        if(this.props.height!==prevProps.height&&this.scrollRef&&this.scrollRef.current){
             // @ts-ignore
             const container = this.scrollRef.current.container as HTMLDivElement;
             const _container = container.querySelector(".canvas-container") as HTMLDivElement;

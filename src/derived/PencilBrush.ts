@@ -19,6 +19,7 @@ import {Canvas} from './Canvas';
 import {Pencil} from './Pencil';
 import {Point} from './Point';
 
+
 class PencilBrush extends fabric.PencilBrush implements IBaseBrush{
     protected canvas:Canvas;
     private _render:()=>void;
@@ -30,12 +31,20 @@ class PencilBrush extends fabric.PencilBrush implements IBaseBrush{
     private readonly context:IBrushContext;
     private wbNumber:string;
     private pageNum?:number;
+    private canDraw:boolean;
     constructor(canvas:Canvas,context:IBrushContext,wbNumber:string,pageNum?:number){
         super();
         this.canvas=canvas;
         this.context=context;
         this.wbNumber=wbNumber;
         this.pageNum=pageNum;
+        window.addEventListener("mouseup",this.onLeftMouseUp);
+    }
+    @Bind
+    private onLeftMouseUp(e:MouseEvent){
+        if(0===e.button){
+            this.onMouseUp();
+        }
     }
     @Bind
     public update(wbNumber:string,pageNum?:number){
@@ -59,6 +68,7 @@ class PencilBrush extends fabric.PencilBrush implements IBaseBrush{
         return path;
     }
     protected onMouseDown(pointer:fabric.Point){
+        console.log("down");
         pointer=new Point(pointer);
         this.objectId=this.context.idGenerator.getId();
         // @ts-ignore
@@ -66,6 +76,7 @@ class PencilBrush extends fabric.PencilBrush implements IBaseBrush{
         // 绑定pointer事件
         document.addEventListener("pointermove",this.pointerEvent);
         this.dispatchMessage(this.objectId,this._points);
+        this.canDraw=true;
     };
     @Bind
     private pointerEvent(e:any){
@@ -76,9 +87,13 @@ class PencilBrush extends fabric.PencilBrush implements IBaseBrush{
     }
     @Bind
     private _onMouseMove(pointer:fabric.Point){
+        if(!this.canDraw){
+            return false;
+        }
         pointer=new Point(pointer);
         // @ts-ignore
         super.onMouseMove(pointer);
+        return true;
     }
     protected onMouseMove(pointer:fabric.Point){
         this._onMouseMove(pointer);
@@ -87,23 +102,26 @@ class PencilBrush extends fabric.PencilBrush implements IBaseBrush{
         this.dispatchMessage(this.objectId,this._points);
     };
     protected onMouseUp(){
-        this.objectId&&this._points.length>0&&this.dispatchMsg(this.objectId,this._points);
-        this.context.eventEmitter.trigger(EventList.ObjectAdd,{
-            tag:MessageTag.Shape,
-            shapeType:TOOL_TYPE.Pencil,
-            objectId:this.objectId,
-            wbNumber:this.wbNumber,
-            pageNum:this.pageNum,
-            attributes:{
-                points:this._points,
-                stroke: this.color,
-                strokeWidth: this.width
-            },
-        });
-        // @ts-ignore
-        super.onMouseUp();
-        this.objectId=undefined;
-        document.removeEventListener("pointermove",this.pointerEvent);
+        if(this.objectId&&this._points.length>0){
+            this.dispatchMsg(this.objectId,this._points);
+            this.context.eventEmitter.trigger(EventList.ObjectAdd,{
+                tag:MessageTag.Shape,
+                shapeType:TOOL_TYPE.Pencil,
+                objectId:this.objectId,
+                wbNumber:this.wbNumber,
+                pageNum:this.pageNum,
+                attributes:{
+                    points:this._points,
+                    stroke: this.color,
+                    strokeWidth: this.width
+                },
+            });
+            // @ts-ignore
+            super.onMouseUp();
+            this.objectId=undefined;
+            document.removeEventListener("pointermove",this.pointerEvent);
+        }
+        this.canDraw=false;
     };
     public clear(){
         const ctx  = this.canvas.contextTop;
@@ -133,6 +151,12 @@ class PencilBrush extends fabric.PencilBrush implements IBaseBrush{
     @Debounce(40,{maxWait:40,trailing:true})
     private dispatchMessage(objectId:string,points:Point[]){
         this.dispatchMsg(objectId,points);
+    }
+    
+    @Bind
+    public destroy(){
+        window.removeEventListener("mouseup",this.onLeftMouseUp);
+        document.removeEventListener("pointermove",this.pointerEvent);
     }
 }
 

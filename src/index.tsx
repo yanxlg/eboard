@@ -13,7 +13,6 @@ const eBoardRef1:RefObject<EBoard> = React.createRef();
 
 
 function onMessage(message:string){
-    console.log(message);
     // 延迟5s + random()[0-2]s 处理，通过promise来处理
     eBoardRef.current.dispatchMessage(JSON.parse(message) as any,0,true);
    /* promise=promise.then(()=>{
@@ -86,7 +85,6 @@ setTimeout(()=>{
        const {whiteboardBodyModel:body,whiteboardHeaderModel:header} = JSON.parse(msg);
        return  convertMessage({header,body});
    });
-   console.log(messages);
     eBoardRef1.current.recovery(messages);
 },200);
 

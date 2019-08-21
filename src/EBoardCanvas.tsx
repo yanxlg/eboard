@@ -85,6 +85,7 @@ export declare interface IEBoardCanvasContext extends IBrushContext{
     dispatchMessage:(message:IMessage,timestamp:number,animation?:boolean)=>Promise<{}>;
     setCacheData:(json:any,wbNumber:string,pageNo?:number)=>void;
     clearCacheMessage:(wbNumber:string,pageNo?:number)=>void;
+    clearAll:(wbNumber:string,pageNo?:number)=>void;
     clearUndoRedo:()=>void;
 }
 
@@ -697,12 +698,15 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
         }
     }
     private clear(){
+        // 当前的
+        // const {property} = this.props;
         this.fabricCanvas.clear();
+    /*    this.props.clearAll(property.wbNumber,property.pageNum);
         this.props.clearUndoRedo();// 清空同时清空undoRedo列表
         // 背景图需要保留
         if(this.bgObject){
             this.fabricCanvas.backgroundImage=this.bgObject;
-        }
+        }*/
     }
     @Bind
     private initDispatch(){

@@ -38,6 +38,7 @@ export declare interface IEBoardContext{
     onMessageListener:(message:object)=>void;
     updateActiveWbNumber:(wbNumber:string,pageNum?:number)=>void;
     clearCacheMessage:(wbNumber:string,pageNo?:number)=>void;
+    clearAll:(wbNumber:string,pageNo?:number)=>void;
     setCacheData:(json:any,wbNumber:string,pageNo?:number)=>void;
     getActiveBoard:()=>IBaseFrame|undefined;
     hasBoard:(wbNumber:string,pageNum?:number)=>boolean;
@@ -118,6 +119,7 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
             updateActiveWbNumber:this.updateActiveWbNumber,
             setCacheData:this.setCacheData,
             clearCacheMessage:this.clearCacheMessage,
+            clearAll:this.clearAll,
             getActiveBoard:this.getActiveBoard,
             hasBoard:this.hasBoard,
             updateVScrollOffset:this.updateVScrollOffset,
@@ -298,6 +300,12 @@ class EBoardContext extends React.PureComponent<IEboardContextProps,IEBoardConte
         const {boardMap} = this.state;
         const board = boardMap.get(EBoardContext.getKey(wbNumber,pageNum));
         board&&(board.cacheMessage=CacheMessageList.from());
+    }
+    @Bind
+    private clearAll(wbNumber:string,pageNum?:number){
+        const {boardMap} = this.state;
+        const board = boardMap.get(EBoardContext.getKey(wbNumber,pageNum));
+        board&&(board.cacheMessage=CacheMessageList.from())&&(board.cacheJSON=undefined);
     }
     @Bind
     public addBoard(frame:IBaseFrame,wbNumber:string,pageNum?:number){

@@ -153,7 +153,7 @@ class BasicFrame extends React.PureComponent<IFrameProps>{
     }
     @Bind
     private getCanvasProps(){
-        const {disabled,allowDocControl,eventEmitter,config,onMessageListener,idGenerator,clearUndoRedo,dispatchMessage,pushUndoStack,setCacheData,clearCacheMessage} = this.props;
+        const {disabled,allowDocControl,eventEmitter,config,onMessageListener,idGenerator,clearUndoRedo,dispatchMessage,pushUndoStack,setCacheData,clearCacheMessage,clearAll} = this.props;
         return {
             disabled,
             allowDocControl,
@@ -165,7 +165,8 @@ class BasicFrame extends React.PureComponent<IFrameProps>{
             dispatchMessage,
             pushUndoStack,
             setCacheData,
-            clearCacheMessage
+            clearCacheMessage,
+            clearAll
         }
     }
     render(){

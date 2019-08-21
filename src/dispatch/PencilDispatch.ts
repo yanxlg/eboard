@@ -104,10 +104,14 @@ class PencilDispatch{
                 let obj = this.getObject(objectId) as Pencil;
                 const {points,stroke,strokeWidth} = Object.assign({},attributes);
                 return new Promise((resolve,reject)=>{
-                    // 按照点进行绘制
-                    this.renderPoint(objectId,obj,points,stroke,strokeWidth,wbNumber,pageNum,()=>{
+                    if(points.length>0){
+                        // 按照点进行绘制
+                        this.renderPoint(objectId,obj,points,stroke,strokeWidth,wbNumber,pageNum,()=>{
+                            resolve();
+                        })
+                    }else{
                         resolve();
-                    })
+                    }
                 })
             });
         }else{
@@ -119,13 +123,15 @@ class PencilDispatch{
             const points = attributes.points.map((point:any)=>{
                 return new Point(point.x,point.y);
             });
-            const pathData = this.convertPointsToSVGPath(points,attributes.strokeWidth).join('');
-            obj=new Pencil(objectId,points,this.context,pathData,{
-                stroke:attributes.stroke,
-                strokeWidth:attributes.strokeWidth,
-                fill:null,
-            });
-            this.canvas.add(obj);
+            if(points.length>0){
+                const pathData = this.convertPointsToSVGPath(points,attributes.strokeWidth).join('');
+                obj=new Pencil(objectId,points,this.context,pathData,{
+                    stroke:attributes.stroke,
+                    strokeWidth:attributes.strokeWidth,
+                    fill:null,
+                });
+                this.canvas.add(obj);
+            }
             this.canvas.requestRenderAll();
             this.canvas.renderOnAddRemove=true;
         }

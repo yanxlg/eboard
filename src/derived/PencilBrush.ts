@@ -38,12 +38,13 @@ class PencilBrush extends fabric.PencilBrush implements IBaseBrush{
         this.context=context;
         this.wbNumber=wbNumber;
         this.pageNum=pageNum;
-        window.addEventListener("mouseup",this.onLeftMouseUp);
     }
     @Bind
     private onLeftMouseUp(e:MouseEvent){
         if(0===e.button){
+            // 其他场景不能触发
             this.onMouseUp();
+            window.removeEventListener("mouseup",this.onLeftMouseUp);
         }
     }
     @Bind
@@ -68,7 +69,6 @@ class PencilBrush extends fabric.PencilBrush implements IBaseBrush{
         return path;
     }
     protected onMouseDown(pointer:fabric.Point){
-        console.log("down");
         pointer=new Point(pointer);
         this.objectId=this.context.idGenerator.getId();
         // @ts-ignore
@@ -77,6 +77,7 @@ class PencilBrush extends fabric.PencilBrush implements IBaseBrush{
         document.addEventListener("pointermove",this.pointerEvent);
         this.dispatchMessage(this.objectId,this._points);
         this.canDraw=true;
+        window.addEventListener("mouseup",this.onLeftMouseUp);
     };
     @Bind
     private pointerEvent(e:any){
@@ -116,10 +117,15 @@ class PencilBrush extends fabric.PencilBrush implements IBaseBrush{
                     strokeWidth: this.width
                 },
             });
-            // @ts-ignore
-            super.onMouseUp();
+            if(this._points.length>0){
+                // @ts-ignore
+                super.onMouseUp();
+            }
             this.objectId=undefined;
             document.removeEventListener("pointermove",this.pointerEvent);
+            this._points=[];
+        }else{
+            console.log("error");
         }
         this.canDraw=false;
     };

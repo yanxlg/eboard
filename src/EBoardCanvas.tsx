@@ -699,14 +699,14 @@ class EBoardCanvas extends React.Component<IEBoardCanvasProps>{
     }
     private clear(){
         // 当前的
-        // const {property} = this.props;
+        const {property} = this.props;
         this.fabricCanvas.clear();
-    /*    this.props.clearAll(property.wbNumber,property.pageNum);
+        this.props.clearAll(property.wbNumber,property.pageNum);
         this.props.clearUndoRedo();// 清空同时清空undoRedo列表
         // 背景图需要保留
         if(this.bgObject){
             this.fabricCanvas.backgroundImage=this.bgObject;
-        }*/
+        }
     }
     @Bind
     private initDispatch(){
